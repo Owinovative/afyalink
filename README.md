@@ -74,7 +74,37 @@ Start with a secure modular monolith. Do not start by building every future modu
 
 ## Local Setup Status
 
-This repository is currently initialized as the Afyalink project foundation. The next implementation step is to scaffold the selected backend/frontend stack and convert Milestone 1 into migrations, policies, services, controllers, and UI screens.
+This repository now includes the first executable Milestone 1 domain foundation. The code is intentionally framework-light so the trust-critical rules can be tested before controllers, UI screens, and storage providers are wired in.
+
+## Current Engineering Foundation
+
+- Application workflow state machine.
+- Payment workflow state machine.
+- Credential document requirement registry.
+- Submission readiness checker.
+- Consent version validation.
+- Private credential file upload policy.
+- Audit event factory with secret redaction.
+- PostgreSQL Milestone 1 schema.
+- Milestone 1 API contract.
+- GitHub Actions CI foundation.
+
+## Local Checks
+
+```bash
+cd apps/api
+composer dump-autoload
+composer check
+```
+
+The current tests verify:
+
+- unsafe application status jumps are blocked;
+- duplicate payment confirmation transitions are blocked;
+- profile, credential, consent, and payment readiness rules work;
+- public credential storage paths are rejected;
+- audit metadata redacts secrets;
+- consent is tied to exact active wording and version.
 
 ## Documents
 
@@ -82,4 +112,3 @@ This repository is currently initialized as the Afyalink project foundation. The
 - [Technical Direction](docs/architecture/technical-direction.md)
 - [Security Foundation](docs/security/security-foundation.md)
 - [Docs Index](docs/README.md)
-

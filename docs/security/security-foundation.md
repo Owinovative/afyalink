@@ -30,3 +30,10 @@ Technical controls can reduce misuse but cannot make screenshots impossible. Afy
 
 Use minimum necessary access. Facilities should only see approved candidate information after authorization, and raw documents should remain tightly controlled.
 
+## Implemented Foundation
+
+- `FileUploadPolicy` rejects unsupported MIME types, oversized files, and public storage paths.
+- `SensitiveDataRedactor` removes passwords, tokens, secrets, passkeys, cookies, authorization headers, and database URLs from audit metadata.
+- `AuditEventFactory` creates sanitized audit events for sensitive workflows.
+- `ConsentPolicy` binds accepted consent to an exact version and text hash.
+- PostgreSQL schema keeps audit logs, document versions, payments, application events, and consent records separate for traceability.

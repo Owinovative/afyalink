@@ -49,3 +49,17 @@ Milestone 1 delivers the professional credential intake foundation.
 - Payment records are structured for M-PESA integration.
 - Core tables, policies, and validation are in place.
 
+## Engineering Foundation Added
+
+The repository now includes framework-light domain code for:
+
+- application status transitions;
+- payment status transitions;
+- submission readiness;
+- credential requirements;
+- consent version validation;
+- file upload safety;
+- audit metadata redaction;
+- PostgreSQL Milestone 1 tables and indexes.
+
+These rules should be treated as the canonical product rules when the Laravel controllers, jobs, policies, and UI are added.
