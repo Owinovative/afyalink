@@ -14,10 +14,7 @@
   "scripts": {
     "test": "php tests/run.php",
     "check": [
-      "@php -l src/Domain/Applications/ApplicationStateMachine.php",
-      "@php -l src/Domain/Audit/AuditEventFactory.php",
-      "@php -l src/Domain/Credentials/CredentialRequirementRegistry.php",
-      "@php -l src/Domain/Security/FileUploadPolicy.php",
+      "@php scripts/lint.php",
       "@php -l tests/run.php",
       "@test"
     ]
@@ -26,4 +23,3 @@
     "sort-packages": true
   }
 }
-

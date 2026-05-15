@@ -80,6 +80,14 @@ This repository now includes the first executable Milestone 1 domain foundation.
 
 - Application workflow state machine.
 - Payment workflow state machine.
+- Professional profile value object.
+- Credential record value object.
+- Full application submission service.
+- Admin review service.
+- Role and permission matrix.
+- Signed private document URL factory.
+- Payment intent factory with idempotency behavior.
+- Priority regulatory body registry.
 - Credential document requirement registry.
 - Submission readiness checker.
 - Consent version validation.
@@ -88,6 +96,7 @@ This repository now includes the first executable Milestone 1 domain foundation.
 - PostgreSQL Milestone 1 schema.
 - Milestone 1 API contract.
 - GitHub Actions CI foundation.
+- Static web product foundation for the Afyalink public workflow.
 
 ## Local Checks
 
@@ -95,6 +104,9 @@ This repository now includes the first executable Milestone 1 domain foundation.
 cd apps/api
 composer dump-autoload
 composer check
+
+cd ../web
+npm.cmd run check
 ```
 
 The current tests verify:
@@ -105,6 +117,11 @@ The current tests verify:
 - public credential storage paths are rejected;
 - audit metadata redacts secrets;
 - consent is tied to exact active wording and version.
+- a complete professional application can be submitted only when ready;
+- admin review can approve only through valid transitions;
+- facility viewers cannot access raw credential documents;
+- signed document links are viewer-bound and expiring;
+- payment intent references are idempotent.
 
 ## Documents
 

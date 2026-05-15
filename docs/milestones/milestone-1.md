@@ -61,5 +61,12 @@ The repository now includes framework-light domain code for:
 - file upload safety;
 - audit metadata redaction;
 - PostgreSQL Milestone 1 tables and indexes.
+- professional application submission service;
+- admin review service;
+- role and permission matrix;
+- signed private document link generation;
+- payment intent idempotency;
+- priority regulatory body registry;
+- static web product foundation for the public workflow.
 
 These rules should be treated as the canonical product rules when the Laravel controllers, jobs, policies, and UI are added.

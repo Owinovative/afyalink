@@ -9,6 +9,13 @@ This folder currently contains framework-light PHP domain code for the trust-cri
 - Domain enums for application, credential, payment, document, and role states.
 - Application status transition rules.
 - Payment status transition rules.
+- Professional profile and credential records.
+- Full submission service.
+- Admin review service.
+- Permission matrix.
+- Signed private document link factory.
+- Payment intent factory.
+- Priority regulatory body registry.
 - Professional submission readiness checks.
 - Credential requirement registry.
 - File upload security policy.
@@ -24,6 +31,8 @@ This folder currently contains framework-light PHP domain code for the trust-cri
 composer dump-autoload
 composer check
 ```
+
+Current checks include full submission, admin review, permission boundary, document signing, idempotent payment, consent, audit redaction, and upload policy tests.
 
 ## Recommended Implementation Path
 
