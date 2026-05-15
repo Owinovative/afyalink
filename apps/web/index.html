@@ -3,106 +3,143 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Afyalink | Verify. Connect. Place.</title>
+    <title>Afyalink | Milestone 1 Intake</title>
     <link rel="stylesheet" href="src/styles.css" />
   </head>
   <body>
-    <main class="page-shell">
-      <nav class="topbar">
+    <main class="shell">
+      <header class="topbar">
         <a class="brand" href="/">
-          <img src="../../assets/brand/afyalink-logo.png" alt="Afyalink" />
+          <img src="../../assets/brand/afyalink-logo.png" alt="Afyalink logo" />
           <span>Afyalink</span>
         </a>
-        <div class="nav-links">
-          <a href="#workflow">Workflow</a>
-          <a href="#security">Security</a>
-          <a href="#milestone">Milestone 1</a>
-        </div>
-      </nav>
+        <nav>
+          <a href="#professional">Professional</a>
+          <a href="#credentials">Credentials</a>
+          <a href="#admin">Admin review</a>
+        </nav>
+      </header>
 
       <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Healthcare credential trust platform</p>
-          <h1>Verify professionals before facilities depend on them.</h1>
-          <p class="lead">
-            Afyalink collects professional profiles, credentials, consent, payment records,
-            and admin review decisions in one auditable workflow.
-          </p>
-          <div class="hero-actions">
-            <a href="#workflow" class="primary-action">View workflow</a>
-            <a href="#milestone" class="secondary-action">Milestone 1</a>
-          </div>
-        </div>
-        <div class="trust-panel" aria-label="Afyalink platform priorities">
-          <div>
-            <strong>01</strong>
-            <span>Identity and credential intake</span>
-          </div>
-          <div>
-            <strong>02</strong>
-            <span>Consent and private document storage</span>
-          </div>
-          <div>
-            <strong>03</strong>
-            <span>Admin verification and audit trail</span>
-          </div>
-        </div>
-      </section>
-
-      <section id="workflow" class="section">
-        <p class="eyebrow">Milestone 1 workflow</p>
-        <h2>From professional application to verified trust record.</h2>
-        <div class="workflow-grid">
-          <article>
-            <span>Register</span>
-            <p>Professional creates an account and completes identity details.</p>
-          </article>
-          <article>
-            <span>Upload</span>
-            <p>Credentials are uploaded privately, checksummed, and classified.</p>
-          </article>
-          <article>
-            <span>Consent</span>
-            <p>Current consent wording is accepted and linked to timestamp/device metadata.</p>
-          </article>
-          <article>
-            <span>Pay</span>
-            <p>Payment intent or M-PESA-ready reference is recorded with idempotency.</p>
-          </article>
-          <article>
-            <span>Review</span>
-            <p>Afyalink admin reviews documents and requests replacements where needed.</p>
-          </article>
-          <article>
-            <span>Verify</span>
-            <p>Approved professionals become ready for later controlled facility access.</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="security" class="section split">
         <div>
-          <p class="eyebrow">Security first</p>
-          <h2>Designed for private documents and traceable decisions.</h2>
+          <p class="eyebrow">Verify • Connect • Place</p>
+          <h1>Milestone 1 credential intake, consent, payment, and admin review.</h1>
+          <p class="lead">
+            A professional can register, complete a profile, upload private credentials,
+            accept consent, create a payment reference, submit an application, and follow
+            the review trail.
+          </p>
         </div>
-        <ul class="security-list">
-          <li>No public credential document links.</li>
-          <li>Every sensitive workflow action is auditable.</li>
-          <li>Secrets are redacted before audit metadata is stored.</li>
-          <li>Facilities only get controlled access after approval and subscription.</li>
-        </ul>
+        <div class="status-board" id="dashboardSummary">
+          <span>Readiness</span>
+          <strong>Connect to API</strong>
+          <p>Run the API server and use the forms below to exercise the full workflow.</p>
+        </div>
       </section>
 
-      <section id="milestone" class="section milestone">
-        <p class="eyebrow">Current build milestone</p>
-        <h2>Milestone 1 domain foundation is active.</h2>
-        <p>
-          The repository now has executable backend rules for workflow state,
-          readiness checks, payment safety, consent validation, document security,
-          role permissions, and audit redaction.
-        </p>
+      <section id="professional" class="panel-grid">
+        <article class="panel">
+          <div class="panel-heading">
+            <p class="eyebrow">Account</p>
+            <h2>Register or sign in</h2>
+          </div>
+          <form id="registerForm" class="form-stack">
+            <input name="name" placeholder="Full name" required />
+            <input name="email" type="email" placeholder="Email" required />
+            <input name="phone" placeholder="Phone" required />
+            <input name="password" type="password" placeholder="Password" required />
+            <button type="submit">Register professional</button>
+          </form>
+          <form id="loginForm" class="form-stack compact">
+            <input name="email" type="email" placeholder="Email" required />
+            <input name="password" type="password" placeholder="Password" required />
+            <button type="submit" class="secondary">Sign in</button>
+          </form>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <p class="eyebrow">Profile</p>
+            <h2>Professional profile</h2>
+          </div>
+          <form id="profileForm" class="form-grid">
+            <input name="name" placeholder="Full name" required />
+            <input name="phone" placeholder="Phone" required />
+            <input name="profession" placeholder="Profession" required />
+            <input name="regulatory_body" placeholder="Regulatory body" required />
+            <input name="license_number" placeholder="License number" required />
+            <input name="county" placeholder="County" required />
+            <input name="years_experience" type="number" min="0" step="0.5" placeholder="Years experience" />
+            <input name="availability" placeholder="Availability" />
+            <input name="placement_type" placeholder="Placement type" />
+            <button type="submit">Save profile</button>
+          </form>
+        </article>
+      </section>
+
+      <section id="credentials" class="panel wide">
+        <div class="panel-heading split-heading">
+          <div>
+            <p class="eyebrow">Credential package</p>
+            <h2>Upload private verification documents</h2>
+          </div>
+          <button id="refreshDashboard" class="secondary">Refresh status</button>
+        </div>
+        <div class="credential-layout">
+          <form id="credentialForm" class="form-stack">
+            <select name="document_type" required>
+              <option value="cv">CV</option>
+              <option value="national_id_or_passport">ID / passport</option>
+              <option value="professional_license">Professional license</option>
+              <option value="academic_certificate">Academic certificate</option>
+              <option value="experience_letter">Experience letter</option>
+            </select>
+            <input name="file" type="file" accept=".pdf,image/png,image/jpeg" required />
+            <button type="submit">Upload credential</button>
+          </form>
+          <div>
+            <div class="action-row">
+              <button id="acceptConsent">Accept current consent</button>
+              <button id="createPayment" class="secondary">Create payment reference</button>
+              <button id="submitApplication">Submit application</button>
+            </div>
+            <div id="credentialList" class="list-card">No credential status loaded.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="admin" class="panel wide">
+        <div class="panel-heading split-heading">
+          <div>
+            <p class="eyebrow">Admin review</p>
+            <h2>Applications, documents, payment state, and audit trail</h2>
+          </div>
+          <form id="adminLoginForm" class="inline-form">
+            <input name="email" type="email" placeholder="Admin email" required />
+            <input name="password" type="password" placeholder="Password" required />
+            <button type="submit">Admin sign in</button>
+          </form>
+        </div>
+        <div class="admin-layout">
+          <div>
+            <button id="loadApplications" class="secondary">Load applications</button>
+            <div id="applicationList" class="list-card">No applications loaded.</div>
+          </div>
+          <div>
+            <button id="loadAudit" class="secondary">Load audit log</button>
+            <div id="auditList" class="list-card">No audit records loaded.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel wide">
+        <div class="panel-heading">
+          <p class="eyebrow">API activity</p>
+          <h2>Workflow messages</h2>
+        </div>
+        <pre id="output" class="output">Ready.</pre>
       </section>
     </main>
+    <script type="module" src="src/app.js"></script>
   </body>
 </html>
-

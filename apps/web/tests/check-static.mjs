@@ -2,12 +2,13 @@ import { readFileSync } from "node:fs";
 
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+const js = readFileSync(new URL("../src/app.js", import.meta.url), "utf8");
 
 const requiredText = [
-  "Verify professionals before facilities depend on them.",
-  "Milestone 1 workflow",
-  "No public credential document links.",
-  "Milestone 1 domain foundation is active.",
+  "Milestone 1 credential intake",
+  "Register or sign in",
+  "Upload private verification documents",
+  "Applications, documents, payment state, and audit trail",
 ];
 
 for (const text of requiredText) {
@@ -16,11 +17,25 @@ for (const text of requiredText) {
   }
 }
 
-for (const token of ["--navy", "--blue", "--teal", ".workflow-grid", ".trust-panel"]) {
+for (const token of ["--navy", "--blue", "--teal", ".credential-layout", ".admin-layout"]) {
   if (!css.includes(token)) {
     throw new Error(`Missing expected CSS token: ${token}`);
   }
 }
 
-console.log("Afyalink web foundation check passed.");
+for (const endpoint of [
+  "/api/auth/register",
+  "/api/professional/profile",
+  "/api/professional/credentials",
+  "/api/professional/consents",
+  "/api/professional/payments",
+  "/api/professional/application/submit",
+  "/api/admin/applications",
+  "/api/admin/audit-logs",
+]) {
+  if (!js.includes(endpoint)) {
+    throw new Error(`Milestone 1 app is not wired to ${endpoint}`);
+  }
+}
 
+console.log("Afyalink web milestone 1 intake check passed.");

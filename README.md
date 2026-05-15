@@ -74,7 +74,7 @@ Start with a secure modular monolith. Do not start by building every future modu
 
 ## Local Setup Status
 
-This repository now includes the first executable Milestone 1 domain foundation. The code is intentionally framework-light so the trust-critical rules can be tested before controllers, UI screens, and storage providers are wired in.
+This repository now includes an executable Milestone 1 vertical slice. The backend is still framework-light so trust-critical rules can be tested clearly, but it now exposes real API routes for registration, login, profile completion, credential upload, consent, payment reference creation, application submission, admin review, payment review, credential review, and audit log review.
 
 ## Current Engineering Foundation
 
@@ -95,8 +95,35 @@ This repository now includes the first executable Milestone 1 domain foundation.
 - Audit event factory with secret redaction.
 - PostgreSQL Milestone 1 schema.
 - Milestone 1 API contract.
+- Framework-light API kernel and HTTP controllers.
+- File-backed development persistence.
+- Local private credential storage adapter.
+- Professional and admin workflow endpoints.
+- Interactive web intake console wired to the API contract.
 - GitHub Actions CI foundation.
-- Static web product foundation for the Afyalink public workflow.
+- Web product foundation for the Afyalink Milestone 1 workflow.
+
+## Run Locally
+
+Backend:
+
+```bash
+cd apps/api
+composer install
+composer dump-autoload
+composer check
+php -S localhost:8000 -t public
+```
+
+Frontend:
+
+```bash
+cd apps/web
+npm install
+npm.cmd run check
+```
+
+Open `apps/web/index.html` in a browser. The page calls `http://localhost:8000` by default.
 
 ## Local Checks
 
@@ -128,4 +155,6 @@ The current tests verify:
 - [Milestone 1 Plan](docs/milestones/milestone-1.md)
 - [Technical Direction](docs/architecture/technical-direction.md)
 - [Security Foundation](docs/security/security-foundation.md)
+- [Local Setup](docs/setup.md)
+- [Milestone 1 API Endpoints](docs/api/milestone-1-endpoints.md)
 - [Docs Index](docs/README.md)
