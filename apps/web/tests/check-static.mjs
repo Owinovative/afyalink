@@ -31,6 +31,7 @@ for (const endpoint of [
   "/api/professional/payments",
   "/api/professional/application/submit",
   "/api/admin/applications",
+  "/api/admin/credentials/",
   "/api/admin/audit-logs",
 ]) {
   if (!js.includes(endpoint)) {

@@ -18,12 +18,58 @@ composer check
 php -S localhost:8000 -t public
 ```
 
-The current executable API uses a local JSON datastore for Milestone 1 development:
+The default runtime datastore is PostgreSQL. Start local infrastructure:
 
-- `apps/api/storage/runtime/afyalink-dev.json`
+```bash
+docker compose up -d postgres minio
+```
+
+Create a local `.env` from `.env.example`, then set:
+
+```text
+AFYALINK_DATASTORE=pgsql
+DATABASE_URL=postgresql://afyalink:afyalink_dev_password@localhost:5432/afyalink
+AFYALINK_CREDENTIAL_STORAGE=local
+```
+
+Run migrations:
+
+```bash
+cd apps/api
+php scripts/migrate.php
+```
+
+The JSON datastore remains available only as an explicit test/dev adapter:
+
+```text
+AFYALINK_DATASTORE=json
+AFYALINK_JSON_DATASTORE=apps/api/storage/runtime/afyalink-dev.json
+```
+
+Do not use JSON persistence for production-like local development.
+
+Local private credential storage uses:
+
 - `apps/api/storage/private/credentials`
 
 These paths are ignored and must not be committed.
+
+## Optional MinIO Credential Storage
+
+The application also includes an S3-compatible private storage adapter suitable for MinIO, AWS S3, or Cloudflare R2 style storage.
+
+For MinIO local development:
+
+```text
+AFYALINK_CREDENTIAL_STORAGE=minio
+S3_ENDPOINT=http://localhost:9000
+S3_REGION=us-east-1
+S3_BUCKET=afyalink-credentials
+S3_ACCESS_KEY_ID=afyalink
+S3_SECRET_ACCESS_KEY=afyalink_dev_password
+```
+
+Create the bucket in the MinIO console at `http://localhost:9001`. Keep the bucket private.
 
 ## Frontend
 
@@ -49,6 +95,13 @@ php scripts/create-admin.php "Afyalink Admin" admin@example.com 0799999999 Admin
 ```
 
 You can also set `AFYALINK_ADMIN_NAME`, `AFYALINK_ADMIN_EMAIL`, `AFYALINK_ADMIN_PHONE`, and `AFYALINK_ADMIN_PASSWORD`. Do not hardcode admin credentials into the repository.
+
+## Troubleshooting
+
+- If the API says `DATABASE_URL is required`, either configure PostgreSQL or explicitly set `AFYALINK_DATASTORE=json` for test-only local work.
+- If migrations fail because tables already exist, use a fresh local database or drop/recreate the local `afyalink` database.
+- On Windows, use `npm.cmd run check` for the web check command.
+- Credential uploads must be PDF, JPEG, or PNG and under `AFYALINK_MAX_UPLOAD_BYTES`.
 
 ## Verification
 

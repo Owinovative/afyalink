@@ -68,13 +68,14 @@ The repository now includes framework-light domain code for:
 - payment intent idempotency;
 - priority regulatory body registry;
 - API kernel, route protection, and HTTP controllers;
-- file-backed development persistence;
-- local private credential storage adapter;
+- PostgreSQL-backed runtime repository adapter;
+- JSON datastore retained for explicit test/dev fixture mode;
+- local private and S3-compatible credential storage adapters;
 - professional dashboard and application submission endpoints;
 - admin application, credential, payment, and audit endpoints;
 - interactive web intake and admin review console wired to the API contracts.
 
-These rules should be treated as the canonical product rules when the Laravel controllers, jobs, policies, and PostgreSQL/S3 repositories are added.
+These rules should be treated as the canonical product rules when Laravel controllers, jobs, policies, and ORM repositories are added.
 
 ## Current Executable Flow
 
@@ -88,3 +89,10 @@ These rules should be treated as the canonical product rules when the Laravel co
 8. Admin reviews the application, credentials, payment state, and audit trail.
 
 Credential review is deliberately separated from submission readiness. A professional may submit an intake package once required documents are uploaded and not rejected/replacement/expired. Admin acceptance happens during the verification review phase.
+
+## Runtime Infrastructure Status
+
+- PostgreSQL is the default runtime datastore through `AFYALINK_DATASTORE=pgsql`.
+- JSON persistence remains available only when explicitly selected for tests or fixture work.
+- Credential storage can use local private storage or S3-compatible object storage for MinIO/S3/R2 style providers.
+- API responses avoid returning raw password hashes, credential storage keys, or payment idempotency keys.

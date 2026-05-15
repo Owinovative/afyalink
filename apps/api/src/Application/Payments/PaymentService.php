@@ -9,14 +9,14 @@ use Afyalink\Core\Application\Auth\AuthenticatedUser;
 use Afyalink\Core\Domain\Enums\PaymentStatus;
 use Afyalink\Core\Domain\Payments\PaymentIntentFactory;
 use Afyalink\Core\Domain\Payments\PaymentStateMachine;
-use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
+use Afyalink\Core\Infrastructure\Persistence\DataStore;
 use Afyalink\Core\Support\Exceptions\NotFoundException;
 use Afyalink\Core\Support\Validator;
 
 final readonly class PaymentService
 {
     public function __construct(
-        private JsonDataStore $store,
+        private DataStore $store,
         private AuditLogger $audit,
         private PaymentIntentFactory $factory = new PaymentIntentFactory(),
         private PaymentStateMachine $stateMachine = new PaymentStateMachine(),
@@ -41,7 +41,7 @@ final readonly class PaymentService
                 && ($row['idempotency_key'] ?? '') === $idempotencyKey,
         );
         if ($existing !== null) {
-            return $existing;
+            return $this->safePayment($existing);
         }
 
         $intent = $this->factory->create($user->id, $amountCents, $currency, $method, $idempotencyKey);
@@ -67,7 +67,7 @@ final readonly class PaymentService
             'status' => $row['status'],
         ], $ipAddress, $userAgent);
 
-        return $row;
+        return $this->safePayment($row);
     }
 
     public function statusForUser(int $userId): PaymentStatus
@@ -96,7 +96,7 @@ final readonly class PaymentService
         $rows = $this->store->where('payments', static fn (array $row): bool => (int) $row['user_id'] === $userId);
         usort($rows, static fn (array $a, array $b): int => strcmp((string) $b['created_at'], (string) $a['created_at']));
 
-        return $rows;
+        return array_map(fn (array $row): array => $this->safePayment($row), $rows);
     }
 
     /**
@@ -133,6 +133,27 @@ final readonly class PaymentService
             'note' => $note,
         ], $ipAddress, $userAgent);
 
-        return $updated;
+        return $this->safePayment($updated);
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private function safePayment(array $row): array
+    {
+        return [
+            'id' => (int) $row['id'],
+            'user_id' => (int) $row['user_id'],
+            'intent_reference' => (string) $row['intent_reference'],
+            'amount_cents' => (int) $row['amount_cents'],
+            'currency' => (string) $row['currency'],
+            'method' => (string) $row['method'],
+            'status' => (string) $row['status'],
+            'external_reference' => $row['external_reference'] ?? null,
+            'review_note' => $row['review_note'] ?? null,
+            'created_at' => (string) $row['created_at'],
+            'updated_at' => (string) $row['updated_at'],
+        ];
     }
 }

@@ -13,6 +13,8 @@ use Afyalink\Core\Application\Credentials\CredentialService;
 use Afyalink\Core\Application\Payments\PaymentService;
 use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
 use Afyalink\Core\Domain\Permissions\Permission;
+use Afyalink\Core\Domain\Enums\UserRole;
+use Afyalink\Core\Domain\Security\FileUploadPolicy;
 use Afyalink\Core\Http\Controllers\AdminController;
 use Afyalink\Core\Http\Controllers\ApplicationController;
 use Afyalink\Core\Http\Controllers\AuthController;
@@ -20,8 +22,8 @@ use Afyalink\Core\Http\Controllers\ConsentController;
 use Afyalink\Core\Http\Controllers\CredentialController;
 use Afyalink\Core\Http\Controllers\PaymentController;
 use Afyalink\Core\Http\Controllers\ProfessionalController;
-use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
-use Afyalink\Core\Infrastructure\Storage\LocalPrivateCredentialStorage;
+use Afyalink\Core\Infrastructure\Persistence\DataStore;
+use Afyalink\Core\Infrastructure\Storage\CredentialStorage;
 use Afyalink\Core\Support\Exceptions\AuthorizationException;
 use Afyalink\Core\Support\Exceptions\NotFoundException;
 use Afyalink\Core\Support\Exceptions\ValidationException;
@@ -36,15 +38,17 @@ final class ApiKernel
     private AuthorizationService $authorization;
 
     public function __construct(
-        private readonly JsonDataStore $store,
-        LocalPrivateCredentialStorage $storage,
+        private readonly DataStore $store,
+        CredentialStorage $storage,
+        private readonly int $sessionTtlSeconds = 43200,
+        private readonly int $maxUploadBytes = 8388608,
     ) {
         $audit = new AuditLogger($this->store);
-        $this->auth = new AuthService($this->store, $audit);
+        $this->auth = new AuthService($this->store, $audit, sessionTtlSeconds: $this->sessionTtlSeconds);
         $this->authorization = new AuthorizationService();
 
         $profiles = new ProfessionalProfileService($this->store, $audit);
-        $credentials = new CredentialService($this->store, $storage, $audit);
+        $credentials = new CredentialService($this->store, $storage, $audit, new FileUploadPolicy($this->maxUploadBytes));
         $consents = new ConsentService($this->store, $audit);
         $payments = new PaymentService($this->store, $audit);
         $workflow = new ApplicationWorkflowService($this->store, $profiles, $credentials, $consents, $payments, $audit);
@@ -125,13 +129,13 @@ final class ApiKernel
         $this->router->add('POST', '/api/auth/logout', $this->protected([$auth, 'logout']));
         $this->router->add('GET', '/api/me', $this->protected([$auth, 'me']));
 
-        $this->router->add('GET', '/api/professional/dashboard', $this->protected([$professional, 'dashboard']));
-        $this->router->add('PUT', '/api/professional/profile', $this->protected([$professional, 'saveProfile'], Permission::ProfileOwnWrite));
-        $this->router->add('GET', '/api/professional/credentials', $this->protected([$credentials, 'index']));
-        $this->router->add('POST', '/api/professional/credentials', $this->protected([$credentials, 'upload'], Permission::CredentialOwnUpload));
-        $this->router->add('POST', '/api/professional/consents', $this->protected([$consents, 'accept']));
-        $this->router->add('POST', '/api/professional/payments', $this->protected([$payments, 'create']));
-        $this->router->add('POST', '/api/professional/application/submit', $this->protected([$applications, 'submit'], Permission::ApplicationOwnSubmit));
+        $this->router->add('GET', '/api/professional/dashboard', $this->professional([$professional, 'dashboard']));
+        $this->router->add('PUT', '/api/professional/profile', $this->professional([$professional, 'saveProfile'], Permission::ProfileOwnWrite));
+        $this->router->add('GET', '/api/professional/credentials', $this->professional([$credentials, 'index']));
+        $this->router->add('POST', '/api/professional/credentials', $this->professional([$credentials, 'upload'], Permission::CredentialOwnUpload));
+        $this->router->add('POST', '/api/professional/consents', $this->professional([$consents, 'accept']));
+        $this->router->add('POST', '/api/professional/payments', $this->professional([$payments, 'create']));
+        $this->router->add('POST', '/api/professional/application/submit', $this->professional([$applications, 'submit'], Permission::ApplicationOwnSubmit));
 
         $this->router->add('GET', '/api/admin/applications', $this->protected([$admin, 'applications'], Permission::ApplicationReview));
         $this->router->add('GET', '/api/admin/applications/{id}', $this->protected([$admin, 'application'], Permission::ApplicationReview));
@@ -158,5 +162,20 @@ final class ApiKernel
 
             return $handler($request);
         };
+    }
+
+    /**
+     * @param callable(Request): array<string, mixed> $handler
+     * @return callable(Request): array<string, mixed>
+     */
+    private function professional(callable $handler, ?Permission $permission = null): callable
+    {
+        return $this->protected(function (Request $request) use ($handler): array {
+            if ($request->user === null || !$request->user->hasRole(UserRole::Professional)) {
+                throw new AuthorizationException('Professional account required.');
+            }
+
+            return $handler($request);
+        }, $permission);
     }
 }

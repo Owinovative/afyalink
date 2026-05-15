@@ -42,6 +42,7 @@ Run these before handing work back:
 ```bash
 cd apps/api
 composer dump-autoload
+php scripts/migrate.php # when DATABASE_URL is configured
 composer check
 
 cd ../web

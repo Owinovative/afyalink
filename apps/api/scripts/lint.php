@@ -5,6 +5,7 @@ declare(strict_types=1);
 $roots = [
     __DIR__ . '/../src',
     __DIR__ . '/../tests',
+    __DIR__ . '/../public',
     __DIR__,
 ];
 

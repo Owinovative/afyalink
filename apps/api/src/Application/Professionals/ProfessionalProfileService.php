@@ -7,14 +7,14 @@ namespace Afyalink\Core\Application\Professionals;
 use Afyalink\Core\Application\Audit\AuditLogger;
 use Afyalink\Core\Application\Auth\AuthenticatedUser;
 use Afyalink\Core\Domain\Profiles\ProfessionalProfile;
-use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
+use Afyalink\Core\Infrastructure\Persistence\DataStore;
 use Afyalink\Core\Support\Exceptions\NotFoundException;
 use Afyalink\Core\Support\Validator;
 
 final readonly class ProfessionalProfileService
 {
     public function __construct(
-        private JsonDataStore $store,
+        private DataStore $store,
         private AuditLogger $audit,
     ) {}
 

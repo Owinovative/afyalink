@@ -37,3 +37,6 @@ Use minimum necessary access. Facilities should only see approved candidate info
 - `AuditEventFactory` creates sanitized audit events for sensitive workflows.
 - `ConsentPolicy` binds accepted consent to an exact version and text hash.
 - PostgreSQL schema keeps audit logs, document versions, payments, application events, and consent records separate for traceability.
+- PostgreSQL-backed runtime repositories are now available for Milestone 1 auth, profile, credential, consent, payment, application, and audit records.
+- The S3-compatible credential storage adapter keeps credential objects private and rejects unsafe storage keys before making object-storage requests.
+- API responses avoid returning password hashes, credential storage keys, and payment idempotency keys.

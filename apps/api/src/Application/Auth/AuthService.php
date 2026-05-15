@@ -6,17 +6,18 @@ namespace Afyalink\Core\Application\Auth;
 
 use Afyalink\Core\Application\Audit\AuditLogger;
 use Afyalink\Core\Domain\Enums\UserRole;
-use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
+use Afyalink\Core\Infrastructure\Persistence\DataStore;
 use Afyalink\Core\Support\Exceptions\AuthorizationException;
 use Afyalink\Core\Support\Exceptions\ValidationException;
 
 final readonly class AuthService
 {
     public function __construct(
-        private JsonDataStore $store,
+        private DataStore $store,
         private AuditLogger $audit,
         private PasswordHasher $passwords = new PasswordHasher(),
         private TokenGenerator $tokens = new TokenGenerator(),
+        private int $sessionTtlSeconds = 43200,
     ) {}
 
     /**
@@ -154,7 +155,7 @@ final readonly class AuthService
             'user_id' => (int) $user['id'],
             'token_hash' => $this->tokens->hashToken($plainToken),
             'created_at' => gmdate(DATE_ATOM),
-            'expires_at' => gmdate(DATE_ATOM, time() + 60 * 60 * 12),
+            'expires_at' => gmdate(DATE_ATOM, time() + $this->sessionTtlSeconds),
             'revoked_at' => null,
         ]);
 

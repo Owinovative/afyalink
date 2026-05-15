@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Afyalink\Core\Application\Audit;
 
 use Afyalink\Core\Domain\Audit\AuditEventFactory;
-use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
+use Afyalink\Core\Infrastructure\Persistence\DataStore;
 
 final readonly class AuditLogger
 {
     public function __construct(
-        private JsonDataStore $store,
+        private DataStore $store,
         private AuditEventFactory $factory = new AuditEventFactory(),
     ) {}
 

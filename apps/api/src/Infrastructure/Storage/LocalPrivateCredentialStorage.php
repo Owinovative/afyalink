@@ -6,7 +6,7 @@ namespace Afyalink\Core\Infrastructure\Storage;
 
 use RuntimeException;
 
-final readonly class LocalPrivateCredentialStorage
+final readonly class LocalPrivateCredentialStorage implements CredentialStorage
 {
     public function __construct(
         private string $root,
