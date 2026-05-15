@@ -67,6 +67,24 @@ The repository now includes framework-light domain code for:
 - signed private document link generation;
 - payment intent idempotency;
 - priority regulatory body registry;
-- static web product foundation for the public workflow.
+- API kernel, route protection, and HTTP controllers;
+- file-backed development persistence;
+- local private credential storage adapter;
+- professional dashboard and application submission endpoints;
+- admin application, credential, payment, and audit endpoints;
+- interactive web intake and admin review console wired to the API contracts.
 
-These rules should be treated as the canonical product rules when the Laravel controllers, jobs, policies, and UI are added.
+These rules should be treated as the canonical product rules when the Laravel controllers, jobs, policies, and PostgreSQL/S3 repositories are added.
+
+## Current Executable Flow
+
+1. Professional registers or logs in.
+2. Professional saves profile details.
+3. Professional uploads required credentials privately.
+4. Professional accepts the current consent wording/version.
+5. Professional creates a payment reference or payment intent.
+6. Admin verifies payment state.
+7. Professional submits the application once backend readiness checks pass.
+8. Admin reviews the application, credentials, payment state, and audit trail.
+
+Credential review is deliberately separated from submission readiness. A professional may submit an intake package once required documents are uploaded and not rejected/replacement/expired. Admin acceptance happens during the verification review phase.

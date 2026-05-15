@@ -24,6 +24,8 @@ pnpm-debug.log*
 vendor/
 storage/*.key
 bootstrap/cache/*.php
+apps/api/storage/runtime/
+apps/api/storage/private/
 
 # Logs
 *.log
@@ -38,4 +40,3 @@ temp/
 private/
 uploads/
 documents/
-

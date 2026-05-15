@@ -26,6 +26,11 @@ use Afyalink\Core\Domain\Permissions\RolePermissionMatrix;
 use Afyalink\Core\Domain\Profiles\ProfessionalProfile;
 use Afyalink\Core\Domain\Regulatory\RegulatoryBodyRegistry;
 use Afyalink\Core\Domain\Security\FileUploadPolicy;
+use Afyalink\Core\Http\ApiKernel;
+use Afyalink\Core\Http\Request;
+use Afyalink\Core\Http\JsonResponse;
+use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
+use Afyalink\Core\Infrastructure\Storage\LocalPrivateCredentialStorage;
 
 function expectTrue(bool $condition, string $message): void
 {
@@ -52,7 +57,7 @@ $tests = [
         expectFalse($machine->canTransition(PaymentStatus::Confirmed, PaymentStatus::Confirmed), 'confirmed cannot confirm again');
         expectTrue($machine->canTransition(PaymentStatus::Failed, PaymentStatus::Initiated), 'failed can be retried');
     },
-    'submission readiness requires profile, accepted credentials, consent, and payment' => function (): void {
+    'submission readiness allows uploaded credentials for submission intake' => function (): void {
         $checker = new SubmissionReadinessChecker(new CredentialRequirementRegistry());
         $profile = [
             'name' => 'Grace Achieng',
@@ -64,13 +69,13 @@ $tests = [
             'county' => 'Kisumu',
         ];
         $credentials = [
-            DocumentType::CurriculumVitae->value => CredentialReviewStatus::Accepted,
-            DocumentType::NationalIdOrPassport->value => CredentialReviewStatus::Accepted,
+            DocumentType::CurriculumVitae->value => CredentialReviewStatus::Uploaded,
+            DocumentType::NationalIdOrPassport->value => CredentialReviewStatus::PendingReview,
             DocumentType::ProfessionalLicense->value => CredentialReviewStatus::Accepted,
-            DocumentType::AcademicCertificate->value => CredentialReviewStatus::Accepted,
+            DocumentType::AcademicCertificate->value => CredentialReviewStatus::Uploaded,
         ];
         $ready = $checker->evaluate($profile, $credentials, true, PaymentStatus::Confirmed);
-        expectTrue($ready->ready, 'complete profile should be ready');
+        expectTrue($ready->ready, 'complete intake package should be ready before admin review');
 
         $notReady = $checker->evaluate($profile, [], true, PaymentStatus::Confirmed);
         expectFalse($notReady->ready, 'missing credentials should block submission');
@@ -195,6 +200,110 @@ $tests = [
         );
         expectTrue((new ConsentPolicy())->isCurrent($snapshot, 'v1', $text), 'current consent should validate');
         expectFalse((new ConsentPolicy())->isCurrent($snapshot, 'v2', $text), 'old version should fail');
+    },
+    'api milestone 1 professional to admin review flow is executable' => function (): void {
+        $root = sys_get_temp_dir() . '/afyalink-test-' . bin2hex(random_bytes(4));
+        mkdir($root . '/storage/private/credentials', 0770, true);
+        $kernel = new ApiKernel(
+            new JsonDataStore($root . '/storage/runtime/database.json'),
+            new LocalPrivateCredentialStorage($root . '/storage/private/credentials'),
+        );
+
+        $api = static function (string $method, string $path, array $body = [], ?string $token = null, array $query = []) use ($kernel): JsonResponse {
+            $headers = $token === null ? [] : ['authorization' => "Bearer {$token}"];
+
+            return $kernel->handle(new Request($method, $path, $headers, $body, $query, ipAddress: '127.0.0.1', userAgent: 'test-suite'));
+        };
+
+        $registered = $api('POST', '/api/auth/register', [
+            'name' => 'Milestone Nurse',
+            'email' => 'milestone.nurse@example.com',
+            'phone' => '0711111111',
+            'password' => 'StrongPass123',
+        ]);
+        expectTrue($registered->status === 200, 'professional registration should succeed');
+        $token = (string) $registered->payload['data']['token'];
+
+        $profile = $api('PUT', '/api/professional/profile', [
+            'name' => 'Milestone Nurse',
+            'phone' => '0711111111',
+            'profession' => 'Registered Nurse',
+            'regulatory_body' => 'Nursing Council of Kenya',
+            'license_number' => 'NCK-M1-001',
+            'county' => 'Kisumu',
+            'years_experience' => 5,
+            'availability' => 'available',
+            'placement_type' => 'locum',
+        ], $token);
+        expectTrue($profile->status === 200, 'profile update should succeed');
+
+        foreach ([
+            DocumentType::CurriculumVitae,
+            DocumentType::NationalIdOrPassport,
+            DocumentType::ProfessionalLicense,
+            DocumentType::AcademicCertificate,
+        ] as $type) {
+            $upload = $api('POST', '/api/professional/credentials', [
+                'document_type' => $type->value,
+                'original_name' => $type->value . '.pdf',
+                'mime_type' => 'application/pdf',
+                'content_base64' => base64_encode('%PDF-1.4 milestone-test'),
+            ], $token);
+            expectTrue($upload->status === 200, "credential {$type->value} should upload");
+        }
+
+        $consent = $api('POST', '/api/professional/consents', [], $token);
+        expectTrue($consent->status === 200, 'consent should be accepted');
+
+        $payment = $api('POST', '/api/professional/payments', [
+            'method' => 'mpesa_manual_reference',
+            'idempotency_key' => 'test-payment-1',
+            'amount_cents' => 250000,
+            'external_reference' => 'MPESA-TEST-001',
+        ], $token);
+        expectTrue($payment->status === 200, 'payment intent should be created');
+        $paymentId = (int) $payment->payload['data']['payment']['id'];
+
+        $blockedSubmit = $api('POST', '/api/professional/application/submit', [], $token);
+        expectTrue($blockedSubmit->status === 409, 'submission should wait for confirmed payment');
+
+        $kernel->auth()->createUser('Afyalink Admin', 'admin@example.com', '0799999999', 'AdminPass123', [UserRole::Admin]);
+        $adminLogin = $api('POST', '/api/auth/login', [
+            'email' => 'admin@example.com',
+            'password' => 'AdminPass123',
+        ]);
+        expectTrue($adminLogin->status === 200, 'admin login should succeed');
+        $adminToken = (string) $adminLogin->payload['data']['token'];
+
+        $professionalDenied = $api('GET', '/api/admin/applications', [], $token);
+        expectTrue($professionalDenied->status === 403, 'professional must not access admin applications');
+
+        $pending = $api('PATCH', "/api/admin/payments/{$paymentId}/status", [
+            'status' => PaymentStatus::PendingVerification->value,
+            'note' => 'Reference received.',
+        ], $adminToken);
+        expectTrue($pending->status === 200, 'admin should move payment to pending verification');
+
+        $confirmed = $api('PATCH', "/api/admin/payments/{$paymentId}/status", [
+            'status' => PaymentStatus::Confirmed->value,
+            'note' => 'Manual reference confirmed.',
+        ], $adminToken);
+        expectTrue($confirmed->status === 200, 'admin should confirm payment');
+
+        $submitted = $api('POST', '/api/professional/application/submit', [], $token);
+        expectTrue($submitted->status === 200, 'professional should submit once ready');
+        $applicationId = (int) $submitted->payload['data']['application']['id'];
+
+        $list = $api('GET', '/api/admin/applications', [], $adminToken);
+        expectTrue($list->status === 200 && count($list->payload['data']['applications']) === 1, 'admin should see submitted application');
+
+        $reviewing = $api('PATCH', "/api/admin/applications/{$applicationId}/action", [
+            'action' => 'start_review',
+        ], $adminToken);
+        expectTrue($reviewing->status === 200, 'admin should start review');
+
+        $audit = $api('GET', '/api/admin/audit-logs', [], $adminToken);
+        expectTrue($audit->status === 200 && count($audit->payload['data']['audit_logs']) >= 8, 'sensitive workflow actions should be audited');
     },
 ];
 

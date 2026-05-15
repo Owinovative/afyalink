@@ -8,11 +8,25 @@ CREATE TABLE users (
     phone VARCHAR(40) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     status VARCHAR(40) NOT NULL DEFAULT 'active',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     email_verified_at TIMESTAMPTZ,
     last_login_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE sessions (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    ip_address INET,
+    user_agent TEXT,
+    revoked_at TIMESTAMPTZ,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX sessions_user_active_idx ON sessions(user_id, revoked_at, expires_at DESC);
 
 CREATE TABLE roles (
     id BIGSERIAL PRIMARY KEY,
@@ -65,6 +79,7 @@ CREATE TABLE consents (
 CREATE TABLE applications (
     id BIGSERIAL PRIMARY KEY,
     professional_id BIGINT NOT NULL REFERENCES professionals(id) ON DELETE CASCADE,
+    application_number VARCHAR(80) NOT NULL UNIQUE,
     status VARCHAR(60) NOT NULL DEFAULT 'draft',
     submitted_at TIMESTAMPTZ,
     reviewed_by BIGINT REFERENCES users(id),
@@ -115,7 +130,10 @@ CREATE TABLE payments (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id),
     application_id BIGINT REFERENCES applications(id) ON DELETE SET NULL,
+    intent_reference VARCHAR(120) NOT NULL UNIQUE,
+    idempotency_key VARCHAR(190) NOT NULL,
     amount NUMERIC(12,2) NOT NULL,
+    amount_cents BIGINT NOT NULL,
     currency CHAR(3) NOT NULL DEFAULT 'KES',
     method VARCHAR(60) NOT NULL,
     provider_reference VARCHAR(190),
@@ -124,11 +142,13 @@ CREATE TABLE payments (
     paid_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, idempotency_key),
     UNIQUE (provider_reference)
 );
 
 CREATE INDEX payments_user_status_idx ON payments(user_id, internal_status);
 CREATE INDEX payments_application_status_idx ON payments(application_id, internal_status);
+CREATE INDEX payments_intent_reference_idx ON payments(intent_reference);
 
 CREATE TABLE payment_events (
     id BIGSERIAL PRIMARY KEY,
@@ -165,4 +185,3 @@ CREATE TABLE audit_logs (
 CREATE INDEX audit_logs_entity_idx ON audit_logs(entity_type, entity_id, created_at DESC);
 CREATE INDEX audit_logs_actor_idx ON audit_logs(actor_id, created_at DESC);
 CREATE INDEX audit_logs_action_idx ON audit_logs(action, created_at DESC);
-

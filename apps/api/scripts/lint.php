@@ -5,6 +5,7 @@ declare(strict_types=1);
 $roots = [
     __DIR__ . '/../src',
     __DIR__ . '/../tests',
+    __DIR__,
 ];
 
 $files = [];
@@ -28,4 +29,3 @@ foreach ($files as $file) {
 }
 
 echo count($files) . " PHP files linted.\n";
-

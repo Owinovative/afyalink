@@ -43,8 +43,12 @@ final readonly class SubmissionReadinessChecker
                 continue;
             }
 
-            if ($statusValue !== CredentialReviewStatus::Accepted->value) {
-                $warnings[] = "credential.{$documentType->value}.not_accepted";
+            if (in_array($statusValue, [
+                CredentialReviewStatus::Rejected->value,
+                CredentialReviewStatus::NeedsReplacement->value,
+                CredentialReviewStatus::Expired->value,
+            ], true)) {
+                $warnings[] = "credential.{$documentType->value}.requires_attention";
             }
         }
 
@@ -63,4 +67,3 @@ final readonly class SubmissionReadinessChecker
         );
     }
 }
-
