@@ -10,8 +10,8 @@ use Afyalink\Core\Domain\Credentials\CredentialRecord;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
 use Afyalink\Core\Domain\Enums\DocumentType;
 use Afyalink\Core\Domain\Security\FileUploadPolicy;
-use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
-use Afyalink\Core\Infrastructure\Storage\LocalPrivateCredentialStorage;
+use Afyalink\Core\Infrastructure\Persistence\DataStore;
+use Afyalink\Core\Infrastructure\Storage\CredentialStorage;
 use Afyalink\Core\Support\Exceptions\NotFoundException;
 use Afyalink\Core\Support\Exceptions\ValidationException;
 use Afyalink\Core\Support\Validator;
@@ -19,8 +19,8 @@ use Afyalink\Core\Support\Validator;
 final readonly class CredentialService
 {
     public function __construct(
-        private JsonDataStore $store,
-        private LocalPrivateCredentialStorage $storage,
+        private DataStore $store,
+        private CredentialStorage $storage,
         private AuditLogger $audit,
         private FileUploadPolicy $policy = new FileUploadPolicy(),
     ) {}

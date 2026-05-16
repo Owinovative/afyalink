@@ -8,7 +8,7 @@ use Afyalink\Core\Application\Audit\AuditLogger;
 use Afyalink\Core\Application\Auth\AuthenticatedUser;
 use Afyalink\Core\Domain\Consent\ConsentPolicy;
 use Afyalink\Core\Domain\Consent\ConsentSnapshot;
-use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
+use Afyalink\Core\Infrastructure\Persistence\DataStore;
 use DateTimeImmutable;
 
 final readonly class ConsentService
@@ -17,7 +17,7 @@ final readonly class ConsentService
     public const CURRENT_TEXT = 'I consent to Afyalink processing my professional profile, credential documents, payment reference, and verification review data for secure healthcare professional verification and placement readiness.';
 
     public function __construct(
-        private JsonDataStore $store,
+        private DataStore $store,
         private AuditLogger $audit,
         private ConsentPolicy $policy = new ConsentPolicy(),
     ) {}

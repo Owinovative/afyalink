@@ -35,3 +35,12 @@ Afyalink should start as a modular monolith with strict domain boundaries. This 
 - Background jobs should handle notifications, payment callbacks, virus scanning, and future reminders.
 - Service classes and policy classes should keep modules testable.
 
+## Current Productionization Direction
+
+- Runtime persistence is selected by configuration through `AFYALINK_DATASTORE`.
+- `pgsql` is the production-oriented default and uses a PDO-backed repository adapter against PostgreSQL tables with foreign keys and indexes.
+- `json` is preserved only for tests and explicit local fixture work.
+- Credential storage is selected by `AFYALINK_CREDENTIAL_STORAGE`.
+- `local` stores files outside public web paths for development.
+- `s3`, `minio`, and `r2` use the S3-compatible private object storage adapter.
+- The domain/application service contracts remain stable so a later Laravel repository layer can replace the framework-light adapters without rewriting workflow rules.

@@ -96,8 +96,9 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - PostgreSQL Milestone 1 schema.
 - Milestone 1 API contract.
 - Framework-light API kernel and HTTP controllers.
-- File-backed development persistence.
-- Local private credential storage adapter.
+- PostgreSQL-backed runtime repository adapter.
+- JSON persistence retained only for explicit test/dev fixture mode.
+- Local private and S3-compatible credential storage adapters.
 - Professional and admin workflow endpoints.
 - Interactive web intake console wired to the API contract.
 - GitHub Actions CI foundation.
@@ -111,8 +112,15 @@ Backend:
 cd apps/api
 composer install
 composer dump-autoload
+php scripts/migrate.php
 composer check
 php -S localhost:8000 -t public
+```
+
+For local PostgreSQL/MinIO infrastructure:
+
+```bash
+docker compose up -d postgres minio
 ```
 
 Frontend:
@@ -130,6 +138,7 @@ Open `apps/web/index.html` in a browser. The page calls `http://localhost:8000` 
 ```bash
 cd apps/api
 composer dump-autoload
+php scripts/migrate.php # when DATABASE_URL is configured
 composer check
 
 cd ../web

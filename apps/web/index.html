@@ -122,7 +122,19 @@
         </div>
         <div class="admin-layout">
           <div>
-            <button id="loadApplications" class="secondary">Load applications</button>
+            <form id="applicationSearchForm" class="inline-form search-form">
+              <input name="search" placeholder="Search name, email, or application number" />
+              <select name="status">
+                <option value="">All statuses</option>
+                <option value="submitted">Submitted</option>
+                <option value="under_review">Under review</option>
+                <option value="needs_replacement">Needs replacement</option>
+                <option value="verified">Verified</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <button type="submit" class="secondary">Load applications</button>
+            </form>
             <div id="applicationList" class="list-card">No applications loaded.</div>
           </div>
           <div>
@@ -130,6 +142,7 @@
             <div id="auditList" class="list-card">No audit records loaded.</div>
           </div>
         </div>
+        <div id="applicationDetail" class="detail-card">Select an application to review profile, credentials, payment state, timeline, and allowed actions.</div>
       </section>
 
       <section class="panel wide">

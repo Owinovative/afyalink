@@ -6,7 +6,7 @@ namespace Afyalink\Core\Infrastructure\Persistence;
 
 use RuntimeException;
 
-final class JsonDataStore
+final class JsonDataStore implements DataStore
 {
     /** @var list<string> */
     private const TABLES = [

@@ -11,7 +11,7 @@ use Afyalink\Core\Application\Payments\PaymentService;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
 use Afyalink\Core\Domain\Enums\PaymentStatus;
 use Afyalink\Core\Http\Request;
-use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
+use Afyalink\Core\Infrastructure\Persistence\DataStore;
 use Afyalink\Core\Support\Validator;
 
 final readonly class AdminController
@@ -20,7 +20,7 @@ final readonly class AdminController
         private ApplicationWorkflowService $workflow,
         private CredentialService $credentials,
         private PaymentService $payments,
-        private JsonDataStore $store,
+        private DataStore $store,
     ) {}
 
     /**

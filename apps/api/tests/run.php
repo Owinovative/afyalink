@@ -29,8 +29,11 @@ use Afyalink\Core\Domain\Security\FileUploadPolicy;
 use Afyalink\Core\Http\ApiKernel;
 use Afyalink\Core\Http\Request;
 use Afyalink\Core\Http\JsonResponse;
+use Afyalink\Core\Infrastructure\Config\AppConfig;
 use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
+use Afyalink\Core\Infrastructure\Persistence\PdoPostgresDataStore;
 use Afyalink\Core\Infrastructure\Storage\LocalPrivateCredentialStorage;
+use Afyalink\Core\Infrastructure\Storage\S3CompatibleCredentialStorage;
 
 function expectTrue(bool $condition, string $message): void
 {
@@ -277,6 +280,8 @@ $tests = [
 
         $professionalDenied = $api('GET', '/api/admin/applications', [], $token);
         expectTrue($professionalDenied->status === 403, 'professional must not access admin applications');
+        $adminProfessionalDenied = $api('GET', '/api/professional/dashboard', [], $adminToken);
+        expectTrue($adminProfessionalDenied->status === 403, 'admin token must not access professional dashboard routes');
 
         $pending = $api('PATCH', "/api/admin/payments/{$paymentId}/status", [
             'status' => PaymentStatus::PendingVerification->value,
@@ -297,6 +302,12 @@ $tests = [
         $list = $api('GET', '/api/admin/applications', [], $adminToken);
         expectTrue($list->status === 200 && count($list->payload['data']['applications']) === 1, 'admin should see submitted application');
 
+        $detail = $api('GET', "/api/admin/applications/{$applicationId}", [], $adminToken);
+        expectTrue($detail->status === 200, 'admin detail should load');
+        expectFalse(array_key_exists('password_hash', $detail->payload['data']['professional']), 'admin detail must not expose password hashes');
+        expectFalse(array_key_exists('storage_key', $detail->payload['data']['credentials'][0]), 'admin credential metadata must not expose private storage keys');
+        expectFalse(array_key_exists('idempotency_key', $detail->payload['data']['payments'][0]), 'payment response must not expose idempotency keys');
+
         $reviewing = $api('PATCH', "/api/admin/applications/{$applicationId}/action", [
             'action' => 'start_review',
         ], $adminToken);
@@ -304,6 +315,55 @@ $tests = [
 
         $audit = $api('GET', '/api/admin/audit-logs', [], $adminToken);
         expectTrue($audit->status === 200 && count($audit->payload['data']['audit_logs']) >= 8, 'sensitive workflow actions should be audited');
+    },
+    'configuration defaults to postgresql and supports explicit json adapter' => function (): void {
+        $config = AppConfig::fromEnv([], __DIR__);
+        expectTrue($config->datastoreDriver === 'pgsql', 'default runtime datastore should be PostgreSQL');
+
+        $json = AppConfig::fromEnv(['AFYALINK_DATASTORE' => 'json'], __DIR__);
+        expectTrue($json->datastoreDriver === 'json', 'JSON datastore should be explicit');
+    },
+    's3-compatible storage rejects unsafe keys before network access' => function (): void {
+        $storage = new S3CompatibleCredentialStorage(
+            endpoint: 'http://127.0.0.1:9000',
+            region: 'us-east-1',
+            bucket: 'afyalink-test',
+            accessKey: 'test',
+            secretKey: 'test',
+        );
+
+        try {
+            $storage->put('../public/license.pdf', 'secret');
+            throw new RuntimeException('unsafe S3 key was not rejected');
+        } catch (RuntimeException $exception) {
+            expectTrue(str_contains($exception->getMessage(), 'Unsafe storage key'), 'unsafe S3 key should fail locally');
+        }
+    },
+    'pdo datastore persists rows with json decoding' => function (): void {
+        if (!in_array('sqlite', PDO::getAvailableDrivers(), true)) {
+            echo "SKIP: pdo sqlite driver unavailable\n";
+            return;
+        }
+
+        $pdo = new PDO('sqlite::memory:');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, phone TEXT, password_hash TEXT, roles TEXT, is_active TEXT, created_at TEXT, updated_at TEXT)');
+
+        $store = new PdoPostgresDataStore($pdo);
+        $saved = $store->insert('users', [
+            'name' => 'DB User',
+            'email' => 'db@example.com',
+            'phone' => '0700000000',
+            'password_hash' => 'hash',
+            'roles' => [UserRole::Professional->value],
+            'is_active' => true,
+            'created_at' => gmdate(DATE_ATOM),
+            'updated_at' => gmdate(DATE_ATOM),
+        ]);
+
+        expectTrue($saved['id'] === 1, 'pdo datastore should return inserted id');
+        expectTrue($saved['roles'] === [UserRole::Professional->value], 'pdo datastore should decode json role arrays');
+        expectTrue($saved['is_active'] === true, 'pdo datastore should decode booleans');
     },
 ];
 

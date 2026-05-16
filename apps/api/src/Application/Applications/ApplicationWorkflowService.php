@@ -19,7 +19,7 @@ use Afyalink\Core\Domain\Credentials\CredentialRequirementRegistry;
 use Afyalink\Core\Domain\Enums\ApplicationStatus;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
 use Afyalink\Core\Domain\Enums\PaymentStatus;
-use Afyalink\Core\Infrastructure\Persistence\JsonDataStore;
+use Afyalink\Core\Infrastructure\Persistence\DataStore;
 use Afyalink\Core\Support\Exceptions\NotFoundException;
 use DateTimeImmutable;
 use DomainException;
@@ -27,7 +27,7 @@ use DomainException;
 final readonly class ApplicationWorkflowService
 {
     public function __construct(
-        private JsonDataStore $store,
+        private DataStore $store,
         private ProfessionalProfileService $profiles,
         private CredentialService $credentials,
         private ConsentService $consents,
@@ -152,9 +152,11 @@ final readonly class ApplicationWorkflowService
 
         $userId = (int) $application['user_id'];
 
+        $user = $this->store->find('users', $userId);
+
         return [
             'application' => $application,
-            'professional' => $this->store->find('users', $userId),
+            'professional' => $user === null ? null : $this->safeUser($user),
             'profile' => $this->profiles->findForUser($userId),
             'credentials' => $this->credentials->listForUser($userId),
             'payments' => $this->payments->listForUser($userId),
@@ -237,6 +239,23 @@ final readonly class ApplicationWorkflowService
             ],
             'created_at' => (string) $row['created_at'],
             'updated_at' => (string) $row['updated_at'],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $user
+     * @return array<string, mixed>
+     */
+    private function safeUser(array $user): array
+    {
+        return [
+            'id' => (int) $user['id'],
+            'name' => (string) $user['name'],
+            'email' => (string) $user['email'],
+            'phone' => (string) $user['phone'],
+            'roles' => $user['roles'] ?? [],
+            'is_active' => (bool) ($user['is_active'] ?? false),
+            'created_at' => $user['created_at'] ?? null,
         ];
     }
 

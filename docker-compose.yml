@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: afyalink
+      POSTGRES_USER: afyalink
+      POSTGRES_PASSWORD: afyalink_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - afyalink_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U afyalink -d afyalink"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: afyalink
+      MINIO_ROOT_PASSWORD: afyalink_dev_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - afyalink_minio:/data
+
+volumes:
+  afyalink_postgres:
+  afyalink_minio:

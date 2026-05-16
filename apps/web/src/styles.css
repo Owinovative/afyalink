@@ -182,6 +182,10 @@ h2 {
   grid-template-columns: minmax(160px, 1fr) minmax(140px, 1fr) auto;
 }
 
+.search-form {
+  margin-bottom: 12px;
+}
+
 input,
 select,
 button {
@@ -226,6 +230,44 @@ button.secondary {
   border: 1px solid var(--line);
   background: #f8fcff;
   padding: 14px;
+}
+
+.detail-card {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  background: #fbfdff;
+  padding: 16px;
+  min-height: 140px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detail-section {
+  border: 1px solid var(--line);
+  background: var(--white);
+  padding: 12px;
+}
+
+.detail-section h3 {
+  margin: 0 0 8px;
+  color: var(--navy);
+}
+
+.review-actions {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mini-button {
+  min-height: 32px;
+  padding: 6px 8px;
+  font-size: 0.82rem;
 }
 
 .list-item {
@@ -287,9 +329,11 @@ button.secondary {
   .split-heading,
   .credential-layout,
   .admin-layout,
+  .detail-grid,
   .form-grid,
   .inline-form,
-  .action-row {
+  .action-row,
+  .review-actions {
     grid-template-columns: 1fr;
   }
 

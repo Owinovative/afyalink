@@ -2,7 +2,7 @@
 
 Base path: `/api`
 
-The current implementation is framework-light and Laravel-ready. It uses bearer tokens created by the local auth service. Production implementation should replace the file datastore with PostgreSQL-backed repositories and Laravel Sanctum/Fortify without changing the domain workflow rules.
+The current implementation is framework-light and Laravel-ready. It uses bearer tokens created by the local auth service and now supports PostgreSQL-backed runtime persistence through `AFYALINK_DATASTORE=pgsql`.
 
 ## Public
 
@@ -52,7 +52,7 @@ Credential upload uses JSON in this milestone implementation:
 
 Allowed document types include `cv`, `national_id_or_passport`, `professional_license`, `academic_certificate`, and optional experience/payment/regulatory evidence types.
 
-The API stores the file under private local storage for development, records checksum and metadata, and never returns a public direct file URL.
+The API stores the file through a private credential storage adapter, records checksum and metadata, and never returns a public direct file URL. Supported storage drivers are local private storage and S3-compatible object storage for MinIO/S3/R2 style providers.
 
 ## Payment Contract
 
