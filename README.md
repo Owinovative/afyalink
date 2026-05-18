@@ -166,6 +166,19 @@ The current tests verify:
 - signed document links are viewer-bound and expiring;
 - payment intent references are idempotent.
 
+## Render Staging
+
+This repository now includes `render.yaml` and an API `Dockerfile` for Render staging:
+
+- API: Render Docker web service running PHP 8.3, PostgreSQL migrations, and the API public router.
+- Database: Neon PostgreSQL through `DATABASE_URL`.
+- Web: Render static site built from `apps/web`.
+- Credential files: temporary local staging storage at `/tmp/afyalink/credentials`.
+
+Read the deployment guide before using staging credential uploads:
+
+- [Render Staging Deployment](docs/deployment/render-staging.md)
+
 ## Documents
 
 - [Milestone 1 Plan](docs/milestones/milestone-1.md)

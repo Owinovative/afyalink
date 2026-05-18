@@ -12,6 +12,8 @@ enum Permission: string
     case CredentialRawView = 'credential.raw.view';
     case ApplicationOwnSubmit = 'application.own.submit';
     case ApplicationReview = 'application.review';
+    case VerificationManage = 'verification.manage';
+    case InterviewManage = 'interview.manage';
     case InterviewScoreSubmit = 'interview.score.submit';
     case FacilityCandidateView = 'facility.candidate.view';
     case FacilitySubscriptionManage = 'facility.subscription.manage';
@@ -20,4 +22,3 @@ enum Permission: string
     case UserManage = 'user.manage';
     case SystemManage = 'system.manage';
 }
-

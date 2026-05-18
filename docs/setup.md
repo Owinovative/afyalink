@@ -95,6 +95,30 @@ http://localhost:8000
 
 To point the page elsewhere, set `window.AFYA_API_BASE` before loading `src/app.js`.
 
+For Render/static deployment, build the web bundle with:
+
+```bash
+cd apps/web
+set AFYA_API_BASE=https://your-api-staging.onrender.com
+npm.cmd run build:render
+```
+
+The build writes `dist/src/env.js` and copies shared brand assets into `dist/assets`.
+
+## Render Staging
+
+Use `render.yaml` from the repository root to create the staging API and web services on Render. The staging API uses Neon PostgreSQL via `DATABASE_URL` and temporary local credential storage:
+
+```text
+AFYALINK_DATASTORE=pgsql
+DATABASE_URL=postgresql://USER:PASSWORD@HOST.neon.tech/DBNAME?sslmode=require
+AFYALINK_CREDENTIAL_STORAGE=local
+AFYALINK_LOCAL_CREDENTIAL_ROOT=/tmp/afyalink/credentials
+CORS_ALLOWED_ORIGINS=https://your-web-staging.onrender.com
+```
+
+Temporary local credential storage on Render is not durable and is only acceptable for staging. See [Render Staging Deployment](deployment/render-staging.md).
+
 ## Creating an Admin for Local Testing
 
 ```bash

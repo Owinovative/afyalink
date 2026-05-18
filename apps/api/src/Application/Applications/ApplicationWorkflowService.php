@@ -14,6 +14,7 @@ use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
 use Afyalink\Core\Domain\Applications\AdminReviewService;
 use Afyalink\Core\Domain\Applications\ApplicationRecord;
 use Afyalink\Core\Domain\Applications\ApplicationSubmissionService;
+use Afyalink\Core\Domain\Applications\ApplicationStateMachine;
 use Afyalink\Core\Domain\Applications\ApplicationTimelineEvent;
 use Afyalink\Core\Domain\Applications\SubmissionReadinessChecker;
 use Afyalink\Core\Domain\Credentials\CredentialRequirementRegistry;
@@ -164,6 +165,12 @@ final readonly class ApplicationWorkflowService
             'awaiting_review' => 0,
             'needs_replacement' => 0,
             'ready_for_review' => 0,
+            'awaiting_verification' => 0,
+            'verification_in_progress' => 0,
+            'verification_passed' => 0,
+            'interview_scheduled' => 0,
+            'interview_completed' => 0,
+            'qualified' => 0,
             'approved' => 0,
             'rejected' => 0,
         ];
@@ -176,6 +183,24 @@ final readonly class ApplicationWorkflowService
             }
             if ($status === ApplicationStatus::NeedsReplacement->value) {
                 $counts['needs_replacement']++;
+            }
+            if ($status === ApplicationStatus::AwaitingVerification->value) {
+                $counts['awaiting_verification']++;
+            }
+            if ($status === ApplicationStatus::VerificationInProgress->value) {
+                $counts['verification_in_progress']++;
+            }
+            if ($status === ApplicationStatus::VerificationPassed->value) {
+                $counts['verification_passed']++;
+            }
+            if ($status === ApplicationStatus::InterviewScheduled->value) {
+                $counts['interview_scheduled']++;
+            }
+            if ($status === ApplicationStatus::InterviewCompleted->value) {
+                $counts['interview_completed']++;
+            }
+            if ($status === ApplicationStatus::Qualified->value) {
+                $counts['qualified']++;
             }
             if ($status === ApplicationStatus::Approved->value) {
                 $counts['approved']++;
@@ -247,6 +272,51 @@ final readonly class ApplicationWorkflowService
             'action' => $action,
             'from' => $row['status'] ?? null,
             'to' => $updated['status'],
+            'professional_user_id' => $row['user_id'] ?? null,
+            'note' => $note,
+        ], $ipAddress, $userAgent);
+
+        return $updated;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function findApplication(int $applicationId): array
+    {
+        $application = $this->store->find('applications', $applicationId);
+        if ($application === null) {
+            throw new NotFoundException('Application was not found.');
+        }
+
+        return $application;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function transitionStatus(
+        int $applicationId,
+        ApplicationStatus $to,
+        string $note,
+        ?int $actorId,
+        ?string $ipAddress = null,
+        ?string $userAgent = null,
+        string $auditAction = 'application.status_changed',
+    ): array {
+        $row = $this->findApplication($applicationId);
+        $record = $this->rowToApplication($row);
+        (new ApplicationStateMachine())->assertTransition($record->status, $to);
+        $updatedRecord = $record->withStatus($to, $note, $actorId);
+
+        $updated = $this->store->update('applications', $applicationId, [
+            ...$this->applicationToRow($updatedRecord),
+            'updated_at' => gmdate(DATE_ATOM),
+        ]);
+
+        $this->audit->record($actorId, $auditAction, 'Application', (string) $applicationId, [
+            'from' => $row['status'] ?? null,
+            'to' => $to->value,
             'professional_user_id' => $row['user_id'] ?? null,
             'note' => $note,
         ], $ipAddress, $userAgent);

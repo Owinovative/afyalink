@@ -11,6 +11,11 @@ const applicationList = document.querySelector("#applicationList");
 const applicationDetail = document.querySelector("#applicationDetail");
 const auditList = document.querySelector("#auditList");
 const adminCounters = document.querySelector("#adminCounters");
+const verificationCounters = document.querySelector("#verificationCounters");
+const verificationList = document.querySelector("#verificationList");
+const interviewCounters = document.querySelector("#interviewCounters");
+const interviewList = document.querySelector("#interviewList");
+const milestone2Detail = document.querySelector("#milestone2Detail");
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -111,6 +116,16 @@ function renderDashboard(data) {
     <p>Warnings: ${readiness.warnings.length ? escapeHtml(readiness.warnings.join(", ")) : "None"}</p>
     <p>Payment: ${latestPayment ? `${escapeHtml(latestPayment.intent_reference)} (${escapeHtml(latestPayment.status)})` : "No payment reference yet"}</p>
     <p>Application: ${application ? `${escapeHtml(application.application_number)} (${escapeHtml(application.status)})` : "Not submitted"}</p>
+    <p>Verification: ${
+      data.verification_cases?.length
+        ? `${escapeHtml(data.verification_cases[0].regulatory_body_code)} (${escapeHtml(data.verification_cases[0].status)})`
+        : "Not started"
+    }</p>
+    <p>Interview: ${
+      data.interviews?.length
+        ? `${escapeHtml(data.interviews[0].status)} ${data.interviews[0].scheduled_start_at ? `/ ${escapeHtml(data.interviews[0].scheduled_start_at)}` : ""}`
+        : "Not scheduled"
+    }</p>
   `;
 
   renderSteps(data);
@@ -290,6 +305,9 @@ function renderAdminCounters(overview = {}) {
     ["Awaiting review", overview.awaiting_review ?? 0],
     ["Needs replacement", overview.needs_replacement ?? 0],
     ["Ready", overview.ready_for_review ?? 0],
+    ["Verification", overview.verification_in_progress ?? 0],
+    ["Interview", overview.interview_scheduled ?? 0],
+    ["Qualified", overview.qualified ?? 0],
     ["Approved", overview.approved ?? 0],
     ["Rejected", overview.rejected ?? 0],
   ];
@@ -415,6 +433,8 @@ async function openApplication(id) {
       <button class="mini-button" data-application-action="verify" data-application-id="${application.id}">Verify</button>
       <button class="mini-button" data-application-action="approve" data-application-id="${application.id}">Approve</button>
       <button class="mini-button" data-application-action="reject" data-application-id="${application.id}">Reject</button>
+      <button class="mini-button secondary" data-create-verification="${application.id}">Open verification case</button>
+      <button class="mini-button secondary" data-schedule-interview="${application.id}">Schedule interview</button>
     </div>
   `;
   log("Application detail loaded.", { application: application.application_number, status: application.status });
@@ -441,6 +461,40 @@ applicationDetail.addEventListener("click", async (event) => {
     }
 
     const actionButton = event.target.closest("[data-application-action]");
+    const verificationButton = event.target.closest("[data-create-verification]");
+    const interviewButton = event.target.closest("[data-schedule-interview]");
+    if (verificationButton) {
+      await api("/api/admin/verifications", {
+        method: "POST",
+        token: adminToken,
+        body: {
+          application_id: Number(verificationButton.dataset.createVerification),
+        },
+      });
+      await loadVerifications();
+      await openApplication(verificationButton.dataset.createVerification);
+      log("Verification case opened.");
+      return;
+    }
+    if (interviewButton) {
+      const start = window.prompt("Interview start time (ISO/local accepted)", new Date(Date.now() + 86400000).toISOString());
+      const end = window.prompt("Interview end time (ISO/local accepted)", new Date(Date.now() + 90000000).toISOString());
+      await api("/api/admin/interviews", {
+        method: "POST",
+        token: adminToken,
+        body: {
+          application_id: Number(interviewButton.dataset.scheduleInterview),
+          scheduled_start_at: start,
+          scheduled_end_at: end,
+          mode: "remote",
+          notes: "Scheduled from admin workbench.",
+        },
+      });
+      await loadInterviews();
+      await openApplication(interviewButton.dataset.scheduleInterview);
+      log("Interview scheduled.");
+      return;
+    }
     if (!actionButton) return;
     const note = window.prompt("Review note", `Admin action: ${actionButton.dataset.applicationAction}`);
     await api(`/api/admin/applications/${actionButton.dataset.applicationId}/action`, {
@@ -472,4 +526,224 @@ bindAsync("#loadAudit", "click", async () => {
         .join("")
     : "No audit records.";
   log("Audit logs loaded.", data.audit_logs.slice(0, 5));
+});
+
+function renderCounters(target, overview = {}) {
+  target.innerHTML = Object.entries(overview)
+    .map(([label, value]) => `<div class="counter"><span>${escapeHtml(label.replaceAll("_", " "))}</span><strong>${escapeHtml(value)}</strong></div>`)
+    .join("");
+}
+
+async function loadVerifications(filters = {}) {
+  const query = new URLSearchParams(
+    Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== "" && value !== null)),
+  ).toString();
+  const data = await api(`/api/admin/verifications${query ? `?${query}` : ""}`, { token: adminToken });
+  renderCounters(verificationCounters, data.overview);
+  verificationList.innerHTML = data.verification_cases.length
+    ? data.verification_cases
+        .map(
+          (item) => `
+            <div class="list-item">
+              <strong>${escapeHtml(item.regulatory_body_code)} / ${escapeHtml(item.license_number)}</strong>
+              ${badge(item.status)}
+              <p>${escapeHtml(item.professional.name)} / ${escapeHtml(item.professional.email)} / ${escapeHtml(item.professional.profession)}</p>
+              <button class="mini-button secondary" data-open-verification="${item.id}">Open verification</button>
+            </div>
+          `,
+        )
+        .join("")
+    : "No verification cases.";
+  log("Verification queue loaded.", data.overview);
+}
+
+async function openVerification(id) {
+  const data = await api(`/api/admin/verifications/${id}`, { token: adminToken });
+  const { case: verificationCase, application, professional, profile } = data;
+  milestone2Detail.dataset.currentVerificationId = String(verificationCase.id);
+  milestone2Detail.innerHTML = `
+    <div class="detail-grid">
+      <section class="detail-section">
+        <h3>Professional</h3>
+        <p><strong>${escapeHtml(professional?.name ?? profile?.name ?? "-")}</strong></p>
+        <p>${escapeHtml(professional?.email ?? "-")} / ${escapeHtml(profile?.profession ?? "-")}</p>
+        <p>License: ${escapeHtml(verificationCase.regulatory_body_code)} ${escapeHtml(verificationCase.license_number)}</p>
+      </section>
+      <section class="detail-section">
+        <h3>Verification</h3>
+        ${badge(verificationCase.status)}
+        <p>${escapeHtml(verificationCase.regulatory_body_name)}</p>
+        <p>Method: ${escapeHtml(verificationCase.verification_method)}</p>
+      </section>
+      <section class="detail-section">
+        <h3>Application</h3>
+        <p>${escapeHtml(application.application_number)}</p>
+        ${badge(application.status)}
+      </section>
+    </div>
+    <div class="detail-section">
+      <h3>Evidence</h3>
+      <p>Reference: ${escapeHtml(verificationCase.evidence_reference ?? "-")}</p>
+      <p>${escapeHtml(verificationCase.evidence_notes ?? "No evidence notes recorded.")}</p>
+      <p class="muted">${escapeHtml(verificationCase.final_decision_notes ?? "")}</p>
+    </div>
+    <div class="review-actions">
+      <button class="mini-button secondary" data-verification-status="assigned">Assign</button>
+      <button class="mini-button secondary" data-verification-status="in_progress">In progress</button>
+      <button class="mini-button secondary" data-verification-status="awaiting_external_response">Await external</button>
+      <button class="mini-button secondary" data-verification-status="needs_clarification">Needs clarification</button>
+      <button class="mini-button" data-verification-status="verified">Verified</button>
+      <button class="mini-button" data-verification-status="failed">Failed</button>
+    </div>
+  `;
+  log("Verification detail loaded.", { id: verificationCase.id, status: verificationCase.status });
+}
+
+verificationList.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-open-verification]");
+  if (!button) return;
+  try {
+    await openVerification(button.dataset.openVerification);
+  } catch (error) {
+    log(error.message || "Could not open verification case.");
+  }
+});
+
+bindAsync("#verificationSearchForm", "submit", async (event) => {
+  event.preventDefault();
+  await loadVerifications(formData(event.currentTarget));
+});
+
+async function loadInterviews(filters = {}) {
+  const query = new URLSearchParams(
+    Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== "" && value !== null)),
+  ).toString();
+  const data = await api(`/api/admin/interviews${query ? `?${query}` : ""}`, { token: adminToken });
+  renderCounters(interviewCounters, data.overview);
+  interviewList.innerHTML = data.interviews.length
+    ? data.interviews
+        .map(
+          (item) => `
+            <div class="list-item">
+              <strong>${escapeHtml(item.professional.name)} / ${escapeHtml(item.mode)}</strong>
+              ${badge(item.status)}
+              <p>${escapeHtml(item.scheduled_start_at ?? "Not scheduled")} / ${escapeHtml(item.professional.profession)}</p>
+              <button class="mini-button secondary" data-open-interview="${item.id}">Open interview</button>
+            </div>
+          `,
+        )
+        .join("")
+    : "No interviews.";
+  log("Interview queue loaded.", data.overview);
+}
+
+async function openInterview(id) {
+  const data = await api(`/api/admin/interviews/${id}`, { token: adminToken });
+  const { interview, application, professional, profile, scores, rubric } = data;
+  milestone2Detail.dataset.currentInterviewId = String(interview.id);
+  const scoreRows = scores.length
+    ? scores.map((score) => `<li>${escapeHtml(score.category)}: ${escapeHtml(score.score)} / ${escapeHtml(score.max_score)} ${score.comment ? `- ${escapeHtml(score.comment)}` : ""}</li>`).join("")
+    : "<li>No score submitted.</li>";
+  milestone2Detail.innerHTML = `
+    <div class="detail-grid">
+      <section class="detail-section">
+        <h3>Candidate</h3>
+        <p><strong>${escapeHtml(professional?.name ?? profile?.name ?? "-")}</strong></p>
+        <p>${escapeHtml(profile?.profession ?? "-")} / ${escapeHtml(professional?.email ?? "-")}</p>
+      </section>
+      <section class="detail-section">
+        <h3>Interview</h3>
+        ${badge(interview.status)}
+        <p>${escapeHtml(interview.scheduled_start_at ?? "-")} - ${escapeHtml(interview.scheduled_end_at ?? "-")}</p>
+        <p>${escapeHtml(interview.mode)} / ${escapeHtml(interview.location ?? "-")}</p>
+      </section>
+      <section class="detail-section">
+        <h3>Application</h3>
+        <p>${escapeHtml(application.application_number)}</p>
+        ${badge(application.status)}
+      </section>
+    </div>
+    <div class="detail-section">
+      <h3>Rubric</h3>
+      <p class="muted">${escapeHtml(rubric.join(", "))}</p>
+      <ol class="timeline">${scoreRows}</ol>
+    </div>
+    <div class="review-actions">
+      <button class="mini-button" data-complete-interview="${interview.id}" data-recommendation="recommend">Recommend</button>
+      <button class="mini-button secondary" data-complete-interview="${interview.id}" data-recommendation="recommend_with_conditions">Recommend with conditions</button>
+      <button class="mini-button secondary" data-complete-interview="${interview.id}" data-recommendation="do_not_recommend">Do not recommend</button>
+    </div>
+  `;
+  log("Interview detail loaded.", { id: interview.id, status: interview.status });
+}
+
+interviewList.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-open-interview]");
+  if (!button) return;
+  try {
+    await openInterview(button.dataset.openInterview);
+  } catch (error) {
+    log(error.message || "Could not open interview.");
+  }
+});
+
+bindAsync("#interviewSearchForm", "submit", async (event) => {
+  event.preventDefault();
+  await loadInterviews(formData(event.currentTarget));
+});
+
+milestone2Detail.addEventListener("click", async (event) => {
+  try {
+    const verificationStatus = event.target.closest("[data-verification-status]");
+    if (verificationStatus && milestone2Detail.dataset.currentVerificationId) {
+      const note = window.prompt("Verification note", `Move to ${verificationStatus.dataset.verificationStatus}`);
+      const evidence = window.prompt("Evidence/reference", "");
+      await api(`/api/admin/verifications/${milestone2Detail.dataset.currentVerificationId}/status`, {
+        method: "PATCH",
+        token: adminToken,
+        body: {
+          status: verificationStatus.dataset.verificationStatus,
+          note,
+          evidence_reference: evidence,
+          evidence_notes: note,
+          final_decision_notes: note,
+        },
+      });
+      await openVerification(milestone2Detail.dataset.currentVerificationId);
+      await loadVerifications();
+      await loadApplications();
+      return;
+    }
+
+    const completeInterview = event.target.closest("[data-complete-interview]");
+    if (completeInterview) {
+      const notes = window.prompt("Interview notes", "Structured interview completed.");
+      const defaultScores = [
+        "professional_knowledge",
+        "communication",
+        "ethical_judgment",
+        "practical_readiness",
+        "role_fit",
+      ].map((category) => ({ category, score: 4, max_score: 5, weight: 1, comment: "Meets milestone 2 benchmark." }));
+      await api(`/api/admin/interviews/${completeInterview.dataset.completeInterview}/complete`, {
+        method: "PATCH",
+        token: adminToken,
+        body: {
+          recommendation: completeInterview.dataset.recommendation,
+          notes,
+          scores: defaultScores,
+        },
+      });
+      await openInterview(completeInterview.dataset.completeInterview);
+      await loadInterviews();
+      await loadApplications();
+    }
+  } catch (error) {
+    log(error.message || "Milestone 2 action failed.");
+  }
+});
+
+bindAsync("#loadMilestone2", "click", async () => {
+  await loadVerifications();
+  await loadInterviews();
 });

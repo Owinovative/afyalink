@@ -17,8 +17,10 @@ use Afyalink\Core\Domain\Documents\PrivateDocumentUrlFactory;
 use Afyalink\Core\Domain\Enums\ApplicationStatus;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
 use Afyalink\Core\Domain\Enums\DocumentType;
+use Afyalink\Core\Domain\Enums\InterviewRecommendation;
 use Afyalink\Core\Domain\Enums\PaymentStatus;
 use Afyalink\Core\Domain\Enums\UserRole;
+use Afyalink\Core\Domain\Enums\VerificationStatus;
 use Afyalink\Core\Domain\Payments\PaymentStateMachine;
 use Afyalink\Core\Domain\Payments\PaymentIntentFactory;
 use Afyalink\Core\Domain\Permissions\Permission;
@@ -455,6 +457,158 @@ $tests = [
         expectTrue($current->payload['data']['credentials'][0]['review_status'] === CredentialReviewStatus::Uploaded->value, 'replacement should reset review state');
         $old = $store->find('credentials', $credentialId);
         expectTrue(!empty($old['superseded_at']), 'prior credential should be superseded');
+    },
+    'milestone 2 verification and interview happy path qualifies candidate' => function (): void {
+        $root = sys_get_temp_dir() . '/afyalink-m2-test-' . bin2hex(random_bytes(4));
+        mkdir($root . '/storage/private/credentials', 0770, true);
+        $store = new JsonDataStore($root . '/storage/runtime/database.json');
+        $kernel = new ApiKernel($store, new LocalPrivateCredentialStorage($root . '/storage/private/credentials'));
+
+        $api = static function (string $method, string $path, array $body = [], ?string $token = null, array $query = []) use ($kernel): JsonResponse {
+            $headers = $token === null ? [] : ['authorization' => "Bearer {$token}"];
+
+            return $kernel->handle(new Request($method, $path, $headers, $body, $query, ipAddress: '127.0.0.1', userAgent: 'test-suite'));
+        };
+
+        $registered = $api('POST', '/api/auth/register', [
+            'name' => 'Milestone Two Nurse',
+            'email' => 'milestone.two@example.com',
+            'phone' => '0755555555',
+            'password' => 'StrongPass123',
+        ]);
+        expectTrue($registered->status === 200, 'milestone 2 professional should register');
+        $token = (string) $registered->payload['data']['token'];
+        $notice = $store->where('notification_outbox', static fn (array $row): bool => ($row['type'] ?? '') === 'email_verification')[0] ?? null;
+        parse_str((string) parse_url((string) $notice['action_url'], PHP_URL_QUERY), $verificationQuery);
+
+        $api('PUT', '/api/professional/profile', [
+            'name' => 'Milestone Two Nurse',
+            'phone' => '0755555555',
+            'profession' => 'Registered Nurse',
+            'regulatory_body' => 'NCK',
+            'license_number' => 'NCK-M2-001',
+            'county' => 'Nairobi',
+            'years_experience' => 8,
+            'availability' => 'available',
+            'placement_type' => 'full_time',
+        ], $token);
+
+        foreach ([
+            DocumentType::CurriculumVitae,
+            DocumentType::NationalIdOrPassport,
+            DocumentType::ProfessionalLicense,
+            DocumentType::AcademicCertificate,
+        ] as $type) {
+            $api('POST', '/api/professional/credentials', [
+                'document_type' => $type->value,
+                'original_name' => $type->value . '.pdf',
+                'mime_type' => 'application/pdf',
+                'content_base64' => base64_encode('%PDF-1.4 milestone-two'),
+            ], $token);
+        }
+
+        $api('POST', '/api/professional/consents', [], $token);
+        $payment = $api('POST', '/api/professional/payments', [
+            'method' => 'mpesa_manual_reference',
+            'idempotency_key' => 'm2-payment',
+            'amount_cents' => 250000,
+            'external_reference' => 'MPESA-M2-001',
+        ], $token);
+
+        $kernel->auth()->createUser('Milestone Two Admin', 'm2.admin@example.com', '0799999997', 'AdminPass123', [UserRole::Admin]);
+        $adminLogin = $api('POST', '/api/auth/login', ['email' => 'm2.admin@example.com', 'password' => 'AdminPass123']);
+        $adminToken = (string) $adminLogin->payload['data']['token'];
+        $api('PATCH', '/api/admin/payments/' . (int) $payment->payload['data']['payment']['id'] . '/status', [
+            'status' => PaymentStatus::PendingVerification->value,
+            'note' => 'Manual reference received.',
+        ], $adminToken);
+        $api('PATCH', '/api/admin/payments/' . (int) $payment->payload['data']['payment']['id'] . '/status', [
+            'status' => PaymentStatus::Confirmed->value,
+            'note' => 'Manual reference confirmed.',
+        ], $adminToken);
+        $api('POST', '/api/auth/email/verify', ['token' => (string) $verificationQuery['token']]);
+
+        $submitted = $api('POST', '/api/professional/application/submit', [], $token);
+        expectTrue($submitted->status === 200, 'professional should submit before milestone 2 review');
+        $applicationId = (int) $submitted->payload['data']['application']['id'];
+
+        $scheduleTooEarly = $api('POST', '/api/admin/interviews', [
+            'application_id' => $applicationId,
+            'scheduled_start_at' => gmdate(DATE_ATOM, time() + 86400),
+            'scheduled_end_at' => gmdate(DATE_ATOM, time() + 90000),
+        ], $adminToken);
+        expectTrue($scheduleTooEarly->status === 409, 'interview must wait for passed verification');
+
+        $createdCase = $api('POST', '/api/admin/verifications', [
+            'application_id' => $applicationId,
+            'verification_method' => 'manual_registry_check',
+        ], $adminToken);
+        expectTrue($createdCase->status === 200, 'admin should create verification case');
+        $caseId = (int) $createdCase->payload['data']['verification']['case']['id'];
+        $applicationAfterCase = $store->find('applications', $applicationId);
+        expectTrue($applicationAfterCase['status'] === ApplicationStatus::AwaitingVerification->value, 'application should move to awaiting verification');
+
+        $assigned = $api('PATCH', "/api/admin/verifications/{$caseId}/status", [
+            'status' => VerificationStatus::Assigned->value,
+            'note' => 'Assigned to internal reviewer.',
+            'evidence_reference' => 'NCK registry search started.',
+        ], $adminToken);
+        expectTrue($assigned->status === 200, 'verification should assign');
+
+        $passed = $api('PATCH', "/api/admin/verifications/{$caseId}/status", [
+            'status' => VerificationStatus::Verified->value,
+            'note' => 'License active and matching applicant identity.',
+            'evidence_reference' => 'NCK online register',
+            'evidence_notes' => 'Internal reviewer confirmed regulator record.',
+            'final_decision_notes' => 'Verified.',
+        ], $adminToken);
+        expectTrue($passed->status === 200, 'verification should pass');
+        $applicationAfterVerification = $store->find('applications', $applicationId);
+        expectTrue($applicationAfterVerification['status'] === ApplicationStatus::VerificationPassed->value, 'application should move to verification passed');
+
+        $professionalDashboard = $api('GET', '/api/professional/dashboard', [], $token);
+        expectTrue($professionalDashboard->status === 200, 'professional dashboard should load after verification: ' . json_encode($professionalDashboard->payload));
+        expectTrue(count($professionalDashboard->payload['data']['verification_cases']) === 1, 'professional should see safe verification status');
+        expectFalse(array_key_exists('evidence_notes', $professionalDashboard->payload['data']['verification_cases'][0]), 'professional verification status must hide internal evidence notes');
+
+        $scheduled = $api('POST', '/api/admin/interviews', [
+            'application_id' => $applicationId,
+            'scheduled_start_at' => gmdate(DATE_ATOM, time() + 86400),
+            'scheduled_end_at' => gmdate(DATE_ATOM, time() + 90000),
+            'mode' => 'remote',
+            'location' => 'Secure video call',
+            'notes' => 'Panel interview scheduled.',
+        ], $adminToken);
+        expectTrue($scheduled->status === 200, 'interview should schedule after verification passes');
+        $interviewId = (int) $scheduled->payload['data']['interview']['interview']['id'];
+
+        $completed = $api('PATCH', "/api/admin/interviews/{$interviewId}/complete", [
+            'recommendation' => InterviewRecommendation::Recommend->value,
+            'notes' => 'Candidate meets Afyalink milestone 2 readiness.',
+            'scores' => [
+                ['category' => 'professional_knowledge', 'score' => 5, 'max_score' => 5, 'weight' => 1, 'comment' => 'Strong technical answers.'],
+                ['category' => 'communication', 'score' => 4, 'max_score' => 5, 'weight' => 1, 'comment' => 'Clear communication.'],
+                ['category' => 'ethical_judgment', 'score' => 5, 'max_score' => 5, 'weight' => 1, 'comment' => 'Safe ethical reasoning.'],
+                ['category' => 'practical_readiness', 'score' => 4, 'max_score' => 5, 'weight' => 1, 'comment' => 'Ready for supervised placement.'],
+                ['category' => 'role_fit', 'score' => 4, 'max_score' => 5, 'weight' => 1, 'comment' => 'Good role fit.'],
+            ],
+        ], $adminToken);
+        expectTrue($completed->status === 200, 'interview should complete with scores');
+        $finalApplication = $store->find('applications', $applicationId);
+        expectTrue($finalApplication['status'] === ApplicationStatus::Qualified->value, 'recommended candidate should become qualified');
+
+        $professionalDenied = $api('GET', '/api/admin/verifications', [], $token);
+        expectTrue($professionalDenied->status === 403, 'professional cannot access verification admin queue');
+
+        $notificationTypes = array_map(static fn (array $row): string => (string) $row['type'], $store->all('notification_outbox'));
+        expectTrue(in_array('verification_status_changed', $notificationTypes, true), 'verification status should queue notification');
+        expectTrue(in_array('interview_scheduled', $notificationTypes, true), 'interview scheduled should queue notification');
+        expectTrue(in_array('interview_completed', $notificationTypes, true), 'interview completion should queue notification');
+
+        $auditActions = array_map(static fn (array $row): string => (string) $row['action'], $store->all('audit_logs'));
+        expectTrue(in_array('verification.created', $auditActions, true), 'verification creation should be audited');
+        expectTrue(in_array('verification.status_changed', $auditActions, true), 'verification status change should be audited');
+        expectTrue(in_array('interview.completed', $auditActions, true), 'interview completion should be audited');
     },
     'configuration defaults to postgresql and supports explicit json adapter' => function (): void {
         $config = AppConfig::fromEnv([], __DIR__);

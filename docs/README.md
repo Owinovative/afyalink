@@ -11,6 +11,7 @@ The current Milestone 1 implementation also documents executable account lifecyc
 - [Security Foundation](security/security-foundation.md)
 - [Local Setup](setup.md)
 - [Milestone 1 API Endpoints](api/milestone-1-endpoints.md)
+- [Render Staging Deployment](deployment/render-staging.md)
 
 ## Source Documents
 
