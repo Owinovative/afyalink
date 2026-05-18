@@ -17,6 +17,7 @@ final readonly class AuthenticatedUser
         public string $email,
         public string $phone,
         public array $roles,
+        public ?string $emailVerifiedAt = null,
     ) {}
 
     public function hasRole(UserRole $role): bool
@@ -42,6 +43,8 @@ final readonly class AuthenticatedUser
             'email' => $this->email,
             'phone' => $this->phone,
             'roles' => array_map(static fn (UserRole $role) => $role->value, $this->roles),
+            'email_verified_at' => $this->emailVerifiedAt,
+            'email_verified' => $this->emailVerifiedAt !== null && $this->emailVerifiedAt !== '',
         ];
     }
 }

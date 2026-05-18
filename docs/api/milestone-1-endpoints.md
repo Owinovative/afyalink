@@ -11,12 +11,16 @@ The current implementation is framework-light and Laravel-ready. It uses bearer 
 | `GET` | `/api/health` | Process health check |
 | `POST` | `/api/auth/register` | Register a professional and return a bearer token |
 | `POST` | `/api/auth/login` | Login professional or admin |
+| `POST` | `/api/auth/email/verify` | Verify an email verification token |
+| `POST` | `/api/auth/password/forgot` | Queue a password reset notification with anti-enumeration response |
+| `POST` | `/api/auth/password/reset` | Reset password with a valid reset token |
 
 ## Authenticated Professional
 
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `POST` | `/api/auth/logout` | Revoke current session token |
+| `POST` | `/api/auth/email/resend` | Queue a new verification notification for the authenticated professional |
 | `GET` | `/api/me` | Current authenticated user |
 | `GET` | `/api/professional/dashboard` | Profile, credential, consent, payment, application, and readiness state |
 | `PUT` | `/api/professional/profile` | Save professional profile |
@@ -36,6 +40,41 @@ The current implementation is framework-light and Laravel-ready. It uses bearer 
 | `PATCH` | `/api/admin/credentials/{id}/review` | Set credential status: `accepted`, `rejected`, `needs_replacement`, etc. |
 | `PATCH` | `/api/admin/payments/{id}/status` | Move payment through allowed state transitions |
 | `GET` | `/api/admin/audit-logs` | Latest audit records |
+
+`GET /api/admin/applications` also returns an `overview` object with total, awaiting review, replacement, ready, approved, and rejected counters.
+
+## Email Verification Contract
+
+Registration queues an email verification notification. In the current dev adapter, notification rows are written to `notification_outbox`; a later mail worker can deliver them through SMTP or an email provider without changing the controller flow.
+
+```json
+{
+  "token": "verification-token-from-email"
+}
+```
+
+Final application submission is blocked until the professional account has `email_verified_at`.
+
+## Password Reset Contract
+
+Forgot password uses a safe response for both known and unknown emails:
+
+```json
+{
+  "email": "professional@example.com"
+}
+```
+
+Reset uses the token from the queued notification:
+
+```json
+{
+  "token": "reset-token-from-email",
+  "password": "NewStrongPass123"
+}
+```
+
+Reset tokens are hashed at rest, expire, and are single-use. Successful password reset revokes existing sessions.
 
 ## Credential Upload Contract
 

@@ -11,6 +11,8 @@ This folder currently contains framework-light PHP domain code for the trust-cri
 - Payment status transition rules.
 - Professional profile and credential records.
 - Full submission service.
+- Account lifecycle service for email verification and password reset.
+- Notification outbox service for lifecycle and review messages.
 - Admin review service.
 - Permission matrix.
 - Signed private document link factory.
@@ -32,7 +34,7 @@ composer dump-autoload
 composer check
 ```
 
-Current checks include full submission, admin review, permission boundary, document signing, idempotent payment, consent, audit redaction, and upload policy tests.
+Current checks include email verification, password reset, notification outbox, replacement upload loops, full submission, admin review, permission boundary, document signing, idempotent payment, consent, audit redaction, and upload policy tests.
 
 ## Recommended Implementation Path
 

@@ -4,10 +4,22 @@ let adminToken = localStorage.getItem("afyalink.adminToken") ?? "";
 
 const output = document.querySelector("#output");
 const dashboardSummary = document.querySelector("#dashboardSummary");
+const onboardingSteps = document.querySelector("#onboardingSteps");
 const credentialList = document.querySelector("#credentialList");
+const replacementList = document.querySelector("#replacementList");
 const applicationList = document.querySelector("#applicationList");
 const applicationDetail = document.querySelector("#applicationDetail");
 const auditList = document.querySelector("#auditList");
+const adminCounters = document.querySelector("#adminCounters");
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
 function log(message, data = null) {
   output.textContent = `${message}${data ? `\n${JSON.stringify(data, null, 2)}` : ""}`;
@@ -24,9 +36,20 @@ async function api(path, { method = "GET", body = null, token = professionalToke
   });
   const payload = await response.json();
   if (!response.ok || !payload.ok) {
-    throw new Error(payload.message ?? "Request failed");
+    const detail = payload.errors ? ` ${JSON.stringify(payload.errors)}` : "";
+    throw new Error(`${payload.message ?? "Request failed"}${detail}`);
   }
   return payload.data;
+}
+
+function bindAsync(selector, eventName, handler) {
+  document.querySelector(selector).addEventListener(eventName, async (event) => {
+    try {
+      await handler(event);
+    } catch (error) {
+      log(error.message || "Request failed.");
+    }
+  });
 }
 
 function formData(form) {
@@ -40,27 +63,81 @@ async function fileToBase64(file) {
   return btoa(binary);
 }
 
+function badge(status) {
+  const value = escapeHtml(status || "missing");
+  const kind = ["accepted", "confirmed", "approved", "verified"].includes(status)
+    ? "good"
+    : ["rejected", "needs_replacement", "failed"].includes(status)
+      ? "bad"
+      : "warn";
+  return `<span class="badge ${kind}">${value}</span>`;
+}
+
+function renderSteps(data) {
+  const readiness = data.readiness;
+  const profileComplete = data.profile && !readiness.missing.some((item) => item.startsWith("profile."));
+  const hasRequiredCredentials = !readiness.missing.some((item) => item.startsWith("credential."));
+  const currentPayment = data.payments[0] ?? null;
+  const steps = [
+    ["1", "Email verification", data.account?.email_verified, data.account?.email_verified ? "Verified" : "Verify email before final submission"],
+    ["2", "Professional profile", profileComplete, profileComplete ? "Profile complete" : "Save profession, license, county, and contact details"],
+    ["3", "Credentials", hasRequiredCredentials && !readiness.warnings.length, hasRequiredCredentials ? "Documents uploaded" : "Upload required documents"],
+    ["4", "Consent", data.consent.accepted_current, data.consent.accepted_current ? data.consent.current_version : "Accept current consent"],
+    ["5", "Payment", Boolean(currentPayment), currentPayment ? `${currentPayment.intent_reference} (${currentPayment.status})` : "Create payment reference"],
+    ["6", "Submit", readiness.ready, readiness.ready ? "Ready to submit" : "Blocked by backend readiness checks"],
+  ];
+
+  onboardingSteps.innerHTML = steps
+    .map(
+      ([number, title, done, caption]) => `
+        <div class="step-card ${done ? "complete" : ""}">
+          <span>${number}</span>
+          <strong>${escapeHtml(title)}</strong>
+          <p>${escapeHtml(caption)}</p>
+        </div>
+      `,
+    )
+    .join("");
+}
+
 function renderDashboard(data) {
   const readiness = data.readiness;
   const latestPayment = data.payments[0] ?? null;
   const application = data.application;
   dashboardSummary.innerHTML = `
-    <span>Readiness</span>
+    <span>${data.account?.email_verified ? "Email verified" : "Email not verified"}</span>
     <strong>${readiness.ready ? "Ready to submit" : "Not ready"}</strong>
-    <p>Missing: ${readiness.missing.length ? readiness.missing.join(", ") : "None"}</p>
-    <p>Warnings: ${readiness.warnings.length ? readiness.warnings.join(", ") : "None"}</p>
-    <p>Payment: ${latestPayment ? `${latestPayment.intent_reference} (${latestPayment.status})` : "No payment reference yet"}</p>
-    <p>Application: ${application ? `${application.application_number} (${application.status})` : "Not submitted"}</p>
+    <p>Missing: ${readiness.missing.length ? escapeHtml(readiness.missing.join(", ")) : "None"}</p>
+    <p>Warnings: ${readiness.warnings.length ? escapeHtml(readiness.warnings.join(", ")) : "None"}</p>
+    <p>Payment: ${latestPayment ? `${escapeHtml(latestPayment.intent_reference)} (${escapeHtml(latestPayment.status)})` : "No payment reference yet"}</p>
+    <p>Application: ${application ? `${escapeHtml(application.application_number)} (${escapeHtml(application.status)})` : "Not submitted"}</p>
   `;
+
+  renderSteps(data);
+
+  const replacements = data.credentials.filter((credential) => credential.review_status === "needs_replacement");
+  replacementList.innerHTML = replacements.length
+    ? replacements
+        .map(
+          (credential) => `
+            <div class="notice bad">
+              <strong>${escapeHtml(credential.document_type)} needs replacement</strong>
+              <p>${escapeHtml(credential.review_note || "Upload a clearer replacement document.")}</p>
+            </div>
+          `,
+        )
+        .join("")
+    : "";
 
   credentialList.innerHTML = data.credentials.length
     ? data.credentials
         .map(
           (credential) => `
             <div class="list-item">
-              <strong>${credential.document_type}</strong>
-              <span class="badge ${credential.review_status === "accepted" ? "good" : credential.review_status === "needs_replacement" ? "bad" : "warn"}">${credential.review_status}</span>
-              <p>${credential.original_name} • ${Math.round(credential.size_bytes / 1024)} KB</p>
+              <strong>${escapeHtml(credential.document_type)}</strong>
+              ${badge(credential.review_status)}
+              <p>${escapeHtml(credential.original_name)} / ${Math.round(credential.size_bytes / 1024)} KB</p>
+              ${credential.review_note ? `<p class="muted">Reviewer note: ${escapeHtml(credential.review_note)}</p>` : ""}
             </div>
           `,
         )
@@ -74,7 +151,7 @@ async function refreshDashboard() {
   log("Dashboard refreshed.", data.readiness);
 }
 
-document.querySelector("#registerForm").addEventListener("submit", async (event) => {
+bindAsync("#registerForm", "submit", async (event) => {
   event.preventDefault();
   const data = await api("/api/auth/register", {
     method: "POST",
@@ -83,10 +160,11 @@ document.querySelector("#registerForm").addEventListener("submit", async (event)
   });
   professionalToken = data.token;
   localStorage.setItem("afyalink.professionalToken", professionalToken);
-  log("Professional registered.", data.user);
+  log("Professional registered. Verification message queued.", data.email_verification);
+  await refreshDashboard();
 });
 
-document.querySelector("#loginForm").addEventListener("submit", async (event) => {
+bindAsync("#loginForm", "submit", async (event) => {
   event.preventDefault();
   const data = await api("/api/auth/login", {
     method: "POST",
@@ -96,9 +174,49 @@ document.querySelector("#loginForm").addEventListener("submit", async (event) =>
   professionalToken = data.token;
   localStorage.setItem("afyalink.professionalToken", professionalToken);
   log("Professional signed in.", data.user);
+  await refreshDashboard();
 });
 
-document.querySelector("#profileForm").addEventListener("submit", async (event) => {
+bindAsync("#verifyEmailForm", "submit", async (event) => {
+  event.preventDefault();
+  const data = await api("/api/auth/email/verify", {
+    method: "POST",
+    body: formData(event.currentTarget),
+    token: "",
+  });
+  log("Email verification completed.", data);
+  if (professionalToken) await refreshDashboard();
+});
+
+bindAsync("#resendVerification", "click", async () => {
+  const data = await api("/api/auth/email/resend", { method: "POST", body: {} });
+  log("Verification message queued.", data);
+  await refreshDashboard();
+});
+
+bindAsync("#forgotPasswordForm", "submit", async (event) => {
+  event.preventDefault();
+  const data = await api("/api/auth/password/forgot", {
+    method: "POST",
+    body: formData(event.currentTarget),
+    token: "",
+  });
+  log("Password reset request handled.", data);
+});
+
+bindAsync("#resetPasswordForm", "submit", async (event) => {
+  event.preventDefault();
+  const data = await api("/api/auth/password/reset", {
+    method: "POST",
+    body: formData(event.currentTarget),
+    token: "",
+  });
+  professionalToken = "";
+  localStorage.removeItem("afyalink.professionalToken");
+  log("Password reset completed. Sign in with the new password.", data);
+});
+
+bindAsync("#profileForm", "submit", async (event) => {
   event.preventDefault();
   const body = formData(event.currentTarget);
   body.years_experience = Number(body.years_experience || 0);
@@ -107,7 +225,7 @@ document.querySelector("#profileForm").addEventListener("submit", async (event) 
   await refreshDashboard();
 });
 
-document.querySelector("#credentialForm").addEventListener("submit", async (event) => {
+bindAsync("#credentialForm", "submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
   const data = new FormData(form);
@@ -122,16 +240,17 @@ document.querySelector("#credentialForm").addEventListener("submit", async (even
     },
   });
   log("Credential uploaded.", credential);
+  form.reset();
   await refreshDashboard();
 });
 
-document.querySelector("#acceptConsent").addEventListener("click", async () => {
+bindAsync("#acceptConsent", "click", async () => {
   const data = await api("/api/professional/consents", { method: "POST", body: {} });
   log("Consent accepted.", data.consent);
   await refreshDashboard();
 });
 
-document.querySelector("#createPayment").addEventListener("click", async () => {
+bindAsync("#createPayment", "click", async () => {
   const data = await api("/api/professional/payments", {
     method: "POST",
     body: {
@@ -144,15 +263,15 @@ document.querySelector("#createPayment").addEventListener("click", async () => {
   await refreshDashboard();
 });
 
-document.querySelector("#submitApplication").addEventListener("click", async () => {
+bindAsync("#submitApplication", "click", async () => {
   const data = await api("/api/professional/application/submit", { method: "POST", body: {} });
   log("Application submitted.", data.application);
   await refreshDashboard();
 });
 
-document.querySelector("#refreshDashboard").addEventListener("click", refreshDashboard);
+bindAsync("#refreshDashboard", "click", refreshDashboard);
 
-document.querySelector("#adminLoginForm").addEventListener("submit", async (event) => {
+bindAsync("#adminLoginForm", "submit", async (event) => {
   event.preventDefault();
   const data = await api("/api/auth/login", {
     method: "POST",
@@ -162,31 +281,47 @@ document.querySelector("#adminLoginForm").addEventListener("submit", async (even
   adminToken = data.token;
   localStorage.setItem("afyalink.adminToken", adminToken);
   log("Admin signed in.", data.user);
+  await loadApplications();
 });
+
+function renderAdminCounters(overview = {}) {
+  const items = [
+    ["Total", overview.total ?? 0],
+    ["Awaiting review", overview.awaiting_review ?? 0],
+    ["Needs replacement", overview.needs_replacement ?? 0],
+    ["Ready", overview.ready_for_review ?? 0],
+    ["Approved", overview.approved ?? 0],
+    ["Rejected", overview.rejected ?? 0],
+  ];
+  adminCounters.innerHTML = items
+    .map(([label, value]) => `<div class="counter"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`)
+    .join("");
+}
 
 async function loadApplications(filters = {}) {
   const query = new URLSearchParams(
     Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== "" && value !== null)),
   ).toString();
   const data = await api(`/api/admin/applications${query ? `?${query}` : ""}`, { token: adminToken });
+  renderAdminCounters(data.overview);
   applicationList.innerHTML = data.applications.length
     ? data.applications
         .map(
           (application) => `
             <div class="list-item">
-              <strong>${application.application_number}</strong>
-              <span class="badge warn">${application.status}</span>
-              <p>${application.professional.name} • ${application.professional.profession} • ${application.professional.county}</p>
+              <strong>${escapeHtml(application.application_number)}</strong>
+              ${badge(application.status)}
+              <p>${escapeHtml(application.professional.name)} / ${escapeHtml(application.professional.email)} / ${escapeHtml(application.professional.profession)} / ${escapeHtml(application.professional.county)}</p>
               <button class="mini-button secondary" data-open-application="${application.id}">Open review</button>
             </div>
           `,
         )
         .join("")
     : "No applications.";
-  log("Applications loaded.", data.applications);
+  log("Applications loaded.", data.overview);
 }
 
-document.querySelector("#applicationSearchForm").addEventListener("submit", async (event) => {
+bindAsync("#applicationSearchForm", "submit", async (event) => {
   event.preventDefault();
   await loadApplications(formData(event.currentTarget));
 });
@@ -194,50 +329,85 @@ document.querySelector("#applicationSearchForm").addEventListener("submit", asyn
 applicationList.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-open-application]");
   if (!button) return;
-  await openApplication(button.dataset.openApplication);
+  try {
+    await openApplication(button.dataset.openApplication);
+  } catch (error) {
+    log(error.message || "Could not open application.");
+  }
 });
+
+function timelineHtml(application) {
+  const timeline = application.timeline ?? [];
+  return timeline.length
+    ? timeline
+        .map(
+          (event) => `
+            <li>
+              <strong>${escapeHtml(event.to)}</strong>
+              <span>${escapeHtml(event.occurred_at)}</span>
+              <p>${escapeHtml(event.note || "No note recorded.")}</p>
+            </li>
+          `,
+        )
+        .join("")
+    : "<li>No timeline events recorded.</li>";
+}
 
 async function openApplication(id) {
   const data = await api(`/api/admin/applications/${id}`, { token: adminToken });
   const { application, professional, profile, credentials, payments, consent } = data;
   const latestPayment = payments[0] ?? null;
+  applicationDetail.dataset.currentApplicationId = String(application.id);
   applicationDetail.innerHTML = `
     <div class="detail-grid">
       <section class="detail-section">
         <h3>Professional</h3>
-        <p><strong>${professional?.name ?? profile?.name ?? "-"}</strong></p>
-        <p>${professional?.email ?? profile?.email ?? "-"}</p>
-        <p>${profile?.profession ?? "-"} • ${profile?.county ?? "-"}</p>
-        <p>License: ${profile?.regulatory_body ?? "-"} / ${profile?.license_number ?? "-"}</p>
+        <p><strong>${escapeHtml(professional?.name ?? profile?.name ?? "-")}</strong></p>
+        <p>${escapeHtml(professional?.email ?? profile?.email ?? "-")} / ${professional?.email_verified ? "verified" : "unverified"}</p>
+        <p>${escapeHtml(profile?.profession ?? "-")} / ${escapeHtml(profile?.county ?? "-")}</p>
+        <p>License: ${escapeHtml(profile?.regulatory_body ?? "-")} / ${escapeHtml(profile?.license_number ?? "-")}</p>
       </section>
       <section class="detail-section">
         <h3>Application</h3>
-        <p>${application.application_number}</p>
-        <span class="badge warn">${application.status}</span>
-        <p>Submitted: ${application.submitted_at ?? "-"}</p>
-        <p>Consent: ${consent ? consent.version : "not accepted"}</p>
+        <p>${escapeHtml(application.application_number)}</p>
+        ${badge(application.status)}
+        <p>Submitted: ${escapeHtml(application.submitted_at ?? "-")}</p>
+        <p>Consent: ${escapeHtml(consent ? consent.version : "not accepted")}</p>
       </section>
       <section class="detail-section">
         <h3>Payment</h3>
-        <p>${latestPayment?.intent_reference ?? "No payment"}</p>
-        <span class="badge ${latestPayment?.status === "confirmed" ? "good" : "warn"}">${latestPayment?.status ?? "missing"}</span>
-        <p>${latestPayment ? `${latestPayment.currency} ${(latestPayment.amount_cents / 100).toFixed(2)}` : ""}</p>
+        <p>${escapeHtml(latestPayment?.intent_reference ?? "No payment")}</p>
+        ${badge(latestPayment?.status ?? "missing")}
+        <p>${latestPayment ? `${escapeHtml(latestPayment.currency)} ${(latestPayment.amount_cents / 100).toFixed(2)}` : ""}</p>
       </section>
     </div>
     <div class="detail-section">
       <h3>Credentials</h3>
-      ${credentials.length ? credentials.map((credential) => `
-        <div class="list-item">
-          <strong>${credential.document_type}</strong>
-          <span class="badge ${credential.review_status === "accepted" ? "good" : credential.review_status === "needs_replacement" || credential.review_status === "rejected" ? "bad" : "warn"}">${credential.review_status}</span>
-          <p>${credential.original_name} • checksum ${credential.checksum.slice(0, 12)}...</p>
-          <div class="action-row">
-            <button class="mini-button secondary" data-review-credential="${credential.id}" data-status="accepted">Accept</button>
-            <button class="mini-button secondary" data-review-credential="${credential.id}" data-status="needs_replacement">Needs replacement</button>
-            <button class="mini-button secondary" data-review-credential="${credential.id}" data-status="rejected">Reject</button>
-          </div>
-        </div>
-      `).join("") : "No credentials."}
+      ${
+        credentials.length
+          ? credentials
+              .map(
+                (credential) => `
+                  <div class="list-item">
+                    <strong>${escapeHtml(credential.document_type)}</strong>
+                    ${badge(credential.review_status)}
+                    <p>${escapeHtml(credential.original_name)} / checksum ${escapeHtml(credential.checksum.slice(0, 12))}...</p>
+                    ${credential.review_note ? `<p class="muted">Note: ${escapeHtml(credential.review_note)}</p>` : ""}
+                    <div class="action-row">
+                      <button class="mini-button secondary" data-review-credential="${credential.id}" data-status="accepted">Accept</button>
+                      <button class="mini-button secondary" data-review-credential="${credential.id}" data-status="needs_replacement">Needs replacement</button>
+                      <button class="mini-button secondary" data-review-credential="${credential.id}" data-status="rejected">Reject</button>
+                    </div>
+                  </div>
+                `,
+              )
+              .join("")
+          : "No credentials."
+      }
+    </div>
+    <div class="detail-section">
+      <h3>Timeline</h3>
+      <ol class="timeline">${timelineHtml(application)}</ol>
     </div>
     <div class="review-actions">
       <button class="mini-button" data-application-action="start_review" data-application-id="${application.id}">Start review</button>
@@ -247,46 +417,55 @@ async function openApplication(id) {
       <button class="mini-button" data-application-action="reject" data-application-id="${application.id}">Reject</button>
     </div>
   `;
-  log("Application detail loaded.", data);
+  log("Application detail loaded.", { application: application.application_number, status: application.status });
 }
 
 applicationDetail.addEventListener("click", async (event) => {
   const credentialButton = event.target.closest("[data-review-credential]");
-  if (credentialButton) {
-    await api(`/api/admin/credentials/${credentialButton.dataset.reviewCredential}/review`, {
+  try {
+    if (credentialButton) {
+      const note = window.prompt("Review note", credentialButton.dataset.status === "needs_replacement" ? "Please upload a clearer replacement document." : "");
+      await api(`/api/admin/credentials/${credentialButton.dataset.reviewCredential}/review`, {
+        method: "PATCH",
+        token: adminToken,
+        body: {
+          status: credentialButton.dataset.status,
+          note,
+        },
+      });
+      log("Credential review saved.");
+      if (applicationDetail.dataset.currentApplicationId) {
+        await openApplication(applicationDetail.dataset.currentApplicationId);
+      }
+      return;
+    }
+
+    const actionButton = event.target.closest("[data-application-action]");
+    if (!actionButton) return;
+    const note = window.prompt("Review note", `Admin action: ${actionButton.dataset.applicationAction}`);
+    await api(`/api/admin/applications/${actionButton.dataset.applicationId}/action`, {
       method: "PATCH",
       token: adminToken,
       body: {
-        status: credentialButton.dataset.status,
-        note: `Reviewed from web console as ${credentialButton.dataset.status}`,
+        action: actionButton.dataset.applicationAction,
+        note,
       },
     });
-    log("Credential review saved.");
-    return;
+    await openApplication(actionButton.dataset.applicationId);
+  } catch (error) {
+    log(error.message || "Admin action failed.");
   }
-
-  const actionButton = event.target.closest("[data-application-action]");
-  if (!actionButton) return;
-  await api(`/api/admin/applications/${actionButton.dataset.applicationId}/action`, {
-    method: "PATCH",
-    token: adminToken,
-    body: {
-      action: actionButton.dataset.applicationAction,
-      note: `Admin action: ${actionButton.dataset.applicationAction}`,
-    },
-  });
-  await openApplication(actionButton.dataset.applicationId);
 });
 
-document.querySelector("#loadAudit").addEventListener("click", async () => {
+bindAsync("#loadAudit", "click", async () => {
   const data = await api("/api/admin/audit-logs", { token: adminToken });
   auditList.innerHTML = data.audit_logs.length
     ? data.audit_logs
         .map(
           (audit) => `
             <div class="list-item">
-              <strong>${audit.action}</strong>
-              <p>${audit.entity_type} #${audit.entity_id ?? "-"} • ${audit.created_at}</p>
+              <strong>${escapeHtml(audit.action)}</strong>
+              <p>${escapeHtml(audit.entity_type)} #${escapeHtml(audit.entity_id ?? "-")} / ${escapeHtml(audit.created_at)}</p>
             </div>
           `,
         )

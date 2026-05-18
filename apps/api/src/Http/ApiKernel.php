@@ -6,10 +6,12 @@ namespace Afyalink\Core\Http;
 
 use Afyalink\Core\Application\Applications\ApplicationWorkflowService;
 use Afyalink\Core\Application\Audit\AuditLogger;
+use Afyalink\Core\Application\Auth\AccountLifecycleService;
 use Afyalink\Core\Application\Auth\AuthService;
 use Afyalink\Core\Application\Auth\AuthorizationService;
 use Afyalink\Core\Application\Consent\ConsentService;
 use Afyalink\Core\Application\Credentials\CredentialService;
+use Afyalink\Core\Application\Notifications\NotificationService;
 use Afyalink\Core\Application\Payments\PaymentService;
 use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
 use Afyalink\Core\Domain\Permissions\Permission;
@@ -40,20 +42,32 @@ final class ApiKernel
     public function __construct(
         private readonly DataStore $store,
         CredentialStorage $storage,
+        private readonly string $appUrl = 'http://localhost:3000',
         private readonly int $sessionTtlSeconds = 43200,
         private readonly int $maxUploadBytes = 8388608,
+        private readonly int $emailVerificationTtlSeconds = 86400,
+        private readonly int $passwordResetTtlSeconds = 3600,
     ) {
         $audit = new AuditLogger($this->store);
+        $notifications = new NotificationService($this->store);
         $this->auth = new AuthService($this->store, $audit, sessionTtlSeconds: $this->sessionTtlSeconds);
+        $accounts = new AccountLifecycleService(
+            $this->store,
+            $audit,
+            $notifications,
+            $this->appUrl,
+            verificationTtlSeconds: $this->emailVerificationTtlSeconds,
+            resetTtlSeconds: $this->passwordResetTtlSeconds,
+        );
         $this->authorization = new AuthorizationService();
 
         $profiles = new ProfessionalProfileService($this->store, $audit);
-        $credentials = new CredentialService($this->store, $storage, $audit, new FileUploadPolicy($this->maxUploadBytes));
+        $credentials = new CredentialService($this->store, $storage, $audit, new FileUploadPolicy($this->maxUploadBytes), $notifications);
         $consents = new ConsentService($this->store, $audit);
         $payments = new PaymentService($this->store, $audit);
-        $workflow = new ApplicationWorkflowService($this->store, $profiles, $credentials, $consents, $payments, $audit);
+        $workflow = new ApplicationWorkflowService($this->store, $profiles, $credentials, $consents, $payments, $audit, notifications: $notifications);
 
-        $authController = new AuthController($this->auth);
+        $authController = new AuthController($this->auth, $accounts);
         $professionalController = new ProfessionalController($profiles, $workflow);
         $credentialController = new CredentialController($credentials);
         $consentController = new ConsentController($consents);
@@ -126,7 +140,11 @@ final class ApiKernel
         $this->router->add('GET', '/api/health', static fn (): array => ['status' => 'ok']);
         $this->router->add('POST', '/api/auth/register', [$auth, 'register']);
         $this->router->add('POST', '/api/auth/login', [$auth, 'login']);
+        $this->router->add('POST', '/api/auth/email/verify', [$auth, 'verifyEmail']);
+        $this->router->add('POST', '/api/auth/password/forgot', [$auth, 'forgotPassword']);
+        $this->router->add('POST', '/api/auth/password/reset', [$auth, 'resetPassword']);
         $this->router->add('POST', '/api/auth/logout', $this->protected([$auth, 'logout']));
+        $this->router->add('POST', '/api/auth/email/resend', $this->professional([$auth, 'resendEmailVerification']));
         $this->router->add('GET', '/api/me', $this->protected([$auth, 'me']));
 
         $this->router->add('GET', '/api/professional/dashboard', $this->professional([$professional, 'dashboard']));

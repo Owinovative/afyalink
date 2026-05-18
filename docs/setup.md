@@ -30,6 +30,8 @@ Create a local `.env` from `.env.example`, then set:
 AFYALINK_DATASTORE=pgsql
 DATABASE_URL=postgresql://afyalink:afyalink_dev_password@localhost:5432/afyalink
 AFYALINK_CREDENTIAL_STORAGE=local
+AFYALINK_EMAIL_VERIFICATION_TTL_SECONDS=86400
+AFYALINK_PASSWORD_RESET_TTL_SECONDS=3600
 ```
 
 Run migrations:
@@ -53,6 +55,12 @@ Local private credential storage uses:
 - `apps/api/storage/private/credentials`
 
 These paths are ignored and must not be committed.
+
+## Notification Outbox
+
+Milestone 1 queues notification intents in the `notification_outbox` table. The current development adapter records email verification, password reset, application submission, and credential replacement messages for later delivery. It does not require SMTP credentials for local testing.
+
+For local manual testing, inspect the latest `notification_outbox.action_url` in the database or JSON dev store to retrieve the verification/reset token that a real mail worker would send. Do not log or expose those tokens in production.
 
 ## Optional MinIO Credential Storage
 
@@ -102,6 +110,7 @@ You can also set `AFYALINK_ADMIN_NAME`, `AFYALINK_ADMIN_EMAIL`, `AFYALINK_ADMIN_
 - If migrations fail because tables already exist, use a fresh local database or drop/recreate the local `afyalink` database.
 - On Windows, use `npm.cmd run check` for the web check command.
 - Credential uploads must be PDF, JPEG, or PNG and under `AFYALINK_MAX_UPLOAD_BYTES`.
+- Final application submission now requires verified email. If a user cannot submit, check the dashboard readiness list and the queued verification notification.
 
 ## Verification
 

@@ -2,6 +2,8 @@
 
 This folder contains the initial project documentation extracted from the Afyalink blueprint and engineering specification.
 
+The current Milestone 1 implementation also documents executable account lifecycle, notification outbox, replacement workflow, PostgreSQL persistence, and private credential storage behavior.
+
 ## Current Docs
 
 - [Technical Direction](architecture/technical-direction.md)

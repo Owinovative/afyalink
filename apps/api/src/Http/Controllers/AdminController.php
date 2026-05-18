@@ -29,6 +29,7 @@ final readonly class AdminController
     public function applications(Request $request): array
     {
         return [
+            'overview' => $this->workflow->adminOverview(),
             'applications' => $this->workflow->listForAdmin(
                 status: isset($request->query['status']) ? (string) $request->query['status'] : null,
                 search: isset($request->query['search']) ? (string) $request->query['search'] : null,

@@ -6,6 +6,10 @@ This is the first backend API contract. Controllers should enforce policy checks
 
 - `POST /auth/register`
 - `POST /auth/login`
+- `POST /auth/email/verify`
+- `POST /auth/email/resend`
+- `POST /auth/password/forgot`
+- `POST /auth/password/reset`
 - `POST /auth/logout`
 - `GET /me`
 - `PUT /professional/profile`
@@ -39,4 +43,5 @@ This is the first backend API contract. Controllers should enforce policy checks
 - Admin endpoints require roles and policy checks.
 - Document access must use signed private delivery.
 - Every review, document view, payment event, and status change must create an audit log.
-
+- Email verification and password reset tokens must be hashed, expiring, and single-use.
+- Notification delivery must be outbox-driven rather than embedded directly in controllers.

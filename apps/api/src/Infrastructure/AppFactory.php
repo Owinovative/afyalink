@@ -22,8 +22,11 @@ final class AppFactory
         return new ApiKernel(
             self::dataStore($config),
             self::credentialStorage($config),
+            appUrl: $config->appUrl,
             sessionTtlSeconds: $config->sessionTtlSeconds,
             maxUploadBytes: $config->maxUploadBytes,
+            emailVerificationTtlSeconds: $config->emailVerificationTtlSeconds,
+            passwordResetTtlSeconds: $config->passwordResetTtlSeconds,
         );
     }
 

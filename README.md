@@ -20,13 +20,14 @@ Afyalink is not just a recruitment site. It is a trust infrastructure layer for 
 
 Milestone 1 focuses on the foundation:
 
-- professional registration and authentication;
+- professional registration, authentication, email verification, and password reset;
 - professional profile completion;
 - credential document upload;
 - consent capture and consent versioning;
 - payment reference or M-PESA-ready payment domain;
 - application submission workflow;
-- admin review workflow;
+- admin review workflow with replacement requests and review notes;
+- notification/outbox-ready communication events;
 - audit logs for all sensitive actions;
 - private document storage design;
 - secure, scalable architecture ready for later facility access.
@@ -74,7 +75,7 @@ Start with a secure modular monolith. Do not start by building every future modu
 
 ## Local Setup Status
 
-This repository now includes an executable Milestone 1 vertical slice. The backend is still framework-light so trust-critical rules can be tested clearly, but it now exposes real API routes for registration, login, profile completion, credential upload, consent, payment reference creation, application submission, admin review, payment review, credential review, and audit log review.
+This repository now includes an executable Milestone 1 vertical slice. The backend is still framework-light so trust-critical rules can be tested clearly, but it now exposes real API routes for registration, login, email verification, password reset, profile completion, credential upload, consent, payment reference creation, application submission, admin review, payment review, credential review, and audit log review.
 
 ## Current Engineering Foundation
 
@@ -83,6 +84,8 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - Professional profile value object.
 - Credential record value object.
 - Full application submission service.
+- Account lifecycle service for email verification and password reset.
+- Notification outbox service for verification, reset, submission, and replacement events.
 - Admin review service.
 - Role and permission matrix.
 - Signed private document URL factory.
@@ -100,7 +103,7 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - JSON persistence retained only for explicit test/dev fixture mode.
 - Local private and S3-compatible credential storage adapters.
 - Professional and admin workflow endpoints.
-- Interactive web intake console wired to the API contract.
+- Interactive web intake/admin console with step-based onboarding, replacement request visibility, admin counters, review timeline, and account recovery forms.
 - GitHub Actions CI foundation.
 - Web product foundation for the Afyalink Milestone 1 workflow.
 
@@ -147,6 +150,8 @@ npm.cmd run check
 
 The current tests verify:
 
+- email verification tokens are generated, expire, and cannot be reused unsafely;
+- password reset requests avoid user enumeration and rotate credentials;
 - unsafe application status jumps are blocked;
 - duplicate payment confirmation transitions are blocked;
 - profile, credential, consent, and payment readiness rules work;
@@ -154,6 +159,8 @@ The current tests verify:
 - audit metadata redacts secrets;
 - consent is tied to exact active wording and version.
 - a complete professional application can be submitted only when ready;
+- final submission is blocked until the professional email is verified;
+- replacement requests notify the professional and supersede prior documents when a replacement is uploaded;
 - admin review can approve only through valid transitions;
 - facility viewers cannot access raw credential documents;
 - signed document links are viewer-bound and expiring;

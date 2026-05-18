@@ -18,6 +18,9 @@ final class JsonDataStore implements DataStore
         'payments',
         'applications',
         'audit_logs',
+        'email_verification_tokens',
+        'password_reset_tokens',
+        'notification_outbox',
     ];
 
     public function __construct(

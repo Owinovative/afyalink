@@ -15,33 +15,32 @@
         </a>
         <nav>
           <a href="#professional">Professional</a>
-          <a href="#credentials">Credentials</a>
+          <a href="#onboarding">Onboarding</a>
           <a href="#admin">Admin review</a>
         </nav>
       </header>
 
       <section class="hero">
         <div>
-          <p class="eyebrow">Verify • Connect • Place</p>
-          <h1>Milestone 1 credential intake, consent, payment, and admin review.</h1>
+          <p class="eyebrow">Verify / Connect / Place</p>
+          <h1>Credential intake that shows every requirement before submission.</h1>
           <p class="lead">
-            A professional can register, complete a profile, upload private credentials,
-            accept consent, create a payment reference, submit an application, and follow
-            the review trail.
+            Professionals verify email, complete profile data, upload private credentials, accept consent,
+            create a payment reference, and submit only when backend readiness checks pass.
           </p>
         </div>
         <div class="status-board" id="dashboardSummary">
-          <span>Readiness</span>
+          <span>Account state</span>
           <strong>Connect to API</strong>
-          <p>Run the API server and use the forms below to exercise the full workflow.</p>
+          <p>Run the API server, register or sign in, then refresh the dashboard.</p>
         </div>
       </section>
 
       <section id="professional" class="panel-grid">
         <article class="panel">
           <div class="panel-heading">
-            <p class="eyebrow">Account</p>
-            <h2>Register or sign in</h2>
+            <p class="eyebrow">Account lifecycle</p>
+            <h2>Register, verify, recover</h2>
           </div>
           <form id="registerForm" class="form-stack">
             <input name="name" placeholder="Full name" required />
@@ -55,11 +54,29 @@
             <input name="password" type="password" placeholder="Password" required />
             <button type="submit" class="secondary">Sign in</button>
           </form>
+          <div class="auth-actions">
+            <form id="verifyEmailForm" class="form-stack">
+              <input name="token" placeholder="Email verification token" required />
+              <button type="submit" class="secondary">Verify email</button>
+            </form>
+            <button id="resendVerification" class="secondary">Resend verification</button>
+          </div>
+          <div class="auth-actions">
+            <form id="forgotPasswordForm" class="inline-form">
+              <input name="email" type="email" placeholder="Email for reset" required />
+              <button type="submit" class="secondary">Send reset</button>
+            </form>
+            <form id="resetPasswordForm" class="form-stack">
+              <input name="token" placeholder="Password reset token" required />
+              <input name="password" type="password" placeholder="New password" required />
+              <button type="submit" class="secondary">Reset password</button>
+            </form>
+          </div>
         </article>
 
         <article class="panel">
           <div class="panel-heading">
-            <p class="eyebrow">Profile</p>
+            <p class="eyebrow">Step 2</p>
             <h2>Professional profile</h2>
           </div>
           <form id="profileForm" class="form-grid">
@@ -77,14 +94,15 @@
         </article>
       </section>
 
-      <section id="credentials" class="panel wide">
+      <section id="onboarding" class="panel wide">
         <div class="panel-heading split-heading">
           <div>
-            <p class="eyebrow">Credential package</p>
-            <h2>Upload private verification documents</h2>
+            <p class="eyebrow">Professional onboarding</p>
+            <h2>Complete each step before submission</h2>
           </div>
           <button id="refreshDashboard" class="secondary">Refresh status</button>
         </div>
+        <div id="onboardingSteps" class="step-grid"></div>
         <div class="credential-layout">
           <form id="credentialForm" class="form-stack">
             <select name="document_type" required>
@@ -103,6 +121,7 @@
               <button id="createPayment" class="secondary">Create payment reference</button>
               <button id="submitApplication">Submit application</button>
             </div>
+            <div id="replacementList" class="notice-list"></div>
             <div id="credentialList" class="list-card">No credential status loaded.</div>
           </div>
         </div>
@@ -112,7 +131,7 @@
         <div class="panel-heading split-heading">
           <div>
             <p class="eyebrow">Admin review</p>
-            <h2>Applications, documents, payment state, and audit trail</h2>
+            <h2>Queues, documents, payment state, and timeline</h2>
           </div>
           <form id="adminLoginForm" class="inline-form">
             <input name="email" type="email" placeholder="Admin email" required />
@@ -120,6 +139,7 @@
             <button type="submit">Admin sign in</button>
           </form>
         </div>
+        <div id="adminCounters" class="counter-grid"></div>
         <div class="admin-layout">
           <div>
             <form id="applicationSearchForm" class="inline-form search-form">
@@ -142,7 +162,7 @@
             <div id="auditList" class="list-card">No audit records loaded.</div>
           </div>
         </div>
-        <div id="applicationDetail" class="detail-card">Select an application to review profile, credentials, payment state, timeline, and allowed actions.</div>
+        <div id="applicationDetail" class="detail-card">Select an application to review profile, credentials, payment, notes, and allowed actions.</div>
       </section>
 
       <section class="panel wide">

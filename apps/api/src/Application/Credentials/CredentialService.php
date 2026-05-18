@@ -6,6 +6,7 @@ namespace Afyalink\Core\Application\Credentials;
 
 use Afyalink\Core\Application\Audit\AuditLogger;
 use Afyalink\Core\Application\Auth\AuthenticatedUser;
+use Afyalink\Core\Application\Notifications\NotificationService;
 use Afyalink\Core\Domain\Credentials\CredentialRecord;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
 use Afyalink\Core\Domain\Enums\DocumentType;
@@ -23,6 +24,7 @@ final readonly class CredentialService
         private CredentialStorage $storage,
         private AuditLogger $audit,
         private FileUploadPolicy $policy = new FileUploadPolicy(),
+        private ?NotificationService $notifications = null,
     ) {}
 
     /**
@@ -54,6 +56,7 @@ final readonly class CredentialService
         $checksum = hash('sha256', $contents);
 
         $existing = $this->latestForType($user->id, $documentType);
+        $replacementUpload = $existing !== null && ($existing['review_status'] ?? '') === CredentialReviewStatus::NeedsReplacement->value;
         if ($existing !== null && ($existing['review_status'] ?? '') === CredentialReviewStatus::NeedsReplacement->value) {
             $this->store->update('credentials', (int) $existing['id'], [
                 'superseded_at' => gmdate(DATE_ATOM),
@@ -75,11 +78,12 @@ final readonly class CredentialService
             'superseded_at' => null,
         ]);
 
-        $this->audit->record($user->id, 'credential.uploaded', 'Credential', (string) $credential['id'], [
+        $this->audit->record($user->id, $replacementUpload ? 'credential.replacement_uploaded' : 'credential.uploaded', 'Credential', (string) $credential['id'], [
             'document_type' => $documentType->value,
             'checksum' => $checksum,
             'mime_type' => $input['mime_type'],
             'size_bytes' => $size,
+            'superseded_credential_id' => $existing['id'] ?? null,
         ], $ipAddress, $userAgent);
 
         return $this->safeCredential($credential);
@@ -162,6 +166,13 @@ final readonly class CredentialService
             'status' => $status->value,
             'note' => $note,
         ], $ipAddress, $userAgent);
+
+        if ($status === CredentialReviewStatus::NeedsReplacement && $this->notifications !== null) {
+            $user = $this->store->find('users', (int) $credential['user_id']);
+            if ($user !== null) {
+                $this->notifications->credentialReplacementRequested($user, $updated, $note);
+            }
+        }
 
         return $this->safeCredential($updated);
     }
