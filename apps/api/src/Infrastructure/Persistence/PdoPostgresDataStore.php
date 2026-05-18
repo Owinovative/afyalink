@@ -20,6 +20,9 @@ final class PdoPostgresDataStore implements DataStore
         'payments' => 'milestone1_payments',
         'applications' => 'milestone1_applications',
         'audit_logs' => 'audit_logs',
+        'email_verification_tokens' => 'email_verification_tokens',
+        'password_reset_tokens' => 'password_reset_tokens',
+        'notification_outbox' => 'notification_outbox',
     ];
 
     /** @var array<string, list<string>> */
@@ -28,6 +31,7 @@ final class PdoPostgresDataStore implements DataStore
         'profiles' => ['work_preferences'],
         'applications' => ['timeline'],
         'audit_logs' => ['metadata'],
+        'notification_outbox' => ['metadata'],
     ];
 
     public function __construct(

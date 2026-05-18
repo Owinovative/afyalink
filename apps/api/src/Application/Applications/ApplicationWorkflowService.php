@@ -8,6 +8,7 @@ use Afyalink\Core\Application\Audit\AuditLogger;
 use Afyalink\Core\Application\Auth\AuthenticatedUser;
 use Afyalink\Core\Application\Consent\ConsentService;
 use Afyalink\Core\Application\Credentials\CredentialService;
+use Afyalink\Core\Application\Notifications\NotificationService;
 use Afyalink\Core\Application\Payments\PaymentService;
 use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
 use Afyalink\Core\Domain\Applications\AdminReviewService;
@@ -33,6 +34,7 @@ final readonly class ApplicationWorkflowService
         private ConsentService $consents,
         private PaymentService $payments,
         private AuditLogger $audit,
+        private ?NotificationService $notifications = null,
         private ApplicationSubmissionService $submission = new ApplicationSubmissionService(),
         private AdminReviewService $adminReview = new AdminReviewService(),
     ) {}
@@ -55,12 +57,17 @@ final readonly class ApplicationWorkflowService
         $readiness = (new SubmissionReadinessChecker(new CredentialRequirementRegistry()))->evaluate(
             profile: $profile ?? [],
             credentialStatuses: $credentialStatuses,
+            emailVerified: $user->emailVerifiedAt !== null && $user->emailVerifiedAt !== '',
             acceptedCurrentConsent: $this->consents->hasCurrentConsent($user->id),
             paymentStatus: $this->payments->statusForUser($user->id),
         );
 
         return [
             'user' => $user->toArray(),
+            'account' => [
+                'email_verified' => $user->emailVerifiedAt !== null && $user->emailVerifiedAt !== '',
+                'email_verified_at' => $user->emailVerifiedAt,
+            ],
             'profile' => $profile,
             'credentials' => $credentials,
             'consent' => [
@@ -94,6 +101,7 @@ final readonly class ApplicationWorkflowService
         $application = $this->submission->submit(
             profile: $profile,
             credentials: $credentialRecords,
+            emailVerified: $user->emailVerifiedAt !== null && $user->emailVerifiedAt !== '',
             acceptedCurrentConsent: $this->consents->hasCurrentConsent($user->id),
             paymentStatus: $this->payments->statusForUser($user->id),
             actorId: $user->id,
@@ -110,6 +118,11 @@ final readonly class ApplicationWorkflowService
             'application_number' => $row['application_number'],
             'status' => $row['status'],
         ], $ipAddress, $userAgent);
+
+        $userRow = $this->store->find('users', $user->id);
+        if ($userRow !== null && $this->notifications !== null) {
+            $this->notifications->applicationSubmitted($userRow, $row);
+        }
 
         return $row;
     }
@@ -138,6 +151,41 @@ final readonly class ApplicationWorkflowService
         usort($rows, static fn (array $a, array $b): int => strcmp((string) $b['created_at'], (string) $a['created_at']));
 
         return array_map(fn (array $row): array => $this->adminSummary($row), $rows);
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function adminOverview(): array
+    {
+        $rows = $this->store->all('applications');
+        $counts = [
+            'total' => count($rows),
+            'awaiting_review' => 0,
+            'needs_replacement' => 0,
+            'ready_for_review' => 0,
+            'approved' => 0,
+            'rejected' => 0,
+        ];
+
+        foreach ($rows as $row) {
+            $status = (string) ($row['status'] ?? '');
+            if ($status === ApplicationStatus::Submitted->value) {
+                $counts['awaiting_review']++;
+                $counts['ready_for_review']++;
+            }
+            if ($status === ApplicationStatus::NeedsReplacement->value) {
+                $counts['needs_replacement']++;
+            }
+            if ($status === ApplicationStatus::Approved->value) {
+                $counts['approved']++;
+            }
+            if ($status === ApplicationStatus::Rejected->value) {
+                $counts['rejected']++;
+            }
+        }
+
+        return $counts;
     }
 
     /**
@@ -255,6 +303,8 @@ final readonly class ApplicationWorkflowService
             'phone' => (string) $user['phone'],
             'roles' => $user['roles'] ?? [],
             'is_active' => (bool) ($user['is_active'] ?? false),
+            'email_verified_at' => $user['email_verified_at'] ?? null,
+            'email_verified' => !empty($user['email_verified_at']),
             'created_at' => $user['created_at'] ?? null,
         ];
     }

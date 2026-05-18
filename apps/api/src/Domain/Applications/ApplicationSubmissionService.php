@@ -24,6 +24,7 @@ final readonly class ApplicationSubmissionService
     public function submit(
         ProfessionalProfile $profile,
         array $credentials,
+        bool $emailVerified,
         bool $acceptedCurrentConsent,
         PaymentStatus $paymentStatus,
         ?int $actorId = null,
@@ -36,6 +37,7 @@ final readonly class ApplicationSubmissionService
         $readiness = (new SubmissionReadinessChecker($this->requirements))->evaluate(
             profile: $profile->toSubmissionArray(),
             credentialStatuses: $credentialStatuses,
+            emailVerified: $emailVerified,
             acceptedCurrentConsent: $acceptedCurrentConsent,
             paymentStatus: $paymentStatus,
         );
@@ -71,4 +73,3 @@ final readonly class ApplicationSubmissionService
         return sprintf('AFYA-%s-%s-%s', $date, $seed ?: 'PRO', $fingerprint);
     }
 }
-

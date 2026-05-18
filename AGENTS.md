@@ -22,6 +22,8 @@ Milestone 1 is professional credential intake:
 - payment reference/payment intent;
 - application submission readiness;
 - admin review;
+- email verification/password reset lifecycle;
+- notification outbox;
 - audit logging.
 
 Do not drift into later milestones unless the user explicitly starts a later milestone. Facility portals, interviews, regulatory API automation, matching, and production M-PESA callbacks should be added only behind clean extension points.
@@ -34,6 +36,8 @@ Do not drift into later milestones unless the user explicitly starts a later mil
 - All admin-sensitive actions must require authorization and create an audit record.
 - Keep consent wording versioned and hash-validated.
 - Payment transitions must be idempotency-aware and state-machine controlled.
+- Verification and reset tokens must be hashed at rest, expire, and never be logged.
+- Notification outbox action URLs are sensitive and must not be exposed through public/debug endpoints.
 
 ## Verification Commands
 

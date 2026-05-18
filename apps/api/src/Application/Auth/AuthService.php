@@ -45,6 +45,7 @@ final readonly class AuthService
             'password_hash' => $this->passwords->hash($password),
             'roles' => [UserRole::Professional->value],
             'is_active' => true,
+            'email_verified_at' => null,
             'created_at' => gmdate(DATE_ATOM),
             'updated_at' => gmdate(DATE_ATOM),
         ]);
@@ -82,6 +83,7 @@ final readonly class AuthService
             'password_hash' => $this->passwords->hash($password),
             'roles' => array_map(static fn (UserRole $role): string => $role->value, $roles),
             'is_active' => true,
+            'email_verified_at' => gmdate(DATE_ATOM),
             'created_at' => gmdate(DATE_ATOM),
             'updated_at' => gmdate(DATE_ATOM),
         ]);
@@ -108,6 +110,11 @@ final readonly class AuthService
             $this->audit->record((int) $user['id'], 'auth.inactive_login_blocked', 'User', (string) $user['id'], [], $ipAddress, $userAgent);
             throw new AuthorizationException('Account is inactive.');
         }
+
+        $this->store->update('users', (int) $user['id'], [
+            'last_login_at' => gmdate(DATE_ATOM),
+            'updated_at' => gmdate(DATE_ATOM),
+        ]);
 
         return $this->createSession($user, $ipAddress, $userAgent);
     }
@@ -185,6 +192,7 @@ final readonly class AuthService
             email: (string) $user['email'],
             phone: (string) $user['phone'],
             roles: $roles,
+            emailVerifiedAt: isset($user['email_verified_at']) && $user['email_verified_at'] !== null ? (string) $user['email_verified_at'] : null,
         );
     }
 

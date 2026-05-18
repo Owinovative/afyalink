@@ -7,6 +7,7 @@ Afyalink should start as a modular monolith with strict domain boundaries. This 
 ## Core Domains
 
 - Identity and access
+- Account lifecycle and notification outbox
 - Professional profiles
 - Credential documents
 - Consent and legal acceptance
@@ -33,6 +34,7 @@ Afyalink should start as a modular monolith with strict domain boundaries. This 
 - Database constraints must enforce core integrity.
 - Files must never be stored in a public web directory.
 - Background jobs should handle notifications, payment callbacks, virus scanning, and future reminders.
+- Notification delivery should be driven from an outbox table so email verification, reset, and review messages are durable and retryable.
 - Service classes and policy classes should keep modules testable.
 
 ## Current Productionization Direction
@@ -44,3 +46,4 @@ Afyalink should start as a modular monolith with strict domain boundaries. This 
 - `local` stores files outside public web paths for development.
 - `s3`, `minio`, and `r2` use the S3-compatible private object storage adapter.
 - The domain/application service contracts remain stable so a later Laravel repository layer can replace the framework-light adapters without rewriting workflow rules.
+- Account lifecycle flows now use hashed verification/reset token records and notification outbox rows. This keeps direct mail providers outside controllers and prepares the system for Redis-backed queue workers later.

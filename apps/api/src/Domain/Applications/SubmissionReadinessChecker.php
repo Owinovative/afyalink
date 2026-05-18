@@ -22,6 +22,7 @@ final readonly class SubmissionReadinessChecker
     public function evaluate(
         array $profile,
         array $credentialStatuses,
+        bool $emailVerified,
         bool $acceptedCurrentConsent,
         PaymentStatus $paymentStatus,
     ): SubmissionReadiness {
@@ -50,6 +51,10 @@ final readonly class SubmissionReadinessChecker
             ], true)) {
                 $warnings[] = "credential.{$documentType->value}.requires_attention";
             }
+        }
+
+        if (!$emailVerified) {
+            $missing[] = 'account.email_verified';
         }
 
         if (!$acceptedCurrentConsent) {

@@ -174,6 +174,14 @@ h2 {
   border-top: 1px solid var(--line);
 }
 
+.auth-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
 .form-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -232,6 +240,65 @@ button.secondary {
   padding: 14px;
 }
 
+.step-grid,
+.counter-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.step-card,
+.counter,
+.notice {
+  border: 1px solid var(--line);
+  background: #fbfdff;
+  padding: 12px;
+}
+
+.step-card span,
+.counter span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  color: var(--blue);
+  font-weight: 900;
+}
+
+.step-card strong,
+.counter strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--navy);
+}
+
+.step-card p,
+.notice p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.step-card.complete {
+  border-color: #b5e5ca;
+  background: #f6fef9;
+}
+
+.notice-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.notice.bad {
+  border-color: #fecdca;
+  background: #fff7f7;
+}
+
 .detail-card {
   margin-top: 16px;
   border: 1px solid var(--line);
@@ -262,6 +329,21 @@ button.secondary {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   margin-top: 12px;
+}
+
+.timeline {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.timeline li {
+  margin-bottom: 10px;
+}
+
+.timeline span,
+.muted {
+  color: var(--muted);
+  font-size: 0.88rem;
 }
 
 .mini-button {
@@ -333,6 +415,8 @@ button.secondary {
   .form-grid,
   .inline-form,
   .action-row,
+  .step-grid,
+  .counter-grid,
   .review-actions {
     grid-template-columns: 1fr;
   }

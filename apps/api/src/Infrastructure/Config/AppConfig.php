@@ -22,6 +22,8 @@ final readonly class AppConfig
         public ?string $s3SecretKey,
         public int $sessionTtlSeconds,
         public int $maxUploadBytes,
+        public int $emailVerificationTtlSeconds,
+        public int $passwordResetTtlSeconds,
     ) {}
 
     /**
@@ -45,6 +47,8 @@ final readonly class AppConfig
             s3SecretKey: $env['S3_SECRET_ACCESS_KEY'] ?? null,
             sessionTtlSeconds: (int) ($env['AFYALINK_SESSION_TTL_SECONDS'] ?? 43200),
             maxUploadBytes: (int) ($env['AFYALINK_MAX_UPLOAD_BYTES'] ?? 8388608),
+            emailVerificationTtlSeconds: (int) ($env['AFYALINK_EMAIL_VERIFICATION_TTL_SECONDS'] ?? 86400),
+            passwordResetTtlSeconds: (int) ($env['AFYALINK_PASSWORD_RESET_TTL_SECONDS'] ?? 3600),
         );
     }
 }

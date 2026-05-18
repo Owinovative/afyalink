@@ -77,12 +77,13 @@ $tests = [
             DocumentType::ProfessionalLicense->value => CredentialReviewStatus::Accepted,
             DocumentType::AcademicCertificate->value => CredentialReviewStatus::Uploaded,
         ];
-        $ready = $checker->evaluate($profile, $credentials, true, PaymentStatus::Confirmed);
+        $ready = $checker->evaluate($profile, $credentials, true, true, PaymentStatus::Confirmed);
         expectTrue($ready->ready, 'complete intake package should be ready before admin review');
 
-        $notReady = $checker->evaluate($profile, [], true, PaymentStatus::Confirmed);
+        $notReady = $checker->evaluate($profile, [], false, true, PaymentStatus::Confirmed);
         expectFalse($notReady->ready, 'missing credentials should block submission');
         expectTrue(in_array('credential.cv', $notReady->missing, true), 'cv should be required');
+        expectTrue(in_array('account.email_verified', $notReady->missing, true), 'email verification should be required');
     },
     'professional can submit complete milestone 1 package' => function (): void {
         $profile = new ProfessionalProfile(
@@ -105,6 +106,7 @@ $tests = [
         $application = (new ApplicationSubmissionService())->submit(
             profile: $profile,
             credentials: $credentials,
+            emailVerified: true,
             acceptedCurrentConsent: true,
             paymentStatus: PaymentStatus::Confirmed,
             actorId: 1,
@@ -122,7 +124,7 @@ $tests = [
             new CredentialRecord(DocumentType::ProfessionalLicense, 'p/2/license.pdf', str_repeat('c', 64), 'application/pdf', 2048, CredentialReviewStatus::Accepted),
             new CredentialRecord(DocumentType::AcademicCertificate, 'p/2/cert.pdf', str_repeat('d', 64), 'application/pdf', 2048, CredentialReviewStatus::Accepted),
         ];
-        $application = (new ApplicationSubmissionService())->submit($profile, $credentials, true, PaymentStatus::Confirmed, 10);
+        $application = (new ApplicationSubmissionService())->submit($profile, $credentials, true, true, PaymentStatus::Confirmed, 10);
         $review = new AdminReviewService();
         $reviewing = $review->moveToReview($application, 99);
         $verified = $review->verify($reviewing, 'License checked against source evidence.', 99);
@@ -207,8 +209,9 @@ $tests = [
     'api milestone 1 professional to admin review flow is executable' => function (): void {
         $root = sys_get_temp_dir() . '/afyalink-test-' . bin2hex(random_bytes(4));
         mkdir($root . '/storage/private/credentials', 0770, true);
+        $store = new JsonDataStore($root . '/storage/runtime/database.json');
         $kernel = new ApiKernel(
-            new JsonDataStore($root . '/storage/runtime/database.json'),
+            $store,
             new LocalPrivateCredentialStorage($root . '/storage/private/credentials'),
         );
 
@@ -226,6 +229,11 @@ $tests = [
         ]);
         expectTrue($registered->status === 200, 'professional registration should succeed');
         $token = (string) $registered->payload['data']['token'];
+        expectTrue($registered->payload['data']['email_verification']['notification_queued'] === true, 'registration should queue verification notification');
+
+        $verificationNotice = $store->where('notification_outbox', static fn (array $row): bool => ($row['type'] ?? '') === 'email_verification')[0] ?? null;
+        expectTrue($verificationNotice !== null, 'verification notification should be stored');
+        parse_str((string) parse_url((string) $verificationNotice['action_url'], PHP_URL_QUERY), $verificationQuery);
 
         $profile = $api('PUT', '/api/professional/profile', [
             'name' => 'Milestone Nurse',
@@ -295,12 +303,22 @@ $tests = [
         ], $adminToken);
         expectTrue($confirmed->status === 200, 'admin should confirm payment');
 
+        $unverifiedSubmit = $api('POST', '/api/professional/application/submit', [], $token);
+        expectTrue($unverifiedSubmit->status === 409, 'submission should wait for verified email');
+
+        $verify = $api('POST', '/api/auth/email/verify', ['token' => (string) $verificationQuery['token']], token: '');
+        expectTrue($verify->status === 200 && $verify->payload['data']['email_verified'] === true, 'email verification should succeed');
+
         $submitted = $api('POST', '/api/professional/application/submit', [], $token);
         expectTrue($submitted->status === 200, 'professional should submit once ready');
         $applicationId = (int) $submitted->payload['data']['application']['id'];
 
         $list = $api('GET', '/api/admin/applications', [], $adminToken);
         expectTrue($list->status === 200 && count($list->payload['data']['applications']) === 1, 'admin should see submitted application');
+        expectTrue($list->payload['data']['overview']['awaiting_review'] === 1, 'admin overview should count awaiting review');
+
+        $filtered = $api('GET', '/api/admin/applications', [], $adminToken, ['status' => ApplicationStatus::Submitted->value, 'search' => 'milestone.nurse']);
+        expectTrue(count($filtered->payload['data']['applications']) === 1, 'admin queue search/status filters should find matching application');
 
         $detail = $api('GET', "/api/admin/applications/{$applicationId}", [], $adminToken);
         expectTrue($detail->status === 200, 'admin detail should load');
@@ -315,6 +333,128 @@ $tests = [
 
         $audit = $api('GET', '/api/admin/audit-logs', [], $adminToken);
         expectTrue($audit->status === 200 && count($audit->payload['data']['audit_logs']) >= 8, 'sensitive workflow actions should be audited');
+    },
+    'email verification and password reset lifecycle is safe' => function (): void {
+        $root = sys_get_temp_dir() . '/afyalink-auth-test-' . bin2hex(random_bytes(4));
+        mkdir($root . '/storage/private/credentials', 0770, true);
+        $store = new JsonDataStore($root . '/storage/runtime/database.json');
+        $kernel = new ApiKernel($store, new LocalPrivateCredentialStorage($root . '/storage/private/credentials'));
+
+        $api = static function (string $method, string $path, array $body = [], ?string $token = null) use ($kernel): JsonResponse {
+            $headers = $token === null ? [] : ['authorization' => "Bearer {$token}"];
+
+            return $kernel->handle(new Request($method, $path, $headers, $body, [], ipAddress: '127.0.0.1', userAgent: 'test-suite'));
+        };
+
+        $registered = $api('POST', '/api/auth/register', [
+            'name' => 'Lifecycle User',
+            'email' => 'lifecycle@example.com',
+            'phone' => '0722222222',
+            'password' => 'StrongPass123',
+        ]);
+        expectTrue($registered->status === 200, 'lifecycle registration should succeed');
+
+        $verificationNotice = $store->where('notification_outbox', static fn (array $row): bool => ($row['type'] ?? '') === 'email_verification')[0] ?? null;
+        parse_str((string) parse_url((string) $verificationNotice['action_url'], PHP_URL_QUERY), $verificationQuery);
+        $verified = $api('POST', '/api/auth/email/verify', ['token' => (string) $verificationQuery['token']]);
+        expectTrue($verified->status === 200 && $verified->payload['data']['email_verified'] === true, 'valid verification token should verify email');
+
+        $duplicate = $api('POST', '/api/auth/email/verify', ['token' => (string) $verificationQuery['token']]);
+        expectTrue($duplicate->status === 200 && $duplicate->payload['data']['already_used'] === true, 'duplicate verification should be safe');
+
+        $unknownReset = $api('POST', '/api/auth/password/forgot', ['email' => 'nobody@example.com']);
+        expectTrue($unknownReset->status === 200, 'unknown reset request should not enumerate users');
+
+        $resetRequest = $api('POST', '/api/auth/password/forgot', ['email' => 'lifecycle@example.com']);
+        expectTrue($resetRequest->status === 200, 'known reset request should succeed safely');
+        $resetNotice = array_values(array_filter(
+            $store->all('notification_outbox'),
+            static fn (array $row): bool => ($row['type'] ?? '') === 'password_reset',
+        ))[0] ?? null;
+        expectTrue($resetNotice !== null, 'password reset notification should be queued');
+        parse_str((string) parse_url((string) $resetNotice['action_url'], PHP_URL_QUERY), $resetQuery);
+
+        $reset = $api('POST', '/api/auth/password/reset', [
+            'token' => (string) $resetQuery['token'],
+            'password' => 'NewStrongPass123',
+        ]);
+        expectTrue($reset->status === 200, 'password reset should succeed');
+
+        $oldLogin = $api('POST', '/api/auth/login', ['email' => 'lifecycle@example.com', 'password' => 'StrongPass123']);
+        expectTrue($oldLogin->status === 403, 'old password should be rejected after reset');
+        $newLogin = $api('POST', '/api/auth/login', ['email' => 'lifecycle@example.com', 'password' => 'NewStrongPass123']);
+        expectTrue($newLogin->status === 200, 'new password should login');
+
+        $expiredUser = $api('POST', '/api/auth/register', [
+            'name' => 'Expired User',
+            'email' => 'expired@example.com',
+            'phone' => '0733333333',
+            'password' => 'StrongPass123',
+        ]);
+        expectTrue($expiredUser->status === 200, 'expired token test user should register');
+        $expiredNotice = array_values(array_filter(
+            $store->all('notification_outbox'),
+            static fn (array $row): bool => ($row['type'] ?? '') === 'email_verification' && ($row['recipient_email'] ?? '') === 'expired@example.com',
+        ))[0] ?? null;
+        parse_str((string) parse_url((string) $expiredNotice['action_url'], PHP_URL_QUERY), $expiredQuery);
+        $expiredToken = $store->where('email_verification_tokens', static fn (array $row): bool => empty($row['used_at']))[0] ?? null;
+        $store->update('email_verification_tokens', (int) $expiredToken['id'], ['expires_at' => gmdate(DATE_ATOM, time() - 60)]);
+        $expiredVerify = $api('POST', '/api/auth/email/verify', ['token' => (string) $expiredQuery['token']]);
+        expectTrue($expiredVerify->status === 422, 'expired verification token should be rejected');
+    },
+    'credential replacement loop supersedes prior document and queues notification' => function (): void {
+        $root = sys_get_temp_dir() . '/afyalink-replacement-test-' . bin2hex(random_bytes(4));
+        mkdir($root . '/storage/private/credentials', 0770, true);
+        $store = new JsonDataStore($root . '/storage/runtime/database.json');
+        $kernel = new ApiKernel($store, new LocalPrivateCredentialStorage($root . '/storage/private/credentials'));
+
+        $api = static function (string $method, string $path, array $body = [], ?string $token = null) use ($kernel): JsonResponse {
+            $headers = $token === null ? [] : ['authorization' => "Bearer {$token}"];
+
+            return $kernel->handle(new Request($method, $path, $headers, $body, [], ipAddress: '127.0.0.1', userAgent: 'test-suite'));
+        };
+
+        $registered = $api('POST', '/api/auth/register', [
+            'name' => 'Replacement Nurse',
+            'email' => 'replacement@example.com',
+            'phone' => '0744444444',
+            'password' => 'StrongPass123',
+        ]);
+        $token = (string) $registered->payload['data']['token'];
+        $credential = $api('POST', '/api/professional/credentials', [
+            'document_type' => DocumentType::ProfessionalLicense->value,
+            'original_name' => 'license.pdf',
+            'mime_type' => 'application/pdf',
+            'content_base64' => base64_encode('%PDF-1.4 old-license'),
+        ], $token);
+        $credentialId = (int) $credential->payload['data']['credential']['id'];
+
+        $kernel->auth()->createUser('Review Admin', 'review@example.com', '0799999998', 'AdminPass123', [UserRole::Admin]);
+        $adminLogin = $api('POST', '/api/auth/login', ['email' => 'review@example.com', 'password' => 'AdminPass123']);
+        $adminToken = (string) $adminLogin->payload['data']['token'];
+
+        $review = $api('PATCH', "/api/admin/credentials/{$credentialId}/review", [
+            'status' => CredentialReviewStatus::NeedsReplacement->value,
+            'note' => 'License image is unclear.',
+        ], $adminToken);
+        expectTrue($review->status === 200, 'admin should request credential replacement');
+        expectTrue(count(array_filter(
+            $store->all('notification_outbox'),
+            static fn (array $row): bool => ($row['type'] ?? '') === 'credential_replacement_requested',
+        )) === 1, 'replacement request should queue notification');
+
+        $replacement = $api('POST', '/api/professional/credentials', [
+            'document_type' => DocumentType::ProfessionalLicense->value,
+            'original_name' => 'license-clear.pdf',
+            'mime_type' => 'application/pdf',
+            'content_base64' => base64_encode('%PDF-1.4 replacement-license'),
+        ], $token);
+        expectTrue($replacement->status === 200, 'professional should upload replacement');
+        $current = $api('GET', '/api/professional/credentials', [], $token);
+        expectTrue(count($current->payload['data']['credentials']) === 1, 'superseded credential should not appear in current list');
+        expectTrue($current->payload['data']['credentials'][0]['review_status'] === CredentialReviewStatus::Uploaded->value, 'replacement should reset review state');
+        $old = $store->find('credentials', $credentialId);
+        expectTrue(!empty($old['superseded_at']), 'prior credential should be superseded');
     },
     'configuration defaults to postgresql and supports explicit json adapter' => function (): void {
         $config = AppConfig::fromEnv([], __DIR__);
