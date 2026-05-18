@@ -10,13 +10,14 @@
     <main class="shell">
       <header class="topbar">
         <a class="brand" href="/">
-          <img src="../../assets/brand/afyalink-logo.png" alt="Afyalink logo" />
+          <img src="assets/brand/afyalink-logo.png" alt="Afyalink logo" />
           <span>Afyalink</span>
         </a>
         <nav>
           <a href="#professional">Professional</a>
           <a href="#onboarding">Onboarding</a>
           <a href="#admin">Admin review</a>
+          <a href="#operations">Verification</a>
         </nav>
       </header>
 
@@ -165,6 +166,53 @@
         <div id="applicationDetail" class="detail-card">Select an application to review profile, credentials, payment, notes, and allowed actions.</div>
       </section>
 
+      <section id="operations" class="panel wide">
+        <div class="panel-heading split-heading">
+          <div>
+            <p class="eyebrow">Milestone 2 operations</p>
+            <h2>Regulatory verification and interview workbench</h2>
+          </div>
+          <button id="loadMilestone2" class="secondary">Load work queues</button>
+        </div>
+        <div class="admin-layout">
+          <div>
+            <div id="verificationCounters" class="counter-grid compact-counters"></div>
+            <form id="verificationSearchForm" class="inline-form search-form">
+              <select name="status">
+                <option value="">All verification statuses</option>
+                <option value="pending">Pending</option>
+                <option value="assigned">Assigned</option>
+                <option value="in_progress">In progress</option>
+                <option value="awaiting_external_response">Awaiting external response</option>
+                <option value="needs_clarification">Needs clarification</option>
+                <option value="verified">Verified</option>
+                <option value="failed">Failed</option>
+              </select>
+              <input name="profession" placeholder="Profession filter" />
+              <button type="submit" class="secondary">Load verifications</button>
+            </form>
+            <div id="verificationList" class="list-card">No verification cases loaded.</div>
+          </div>
+          <div>
+            <div id="interviewCounters" class="counter-grid compact-counters"></div>
+            <form id="interviewSearchForm" class="inline-form search-form">
+              <select name="status">
+                <option value="">All interview statuses</option>
+                <option value="pending_schedule">Pending schedule</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="no_show">No show</option>
+              </select>
+              <input name="interviewer_id" placeholder="Interviewer ID" />
+              <button type="submit" class="secondary">Load interviews</button>
+            </form>
+            <div id="interviewList" class="list-card">No interviews loaded.</div>
+          </div>
+        </div>
+        <div id="milestone2Detail" class="detail-card">Open an application, verification case, or interview to manage Milestone 2 actions.</div>
+      </section>
+
       <section class="panel wide">
         <div class="panel-heading">
           <p class="eyebrow">API activity</p>
@@ -173,6 +221,7 @@
         <pre id="output" class="output">Ready.</pre>
       </section>
     </main>
+    <script src="src/env.js"></script>
     <script type="module" src="src/app.js"></script>
   </body>
 </html>

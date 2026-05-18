@@ -11,9 +11,11 @@ use Afyalink\Core\Application\Auth\AuthService;
 use Afyalink\Core\Application\Auth\AuthorizationService;
 use Afyalink\Core\Application\Consent\ConsentService;
 use Afyalink\Core\Application\Credentials\CredentialService;
+use Afyalink\Core\Application\Interviews\InterviewService;
 use Afyalink\Core\Application\Notifications\NotificationService;
 use Afyalink\Core\Application\Payments\PaymentService;
 use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
+use Afyalink\Core\Application\Verification\VerificationService;
 use Afyalink\Core\Domain\Permissions\Permission;
 use Afyalink\Core\Domain\Enums\UserRole;
 use Afyalink\Core\Domain\Security\FileUploadPolicy;
@@ -66,14 +68,16 @@ final class ApiKernel
         $consents = new ConsentService($this->store, $audit);
         $payments = new PaymentService($this->store, $audit);
         $workflow = new ApplicationWorkflowService($this->store, $profiles, $credentials, $consents, $payments, $audit, notifications: $notifications);
+        $verifications = new VerificationService($this->store, $workflow, $audit, $notifications);
+        $interviews = new InterviewService($this->store, $workflow, $audit, $notifications);
 
         $authController = new AuthController($this->auth, $accounts);
-        $professionalController = new ProfessionalController($profiles, $workflow);
+        $professionalController = new ProfessionalController($profiles, $workflow, $verifications, $interviews);
         $credentialController = new CredentialController($credentials);
         $consentController = new ConsentController($consents);
         $paymentController = new PaymentController($payments);
         $applicationController = new ApplicationController($workflow);
-        $adminController = new AdminController($workflow, $credentials, $payments, $this->store);
+        $adminController = new AdminController($workflow, $credentials, $payments, $this->store, $verifications, $interviews);
 
         $this->router = new Router();
         $this->routes($authController, $professionalController, $credentialController, $consentController, $paymentController, $applicationController, $adminController);
@@ -160,6 +164,15 @@ final class ApiKernel
         $this->router->add('PATCH', '/api/admin/applications/{id}/action', $this->protected([$admin, 'action'], Permission::ApplicationReview));
         $this->router->add('PATCH', '/api/admin/credentials/{id}/review', $this->protected([$admin, 'reviewCredential'], Permission::CredentialReview));
         $this->router->add('PATCH', '/api/admin/payments/{id}/status', $this->protected([$admin, 'updatePayment'], Permission::PaymentManage));
+        $this->router->add('GET', '/api/admin/regulatory-bodies', $this->protected([$admin, 'regulatoryBodies'], Permission::VerificationManage));
+        $this->router->add('GET', '/api/admin/verifications', $this->protected([$admin, 'verificationCases'], Permission::VerificationManage));
+        $this->router->add('POST', '/api/admin/verifications', $this->protected([$admin, 'createVerificationCase'], Permission::VerificationManage));
+        $this->router->add('GET', '/api/admin/verifications/{id}', $this->protected([$admin, 'verificationCase'], Permission::VerificationManage));
+        $this->router->add('PATCH', '/api/admin/verifications/{id}/status', $this->protected([$admin, 'updateVerificationStatus'], Permission::VerificationManage));
+        $this->router->add('GET', '/api/admin/interviews', $this->protected([$admin, 'interviews'], Permission::InterviewManage));
+        $this->router->add('POST', '/api/admin/interviews', $this->protected([$admin, 'scheduleInterview'], Permission::InterviewManage));
+        $this->router->add('GET', '/api/admin/interviews/{id}', $this->protected([$admin, 'interview'], Permission::InterviewManage));
+        $this->router->add('PATCH', '/api/admin/interviews/{id}/complete', $this->protected([$admin, 'completeInterview'], Permission::InterviewScoreSubmit));
         $this->router->add('GET', '/api/admin/audit-logs', $this->protected([$admin, 'auditLogs'], Permission::AuditRead));
     }
 

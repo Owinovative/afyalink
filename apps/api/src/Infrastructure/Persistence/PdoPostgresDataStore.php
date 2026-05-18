@@ -23,6 +23,10 @@ final class PdoPostgresDataStore implements DataStore
         'email_verification_tokens' => 'email_verification_tokens',
         'password_reset_tokens' => 'password_reset_tokens',
         'notification_outbox' => 'notification_outbox',
+        'regulatory_bodies' => 'regulatory_bodies',
+        'verification_cases' => 'verification_cases',
+        'interviews' => 'interviews',
+        'interview_score_items' => 'interview_score_items',
     ];
 
     /** @var array<string, list<string>> */
@@ -32,6 +36,9 @@ final class PdoPostgresDataStore implements DataStore
         'applications' => ['timeline'],
         'audit_logs' => ['metadata'],
         'notification_outbox' => ['metadata'],
+        'regulatory_bodies' => ['profession_coverage'],
+        'verification_cases' => ['timeline'],
+        'interviews' => ['timeline'],
     ];
 
     public function __construct(

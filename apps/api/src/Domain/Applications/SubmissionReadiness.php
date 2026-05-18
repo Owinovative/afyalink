@@ -15,5 +15,16 @@ final readonly class SubmissionReadiness
         public array $missing,
         public array $warnings = [],
     ) {}
-}
 
+    /**
+     * @return array{ready: bool, missing: list<string>, warnings: list<string>}
+     */
+    public function toArray(): array
+    {
+        return [
+            'ready' => $this->ready,
+            'missing' => $this->missing,
+            'warnings' => $this->warnings,
+        ];
+    }
+}

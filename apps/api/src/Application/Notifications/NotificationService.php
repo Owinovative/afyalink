@@ -114,4 +114,67 @@ final readonly class NotificationService
             ],
         );
     }
+
+    /**
+     * @param array<string, mixed> $user
+     * @param array<string, mixed> $verificationCase
+     */
+    public function verificationStatusChanged(array $user, array $verificationCase, string $status): void
+    {
+        $this->queueEmail(
+            recipientUserId: (int) $user['id'],
+            recipientEmail: (string) $user['email'],
+            type: 'verification_status_changed',
+            subject: 'Afyalink verification status updated',
+            body: 'Your Afyalink regulatory verification status has been updated. Sign in to view the current application progress.',
+            actionUrl: null,
+            metadata: [
+                'verification_case_id' => $verificationCase['id'] ?? null,
+                'regulatory_body_code' => $verificationCase['regulatory_body_code'] ?? null,
+                'status' => $status,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $user
+     * @param array<string, mixed> $interview
+     */
+    public function interviewScheduled(array $user, array $interview): void
+    {
+        $this->queueEmail(
+            recipientUserId: (int) $user['id'],
+            recipientEmail: (string) $user['email'],
+            type: 'interview_scheduled',
+            subject: 'Afyalink interview scheduled',
+            body: 'Your Afyalink interview has been scheduled. Sign in to view the date, time, mode, and location.',
+            actionUrl: null,
+            metadata: [
+                'interview_id' => $interview['id'] ?? null,
+                'scheduled_start_at' => $interview['scheduled_start_at'] ?? null,
+                'mode' => $interview['mode'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $user
+     * @param array<string, mixed> $interview
+     */
+    public function interviewCompleted(array $user, array $interview, string $recommendation): void
+    {
+        $this->queueEmail(
+            recipientUserId: (int) $user['id'],
+            recipientEmail: (string) $user['email'],
+            type: 'interview_completed',
+            subject: 'Afyalink interview review completed',
+            body: 'Your Afyalink interview review has been completed. Sign in to view the current application progress.',
+            actionUrl: null,
+            metadata: [
+                'interview_id' => $interview['id'] ?? null,
+                'status' => $interview['status'] ?? null,
+                'recommendation' => $recommendation,
+            ],
+        );
+    }
 }

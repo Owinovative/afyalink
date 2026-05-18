@@ -19,8 +19,10 @@ final class RolePermissionMatrix
             Permission::CredentialReview,
             Permission::CredentialRawView,
             Permission::ApplicationReview,
+            Permission::VerificationManage,
         ],
         'interviewer' => [
+            Permission::InterviewManage,
             Permission::InterviewScoreSubmit,
         ],
         'facility_admin' => [
@@ -35,6 +37,9 @@ final class RolePermissionMatrix
             Permission::CredentialReview,
             Permission::CredentialRawView,
             Permission::ApplicationReview,
+            Permission::VerificationManage,
+            Permission::InterviewManage,
+            Permission::InterviewScoreSubmit,
             Permission::PaymentManage,
             Permission::AuditRead,
         ],
@@ -45,6 +50,8 @@ final class RolePermissionMatrix
             Permission::CredentialRawView,
             Permission::ApplicationOwnSubmit,
             Permission::ApplicationReview,
+            Permission::VerificationManage,
+            Permission::InterviewManage,
             Permission::InterviewScoreSubmit,
             Permission::FacilityCandidateView,
             Permission::FacilitySubscriptionManage,
@@ -68,4 +75,3 @@ final class RolePermissionMatrix
         return self::MATRIX[$role->value] ?? [];
     }
 }
-

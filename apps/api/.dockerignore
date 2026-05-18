@@ -1,0 +1,8 @@
+vendor/
+storage/runtime/
+storage/private/
+*.log
+.env
+.env.*
+!/.env.example
+
