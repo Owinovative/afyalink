@@ -102,6 +102,10 @@ After deployment:
 3. Inspect `notification_outbox` in Neon to retrieve the verification URL while no mail worker exists.
 4. Complete profile, credential upload, consent, payment reference, and application submission.
 5. Sign in as admin and review the application.
+6. Complete verification and interview qualification for one candidate.
+7. Publish the candidate from the admin facility operations console.
+8. Register a facility, submit it for review, approve it as admin, and activate facility access.
+9. Confirm the facility can browse/open the published candidate and that `candidate_profile_views` and `audit_logs` receive view records.
 
 ## Production Changes Required Later
 
@@ -109,6 +113,6 @@ Before production:
 
 - Replace temporary local credential storage with private S3/R2 storage.
 - Add a real mail delivery worker for `notification_outbox`.
+- Add production M-PESA callbacks and reconciliation for facility access subscriptions.
 - Use a dedicated migration/predeploy step instead of running migrations in the API start command if zero-downtime deploys are required.
 - Add a Render persistent disk only if intentionally accepting single-instance storage constraints. Object storage is preferred for credentials.
-

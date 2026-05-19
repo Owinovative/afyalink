@@ -25,6 +25,17 @@ final class JsonDataStore implements DataStore
         'verification_cases',
         'interviews',
         'interview_score_items',
+        'facilities',
+        'facility_memberships',
+        'facility_documents',
+        'facility_access_subscriptions',
+        'candidate_publications',
+        'candidate_profile_views',
+        'facility_requests',
+        'facility_appointments',
+        'recommendation_requests',
+        'recommendation_packages',
+        'recommendation_package_candidates',
     ];
 
     public function __construct(

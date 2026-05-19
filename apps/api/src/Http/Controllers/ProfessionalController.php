@@ -6,6 +6,7 @@ namespace Afyalink\Core\Http\Controllers;
 
 use Afyalink\Core\Application\Applications\ApplicationWorkflowService;
 use Afyalink\Core\Application\Auth\AuthenticatedUser;
+use Afyalink\Core\Application\Facilities\CandidatePublicationService;
 use Afyalink\Core\Application\Interviews\InterviewService;
 use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
 use Afyalink\Core\Application\Verification\VerificationService;
@@ -18,6 +19,7 @@ final readonly class ProfessionalController
         private ApplicationWorkflowService $workflow,
         private ?VerificationService $verifications = null,
         private ?InterviewService $interviews = null,
+        private ?CandidatePublicationService $publications = null,
     ) {}
 
     /**
@@ -44,6 +46,12 @@ final readonly class ProfessionalController
         $dashboard = $this->workflow->dashboard($user);
         $dashboard['verification_cases'] = $this->verifications?->professionalCases($user->id) ?? [];
         $dashboard['interviews'] = $this->interviews?->professionalInterviews($user->id) ?? [];
+        $dashboard['facility_visibility'] = $this->publications?->professionalVisibility($user->id) ?? [
+            'published' => false,
+            'status' => null,
+            'candidate_code' => null,
+            'view_count' => 0,
+        ];
 
         return $dashboard;
     }

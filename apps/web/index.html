@@ -16,8 +16,10 @@
         <nav>
           <a href="#professional">Professional</a>
           <a href="#onboarding">Onboarding</a>
+          <a href="#facility">Facility</a>
           <a href="#admin">Admin review</a>
           <a href="#operations">Verification</a>
+          <a href="#facility-operations">Facilities</a>
         </nav>
       </header>
 
@@ -166,6 +168,104 @@
         <div id="applicationDetail" class="detail-card">Select an application to review profile, credentials, payment, notes, and allowed actions.</div>
       </section>
 
+      <section id="facility" class="panel wide">
+        <div class="panel-heading split-heading">
+          <div>
+            <p class="eyebrow">Facility marketplace</p>
+            <h2>Onboarding, paid access, candidate viewing, and requests</h2>
+          </div>
+          <button id="facilityRefreshDashboard" class="secondary">Refresh facility</button>
+        </div>
+        <div id="facilityDashboard" class="detail-card">Facility onboarding state has not loaded.</div>
+        <div class="panel-grid embedded-grid">
+          <article class="inner-panel">
+            <div class="panel-heading">
+              <p class="eyebrow">Facility account</p>
+              <h2>Register or sign in</h2>
+            </div>
+            <form id="facilityRegisterForm" class="form-stack">
+              <input name="name" placeholder="Owner full name" required />
+              <input name="email" type="email" placeholder="Owner/facility email" required />
+              <input name="phone" placeholder="Owner/facility phone" required />
+              <input name="password" type="password" placeholder="Password" required />
+              <input name="legal_name" placeholder="Facility legal name" required />
+              <input name="display_name" placeholder="Facility display name" required />
+              <input name="facility_type" placeholder="Facility type" required />
+              <input name="registration_number" placeholder="Registration/license number" />
+              <input name="county" placeholder="County" required />
+              <input name="location" placeholder="Location" />
+              <input name="physical_address" placeholder="Physical address" />
+              <input name="contact_person" placeholder="Contact person" required />
+              <button type="submit">Register facility</button>
+            </form>
+            <form id="facilityLoginForm" class="form-stack compact">
+              <input name="email" type="email" placeholder="Facility user email" required />
+              <input name="password" type="password" placeholder="Password" required />
+              <button type="submit" class="secondary">Facility sign in</button>
+            </form>
+          </article>
+          <article class="inner-panel">
+            <div class="panel-heading">
+              <p class="eyebrow">Facility profile</p>
+              <h2>Details and access</h2>
+            </div>
+            <form id="facilityProfileForm" class="form-grid">
+              <input name="legal_name" placeholder="Facility legal name" required />
+              <input name="display_name" placeholder="Facility display name" required />
+              <input name="facility_type" placeholder="Facility type" required />
+              <input name="registration_number" placeholder="Registration/license number" />
+              <input name="county" placeholder="County" required />
+              <input name="location" placeholder="Location" />
+              <input name="email" type="email" placeholder="Facility email" required />
+              <input name="phone" placeholder="Facility phone" required />
+              <input name="physical_address" placeholder="Physical address" />
+              <input name="contact_person" placeholder="Contact person" required />
+              <button type="submit">Save facility</button>
+            </form>
+            <div class="action-row compact">
+              <button id="facilitySubmit">Submit onboarding</button>
+              <button id="facilityCreatePayment" class="secondary">Create access reference</button>
+              <button id="facilityLoadPackages" class="secondary">Load packages</button>
+            </div>
+          </article>
+        </div>
+        <div class="admin-layout">
+          <div>
+            <form id="facilityCandidateSearchForm" class="inline-form search-form">
+              <input name="search" placeholder="Candidate, profession, or code" />
+              <input name="county" placeholder="County" />
+              <input name="min_years_experience" type="number" min="0" step="1" placeholder="Min years" />
+              <button type="submit" class="secondary">Browse candidates</button>
+            </form>
+            <div id="facilityCandidateList" class="list-card">No facility candidates loaded.</div>
+          </div>
+          <div>
+            <div id="facilityCandidateDetail" class="detail-card">Open a candidate to view a watermarked read-only profile.</div>
+            <div id="facilityPackageList" class="list-card compact">No recommendation packages loaded.</div>
+          </div>
+        </div>
+        <div class="admin-layout">
+          <form id="facilityAppointmentForm" class="form-stack">
+            <input name="title" placeholder="Request title" required />
+            <input name="role_needed" placeholder="Role or hiring need" />
+            <input name="candidate_publication_ids" placeholder="Candidate publication IDs, comma-separated" />
+            <input name="preferred_timing" placeholder="Preferred timing" />
+            <input name="contact_preference" placeholder="Contact preference" />
+            <input name="notes" placeholder="Request notes" />
+            <button type="submit">Submit appointment request</button>
+          </form>
+          <form id="facilityRecommendationForm" class="form-stack">
+            <input name="role_needed" placeholder="Role to recommend for" required />
+            <input name="county" placeholder="County" />
+            <input name="urgency" placeholder="Urgency" />
+            <input name="experience_level" placeholder="Experience level" />
+            <input name="candidate_publication_ids" placeholder="Candidate IDs of interest" />
+            <input name="notes" placeholder="Recommendation notes" />
+            <button type="submit" class="secondary">Request recommendations</button>
+          </form>
+        </div>
+      </section>
+
       <section id="operations" class="panel wide">
         <div class="panel-heading split-heading">
           <div>
@@ -211,6 +311,76 @@
           </div>
         </div>
         <div id="milestone2Detail" class="detail-card">Open an application, verification case, or interview to manage Milestone 2 actions.</div>
+      </section>
+
+      <section id="facility-operations" class="panel wide">
+        <div class="panel-heading split-heading">
+          <div>
+            <p class="eyebrow">Milestone 3 admin</p>
+            <h2>Facility operations, access, publications, and recommendations</h2>
+          </div>
+          <button id="loadFacilityOperations" class="secondary">Load facility operations</button>
+        </div>
+        <div id="adminFacilityCounters" class="counter-grid"></div>
+        <div class="admin-layout">
+          <div>
+            <form id="adminFacilitySearchForm" class="inline-form search-form">
+              <input name="search" placeholder="Search facility" />
+              <select name="status">
+                <option value="">All review statuses</option>
+                <option value="submitted">Submitted</option>
+                <option value="under_review">Under review</option>
+                <option value="approved">Approved</option>
+                <option value="clarification_requested">Clarification</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <button type="submit" class="secondary">Load facilities</button>
+            </form>
+            <div id="adminFacilityList" class="list-card">No facilities loaded.</div>
+          </div>
+          <div id="adminFacilityDetail" class="detail-card">Open a facility to review approval and access status.</div>
+        </div>
+        <div class="admin-layout">
+          <div>
+            <form id="adminPublicationForm" class="form-stack">
+              <input name="application_id" type="number" min="1" placeholder="Qualified application ID" required />
+              <input name="headline" placeholder="Publication headline" />
+              <input name="summary" placeholder="Facility-facing summary" />
+              <select name="status">
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+              <button type="submit">Publish candidate</button>
+            </form>
+            <div id="adminPublicationList" class="list-card compact">No publications loaded.</div>
+          </div>
+          <div>
+            <form id="adminRecommendationPackageForm" class="form-stack">
+              <input name="recommendation_request_id" type="number" min="1" placeholder="Recommendation request ID" />
+              <input name="facility_id" type="number" min="1" placeholder="Facility ID if no request" />
+              <input name="title" placeholder="Package title" required />
+              <input name="rationale" placeholder="Package rationale" />
+              <input name="candidate_publication_ids" placeholder="Candidate publication IDs" />
+              <select name="status">
+                <option value="draft">Draft</option>
+                <option value="ready">Ready</option>
+                <option value="shared">Shared</option>
+              </select>
+              <button type="submit" class="secondary">Save package</button>
+            </form>
+            <div id="adminRecommendationPackageList" class="list-card compact">No packages loaded.</div>
+          </div>
+        </div>
+        <div class="admin-layout">
+          <div>
+            <h2>Facility requests</h2>
+            <div id="adminFacilityRequestList" class="list-card">No facility requests loaded.</div>
+          </div>
+          <div>
+            <h2>Recommendation requests</h2>
+            <div id="adminRecommendationRequestList" class="list-card">No recommendation requests loaded.</div>
+          </div>
+        </div>
       </section>
 
       <section class="panel wide">

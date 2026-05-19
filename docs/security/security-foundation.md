@@ -28,6 +28,20 @@ Technical controls can reduce misuse but cannot make screenshots impossible. Afy
 - role restrictions;
 - facility terms and legal restrictions.
 
+## Facility Candidate Access
+
+Milestone 3 implements controlled facility access through:
+
+- facility approval before marketplace eligibility;
+- active facility access subscription before candidate browsing or candidate-specific requests;
+- candidate publication records separate from raw application/profile records;
+- facility-safe candidate summaries and credential metadata only;
+- dynamic watermark metadata on candidate detail views;
+- `candidate_profile_views` rows for every profile view;
+- audit action `candidate.profile_viewed`.
+
+No facility endpoint returns credential `storage_key` values or direct public document URLs. Future document preview work must use signed, temporary, viewer-bound URLs and must write document-view attempt audit records.
+
 ## Privacy Position
 
 Use minimum necessary access. Facilities should only see approved candidate information after authorization, and raw documents should remain tightly controlled.
@@ -46,6 +60,8 @@ Use minimum necessary access. Facilities should only see approved candidate info
 - Password reset completion revokes active sessions and records an audit event.
 - Application submission readiness requires verified professional email.
 - Credential replacement requests queue a professional notification and replacement uploads supersede prior rejected/replacement documents.
+- Candidate catalogue publication requires current consent, qualified/approved application state, passed verification, and completed recommended interview.
+- Facility marketplace browsing requires approved facility status and active access.
 
 ## Notification Security
 

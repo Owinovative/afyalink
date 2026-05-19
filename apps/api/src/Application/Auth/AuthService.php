@@ -33,24 +33,50 @@ final readonly class AuthService
     ): array {
         $this->assertPassword($password);
         $email = strtolower(trim($email));
+        $phone = trim($phone);
 
         if ($this->store->first('users', static fn (array $row): bool => strtolower((string) $row['email']) === $email) !== null) {
             throw new ValidationException(['email' => ['An account already exists for this email.']]);
         }
+        if ($this->store->first('users', static fn (array $row): bool => (string) $row['phone'] === $phone) !== null) {
+            throw new ValidationException(['phone' => ['An account already exists for this phone number.']]);
+        }
 
-        $user = $this->store->insert('users', [
-            'name' => trim($name),
-            'email' => $email,
-            'phone' => trim($phone),
-            'password_hash' => $this->passwords->hash($password),
-            'roles' => [UserRole::Professional->value],
-            'is_active' => true,
-            'email_verified_at' => null,
-            'created_at' => gmdate(DATE_ATOM),
-            'updated_at' => gmdate(DATE_ATOM),
-        ]);
+        $user = $this->insertUser(trim($name), $email, $phone, $password, [UserRole::Professional], null);
 
         $this->audit->record((int) $user['id'], 'professional.registered', 'User', (string) $user['id'], [
+            'email' => $email,
+            'roles' => $user['roles'],
+        ], $ipAddress, $userAgent);
+
+        return $this->createSession($user, $ipAddress, $userAgent);
+    }
+
+    /**
+     * @return array{token: string, user: AuthenticatedUser}
+     */
+    public function registerFacilityOwner(
+        string $name,
+        string $email,
+        string $phone,
+        string $password,
+        ?string $ipAddress = null,
+        ?string $userAgent = null,
+    ): array {
+        $this->assertPassword($password);
+        $email = strtolower(trim($email));
+        $phone = trim($phone);
+
+        if ($this->store->first('users', static fn (array $row): bool => strtolower((string) $row['email']) === $email) !== null) {
+            throw new ValidationException(['email' => ['An account already exists for this email.']]);
+        }
+        if ($this->store->first('users', static fn (array $row): bool => (string) $row['phone'] === $phone) !== null) {
+            throw new ValidationException(['phone' => ['An account already exists for this phone number.']]);
+        }
+
+        $user = $this->insertUser(trim($name), $email, $phone, $password, [UserRole::FacilityAdmin], gmdate(DATE_ATOM));
+
+        $this->audit->record((int) $user['id'], 'facility_user.registered', 'User', (string) $user['id'], [
             'email' => $email,
             'roles' => $user['roles'],
         ], $ipAddress, $userAgent);
@@ -76,17 +102,7 @@ final readonly class AuthService
             return $existing;
         }
 
-        return $this->store->insert('users', [
-            'name' => trim($name),
-            'email' => $email,
-            'phone' => trim($phone),
-            'password_hash' => $this->passwords->hash($password),
-            'roles' => array_map(static fn (UserRole $role): string => $role->value, $roles),
-            'is_active' => true,
-            'email_verified_at' => gmdate(DATE_ATOM),
-            'created_at' => gmdate(DATE_ATOM),
-            'updated_at' => gmdate(DATE_ATOM),
-        ]);
+        return $this->insertUser(trim($name), $email, trim($phone), $password, $roles, gmdate(DATE_ATOM));
     }
 
     /**
@@ -205,5 +221,24 @@ final readonly class AuthService
         if (!preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
             throw new ValidationException(['password' => ['Password must contain letters and numbers.']]);
         }
+    }
+
+    /**
+     * @param list<UserRole> $roles
+     * @return array<string, mixed>
+     */
+    private function insertUser(string $name, string $email, string $phone, string $password, array $roles, ?string $emailVerifiedAt): array
+    {
+        return $this->store->insert('users', [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'password_hash' => $this->passwords->hash($password),
+            'roles' => array_map(static fn (UserRole $role): string => $role->value, $roles),
+            'is_active' => true,
+            'email_verified_at' => $emailVerifiedAt,
+            'created_at' => gmdate(DATE_ATOM),
+            'updated_at' => gmdate(DATE_ATOM),
+        ]);
     }
 }

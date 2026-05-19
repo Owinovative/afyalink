@@ -15,8 +15,14 @@ enum Permission: string
     case VerificationManage = 'verification.manage';
     case InterviewManage = 'interview.manage';
     case InterviewScoreSubmit = 'interview.score.submit';
+    case FacilityOwnManage = 'facility.own.manage';
+    case FacilityReview = 'facility.review';
     case FacilityCandidateView = 'facility.candidate.view';
+    case FacilitySubscriptionOwnManage = 'facility.subscription.own.manage';
     case FacilitySubscriptionManage = 'facility.subscription.manage';
+    case CandidatePublicationManage = 'candidate.publication.manage';
+    case FacilityRequestManage = 'facility.request.manage';
+    case RecommendationPackageManage = 'recommendation.package.manage';
     case PaymentManage = 'payment.manage';
     case AuditRead = 'audit.read';
     case UserManage = 'user.manage';

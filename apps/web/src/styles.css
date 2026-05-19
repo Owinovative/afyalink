@@ -21,6 +21,7 @@ body {
   color: var(--ink);
   background: linear-gradient(180deg, #ffffff 0%, #ecf8ff 100%);
   line-height: 1.55;
+  overflow-x: hidden;
 }
 
 .shell {
@@ -198,6 +199,7 @@ input,
 select,
 button {
   width: 100%;
+  min-width: 0;
   min-height: 42px;
   border: 1px solid var(--line);
   border-radius: 4px;
@@ -224,6 +226,13 @@ button.secondary {
   color: var(--blue);
 }
 
+button:disabled {
+  cursor: not-allowed;
+  border-color: #d6e3ec;
+  background: #e8f1f7;
+  color: #6f8192;
+}
+
 .action-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -238,6 +247,30 @@ button.secondary {
   border: 1px solid var(--line);
   background: #f8fcff;
   padding: 14px;
+}
+
+.embedded-grid {
+  max-width: none;
+  width: 100%;
+  margin: 16px 0;
+  padding: 0;
+}
+
+.inner-panel {
+  border: 1px solid var(--line);
+  background: #fbfdff;
+  padding: 18px;
+}
+
+.empty-state {
+  min-height: 88px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  text-align: center;
+  border: 1px dashed var(--line);
+  background: #ffffff;
+  padding: 16px;
 }
 
 .step-grid,
@@ -322,6 +355,25 @@ button.secondary {
 .detail-section h3 {
   margin: 0 0 8px;
   color: var(--navy);
+}
+
+.watermark-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.watermark-panel::after {
+  content: attr(data-watermark);
+  position: absolute;
+  inset: 16px;
+  display: grid;
+  place-items: center;
+  color: rgba(7, 52, 90, 0.09);
+  font-size: 1.9rem;
+  font-weight: 900;
+  text-align: center;
+  transform: rotate(-18deg);
+  pointer-events: none;
 }
 
 .review-actions {

@@ -19,15 +19,19 @@
 
 ## Milestone 3
 
-- Facility onboarding
-- Facility subscriptions
-- Controlled candidate viewing
-- Watermarked candidate profiles
+- Facility onboarding and admin review
+- Facility subscriptions and staging manual access activation
+- Candidate publication layer
+- Controlled candidate marketplace browsing
+- Watermarked and audited candidate profile views
+- Facility appointment/hiring requests
+- Afyalink recommendation requests and shared recommendation packages
+- Professional visibility awareness
 
 ## Later
 
 - Regulatory integration automation where APIs exist
-- Recommendation packages
 - Advanced reporting
 - AI-assisted matching, only after core trust workflows are stable
-
+- Production M-PESA callbacks and automatic subscription reconciliation
+- Viewer-bound signed document preview endpoints where business rules allow document previews

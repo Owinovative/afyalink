@@ -27,6 +27,17 @@ final class PdoPostgresDataStore implements DataStore
         'verification_cases' => 'verification_cases',
         'interviews' => 'interviews',
         'interview_score_items' => 'interview_score_items',
+        'facilities' => 'facilities',
+        'facility_memberships' => 'facility_memberships',
+        'facility_documents' => 'facility_documents',
+        'facility_access_subscriptions' => 'facility_access_subscriptions',
+        'candidate_publications' => 'candidate_publications',
+        'candidate_profile_views' => 'candidate_profile_views',
+        'facility_requests' => 'facility_requests',
+        'facility_appointments' => 'facility_appointments',
+        'recommendation_requests' => 'recommendation_requests',
+        'recommendation_packages' => 'recommendation_packages',
+        'recommendation_package_candidates' => 'recommendation_package_candidates',
     ];
 
     /** @var array<string, list<string>> */
@@ -39,6 +50,18 @@ final class PdoPostgresDataStore implements DataStore
         'regulatory_bodies' => ['profession_coverage'],
         'verification_cases' => ['timeline'],
         'interviews' => ['timeline'],
+        'facility_documents' => ['metadata'],
+        'candidate_publications' => ['summary_snapshot', 'private_admin_notes'],
+        'candidate_profile_views' => ['watermark', 'metadata'],
+        'facility_requests' => ['candidate_publication_ids', 'metadata'],
+        'recommendation_requests' => ['criteria', 'candidate_publication_ids'],
+    ];
+
+    /** @var array<string, list<string>> */
+    private const BOOL_COLUMNS = [
+        'users' => ['is_active'],
+        'regulatory_bodies' => ['active'],
+        'facility_access_subscriptions' => ['admin_override'],
     ];
 
     public function __construct(
@@ -221,8 +244,10 @@ final class PdoPostgresDataStore implements DataStore
             }
         }
 
-        if (array_key_exists('is_active', $row)) {
-            $row['is_active'] = filter_var($row['is_active'], FILTER_VALIDATE_BOOL);
+        foreach (self::BOOL_COLUMNS[$table] ?? [] as $column) {
+            if (array_key_exists($column, $row)) {
+                $row[$column] = filter_var($row[$column], FILTER_VALIDATE_BOOL);
+            }
         }
 
         return $row;

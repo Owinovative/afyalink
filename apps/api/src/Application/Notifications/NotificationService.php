@@ -177,4 +177,147 @@ final readonly class NotificationService
             ],
         );
     }
+
+    /**
+     * @param array<string, mixed> $facility
+     */
+    public function facilityOnboardingSubmitted(array $facility): void
+    {
+        $this->queueEmail(
+            recipientUserId: isset($facility['created_by']) && $facility['created_by'] !== null ? (int) $facility['created_by'] : null,
+            recipientEmail: (string) $facility['email'],
+            type: 'facility_onboarding_submitted',
+            subject: 'Afyalink facility onboarding submitted',
+            body: 'Your facility onboarding details have been submitted for Afyalink review.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'review_status' => $facility['review_status'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $facility
+     */
+    public function facilityReviewDecision(array $facility, string $status, ?string $note): void
+    {
+        $this->queueEmail(
+            recipientUserId: isset($facility['created_by']) && $facility['created_by'] !== null ? (int) $facility['created_by'] : null,
+            recipientEmail: (string) $facility['email'],
+            type: 'facility_review_decision',
+            subject: 'Afyalink facility review updated',
+            body: 'Your facility onboarding review status has changed. Sign in to view the current status and next step.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'review_status' => $status,
+                'note' => $note,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $facility
+     * @param array<string, mixed> $subscription
+     */
+    public function facilitySubscriptionStatusChanged(array $facility, array $subscription): void
+    {
+        $this->queueEmail(
+            recipientUserId: isset($facility['created_by']) && $facility['created_by'] !== null ? (int) $facility['created_by'] : null,
+            recipientEmail: (string) $facility['email'],
+            type: 'facility_subscription_status_changed',
+            subject: 'Afyalink facility access updated',
+            body: 'Your Afyalink facility access status has been updated.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'subscription_id' => $subscription['id'] ?? null,
+                'status' => $subscription['status'] ?? null,
+                'ends_at' => $subscription['ends_at'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $application
+     * @param array<string, mixed> $publication
+     */
+    public function candidatePublicationStatusChanged(array $application, array $publication): void
+    {
+        $user = $this->store->find('users', (int) ($application['user_id'] ?? 0));
+        if ($user === null) {
+            return;
+        }
+
+        $this->queueEmail(
+            recipientUserId: (int) $user['id'],
+            recipientEmail: (string) $user['email'],
+            type: 'candidate_publication_status_changed',
+            subject: 'Afyalink facility catalogue visibility updated',
+            body: 'Your Afyalink facility catalogue visibility has been updated. Sign in to view the current status.',
+            metadata: [
+                'application_id' => $application['id'] ?? null,
+                'publication_id' => $publication['id'] ?? null,
+                'status' => $publication['status'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $facility
+     * @param array<string, mixed> $request
+     */
+    public function facilityAppointmentCreated(array $facility, array $request): void
+    {
+        $this->queueEmail(
+            recipientUserId: isset($facility['created_by']) && $facility['created_by'] !== null ? (int) $facility['created_by'] : null,
+            recipientEmail: (string) $facility['email'],
+            type: 'facility_appointment_created',
+            subject: 'Afyalink facility request received',
+            body: 'Your Afyalink facility request has been received for review.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'request_id' => $request['id'] ?? null,
+                'request_type' => $request['request_type'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $facility
+     * @param array<string, mixed> $appointment
+     */
+    public function facilityAppointmentScheduled(array $facility, array $appointment): void
+    {
+        $this->queueEmail(
+            recipientUserId: isset($facility['created_by']) && $facility['created_by'] !== null ? (int) $facility['created_by'] : null,
+            recipientEmail: (string) $facility['email'],
+            type: 'facility_appointment_scheduled',
+            subject: 'Afyalink facility appointment scheduled',
+            body: 'Your Afyalink facility appointment has been scheduled.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'appointment_id' => $appointment['id'] ?? null,
+                'scheduled_start_at' => $appointment['scheduled_start_at'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $facility
+     * @param array<string, mixed> $package
+     */
+    public function recommendationPackageShared(array $facility, array $package): void
+    {
+        $this->queueEmail(
+            recipientUserId: isset($facility['created_by']) && $facility['created_by'] !== null ? (int) $facility['created_by'] : null,
+            recipientEmail: (string) $facility['email'],
+            type: 'recommendation_package_shared',
+            subject: 'Afyalink recommendation package shared',
+            body: 'Afyalink has shared a recommendation package for your facility request.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'recommendation_package_id' => $package['id'] ?? null,
+                'status' => $package['status'] ?? null,
+            ],
+        );
+    }
 }

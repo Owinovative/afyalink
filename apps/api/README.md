@@ -19,6 +19,7 @@ This folder currently contains framework-light PHP domain code for the trust-cri
 - Payment intent factory.
 - Priority regulatory body registry.
 - Professional submission readiness checks.
+- Facility onboarding, review, access subscription, candidate publication, gated marketplace, candidate view audit, appointment request, and recommendation package services.
 - Credential requirement registry.
 - File upload security policy.
 - Consent version validation.
@@ -34,7 +35,7 @@ composer dump-autoload
 composer check
 ```
 
-Current checks include email verification, password reset, notification outbox, replacement upload loops, full submission, admin review, permission boundary, document signing, idempotent payment, consent, audit redaction, and upload policy tests.
+Current checks include email verification, password reset, notification outbox, replacement upload loops, full submission, admin review, permission boundary, document signing, idempotent payment, consent, audit redaction, upload policy tests, Milestone 2 verification/interview workflow, and Milestone 3 facility marketplace gating/audit workflows.
 
 ## Recommended Implementation Path
 

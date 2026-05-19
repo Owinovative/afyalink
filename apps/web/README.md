@@ -14,6 +14,9 @@ The page includes forms for:
 - application submission;
 - admin login;
 - application and audit review.
+- regulatory verification and interview operations;
+- facility registration/onboarding, access status, candidate browsing, candidate detail viewing, appointment requests, recommendation requests, and shared packages;
+- admin facility review, access management, candidate publication, facility request, and recommendation package operations.
 
 ## Run Locally
 
@@ -36,5 +39,5 @@ npm.cmd run check
 
 1. Move the static console into Next.js or Laravel Inertia + React.
 2. Add route-level guards and real layout components.
-3. Add admin detail/review controls beyond the current API smoke UI.
-4. Keep document access private, watermarked, and audited.
+3. Keep facility candidate views read-only, watermarked, and audited.
+4. Keep document access private and avoid exposing raw credential storage keys.
