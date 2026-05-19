@@ -50,6 +50,8 @@ AFYALINK_JSON_DATASTORE=apps/api/storage/runtime/afyalink-dev.json
 
 Do not use JSON persistence for production-like local development.
 
+Milestone 3 facility marketplace tables are included in the normal migration path. No new environment variables are required for facility onboarding, candidate publication, access gating, requests, or recommendation packages.
+
 Local private credential storage uses:
 
 - `apps/api/storage/private/credentials`
@@ -118,6 +120,8 @@ CORS_ALLOWED_ORIGINS=https://your-web-staging.onrender.com
 ```
 
 Temporary local credential storage on Render is not durable and is only acceptable for staging. See [Render Staging Deployment](deployment/render-staging.md).
+
+Cloudflare R2/S3-compatible private storage is already supported through `AFYALINK_CREDENTIAL_STORAGE=r2` plus `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, and `S3_SECRET_ACCESS_KEY`. Keep buckets private; facility candidate views must not expose raw object keys.
 
 ## Creating an Admin for Local Testing
 

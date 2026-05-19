@@ -104,6 +104,7 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - Local private and S3-compatible credential storage adapters.
 - Professional and admin workflow endpoints.
 - Interactive web intake/admin console with step-based onboarding, replacement request visibility, admin counters, review timeline, and account recovery forms.
+- Facility marketplace platform covering facility onboarding, admin approval, access subscriptions, candidate publication, gated candidate browsing, watermarked candidate detail views, appointment requests, recommendation requests/packages, and facility operations counters.
 - GitHub Actions CI foundation.
 - Web product foundation for the Afyalink Milestone 1 workflow.
 
@@ -165,6 +166,10 @@ The current tests verify:
 - facility viewers cannot access raw credential documents;
 - signed document links are viewer-bound and expiring;
 - payment intent references are idempotent.
+- unapproved facilities and facilities without active access cannot browse candidates;
+- candidate publication requires qualified/approved application state, passed verification, completed recommended interview, and current consent;
+- candidate profile views are watermarked and audited;
+- facility requests and recommendation packages persist through admin-managed workflows.
 
 ## Render Staging
 
@@ -182,8 +187,10 @@ Read the deployment guide before using staging credential uploads:
 ## Documents
 
 - [Milestone 1 Plan](docs/milestones/milestone-1.md)
+- [Milestone 3 Facility Marketplace](docs/milestones/milestone-3.md)
 - [Technical Direction](docs/architecture/technical-direction.md)
 - [Security Foundation](docs/security/security-foundation.md)
 - [Local Setup](docs/setup.md)
 - [Milestone 1 API Endpoints](docs/api/milestone-1-endpoints.md)
+- [Milestone 3 API Endpoints](docs/api/milestone-3-endpoints.md)
 - [Docs Index](docs/README.md)

@@ -10,16 +10,11 @@ Afyalink verifies healthcare professionals and prepares trusted professional pro
 
 ## Engineering Position
 
-Build Milestone 1 first:
+The platform has progressed beyond intake into facility marketplace operations:
 
-- professional onboarding;
-- profile completion;
-- credential upload;
-- consent capture;
-- payment reference / M-PESA-ready payment records;
-- admin review;
-- audit logs;
-- private document storage.
+- professional onboarding, profile, credentials, consent, payment, admin review, verification, interview, and qualification;
+- facility onboarding, admin approval, active access subscriptions, candidate publication, controlled candidate browsing, appointment requests, recommendation requests, and shared recommendation packages;
+- audit and notification outbox coverage for sensitive workflows.
 
 ## Safety Rules
 
@@ -27,5 +22,5 @@ Build Milestone 1 first:
 - No direct public document URLs.
 - Every document view, status change, payment event, login failure, and admin review action must be audited.
 - Role and permission boundaries must exist from day one.
-- Facility access comes later and must be controlled, watermarked, and audited.
-
+- Facility candidate access must remain approval-gated, subscription-gated, read-only, watermarked, and audited.
+- Candidate publication must stay separate from raw professional/application records.

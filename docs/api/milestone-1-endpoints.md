@@ -108,3 +108,7 @@ Payment intent creation is integration-ready:
 ```
 
 The same `user_id + idempotency_key` returns the existing payment row.
+
+## Milestone 3
+
+Facility onboarding, facility access, candidate marketplace, appointment requests, and recommendation package endpoints are documented separately in [Milestone 3 API Endpoints](milestone-3-endpoints.md).

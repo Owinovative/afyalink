@@ -16,9 +16,14 @@ use Afyalink\Core\Domain\Credentials\CredentialRequirementRegistry;
 use Afyalink\Core\Domain\Documents\PrivateDocumentUrlFactory;
 use Afyalink\Core\Domain\Enums\ApplicationStatus;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
+use Afyalink\Core\Domain\Enums\CandidatePublicationStatus;
 use Afyalink\Core\Domain\Enums\DocumentType;
+use Afyalink\Core\Domain\Enums\FacilityAccessStatus;
+use Afyalink\Core\Domain\Enums\FacilityRequestStatus;
+use Afyalink\Core\Domain\Enums\FacilityReviewStatus;
 use Afyalink\Core\Domain\Enums\InterviewRecommendation;
 use Afyalink\Core\Domain\Enums\PaymentStatus;
+use Afyalink\Core\Domain\Enums\RecommendationPackageStatus;
 use Afyalink\Core\Domain\Enums\UserRole;
 use Afyalink\Core\Domain\Enums\VerificationStatus;
 use Afyalink\Core\Domain\Payments\PaymentStateMachine;
@@ -609,6 +614,220 @@ $tests = [
         expectTrue(in_array('verification.created', $auditActions, true), 'verification creation should be audited');
         expectTrue(in_array('verification.status_changed', $auditActions, true), 'verification status change should be audited');
         expectTrue(in_array('interview.completed', $auditActions, true), 'interview completion should be audited');
+    },
+    'milestone 3 facility marketplace gates access and audits candidate views' => function (): void {
+        $root = sys_get_temp_dir() . '/afyalink-m3-test-' . bin2hex(random_bytes(4));
+        mkdir($root . '/storage/private/credentials', 0770, true);
+        $store = new JsonDataStore($root . '/storage/runtime/database.json');
+        $kernel = new ApiKernel($store, new LocalPrivateCredentialStorage($root . '/storage/private/credentials'));
+
+        $api = static function (string $method, string $path, array $body = [], ?string $token = null, array $query = []) use ($kernel): JsonResponse {
+            $headers = $token === null ? [] : ['authorization' => "Bearer {$token}"];
+
+            return $kernel->handle(new Request($method, $path, $headers, $body, $query, ipAddress: '127.0.0.1', userAgent: 'test-suite'));
+        };
+
+        $registered = $api('POST', '/api/auth/register', [
+            'name' => 'Facility Visible Nurse',
+            'email' => 'facility.visible@example.com',
+            'phone' => '0766666666',
+            'password' => 'StrongPass123',
+        ]);
+        expectTrue($registered->status === 200, 'candidate professional should register');
+        $professionalToken = (string) $registered->payload['data']['token'];
+        $notice = $store->where('notification_outbox', static fn (array $row): bool => ($row['type'] ?? '') === 'email_verification')[0] ?? null;
+        parse_str((string) parse_url((string) $notice['action_url'], PHP_URL_QUERY), $verificationQuery);
+
+        $api('PUT', '/api/professional/profile', [
+            'name' => 'Facility Visible Nurse',
+            'phone' => '0766666666',
+            'profession' => 'Registered Nurse',
+            'regulatory_body' => 'NCK',
+            'license_number' => 'NCK-M3-001',
+            'county' => 'Nairobi',
+            'years_experience' => 6,
+            'availability' => 'available',
+            'placement_type' => 'full_time',
+        ], $professionalToken);
+        foreach ([
+            DocumentType::CurriculumVitae,
+            DocumentType::NationalIdOrPassport,
+            DocumentType::ProfessionalLicense,
+            DocumentType::AcademicCertificate,
+        ] as $type) {
+            $upload = $api('POST', '/api/professional/credentials', [
+                'document_type' => $type->value,
+                'original_name' => $type->value . '.pdf',
+                'mime_type' => 'application/pdf',
+                'content_base64' => base64_encode('%PDF-1.4 milestone-three'),
+            ], $professionalToken);
+            expectTrue($upload->status === 200, "credential {$type->value} should upload for publication flow");
+        }
+        $api('POST', '/api/professional/consents', [], $professionalToken);
+        $payment = $api('POST', '/api/professional/payments', [
+            'method' => 'mpesa_manual_reference',
+            'idempotency_key' => 'm3-payment',
+            'amount_cents' => 250000,
+            'external_reference' => 'MPESA-M3-001',
+        ], $professionalToken);
+
+        $kernel->auth()->createUser('Milestone Three Admin', 'm3.admin@example.com', '0799999996', 'AdminPass123', [UserRole::Admin]);
+        $adminLogin = $api('POST', '/api/auth/login', ['email' => 'm3.admin@example.com', 'password' => 'AdminPass123']);
+        expectTrue($adminLogin->status === 200, 'milestone 3 admin should login');
+        $adminToken = (string) $adminLogin->payload['data']['token'];
+        $paymentId = (int) $payment->payload['data']['payment']['id'];
+        $api('PATCH', "/api/admin/payments/{$paymentId}/status", [
+            'status' => PaymentStatus::PendingVerification->value,
+            'note' => 'Manual reference received.',
+        ], $adminToken);
+        $api('PATCH', "/api/admin/payments/{$paymentId}/status", [
+            'status' => PaymentStatus::Confirmed->value,
+            'note' => 'Manual reference confirmed.',
+        ], $adminToken);
+        $api('POST', '/api/auth/email/verify', ['token' => (string) $verificationQuery['token']]);
+        $submitted = $api('POST', '/api/professional/application/submit', [], $professionalToken);
+        expectTrue($submitted->status === 200, 'candidate should submit before publication');
+        $applicationId = (int) $submitted->payload['data']['application']['id'];
+
+        $verification = $api('POST', '/api/admin/verifications', [
+            'application_id' => $applicationId,
+            'verification_method' => 'manual_registry_check',
+        ], $adminToken);
+        $caseId = (int) $verification->payload['data']['verification']['case']['id'];
+        $api('PATCH', "/api/admin/verifications/{$caseId}/status", [
+            'status' => VerificationStatus::Assigned->value,
+            'note' => 'Assigned.',
+        ], $adminToken);
+        $api('PATCH', "/api/admin/verifications/{$caseId}/status", [
+            'status' => VerificationStatus::Verified->value,
+            'note' => 'License active.',
+            'evidence_reference' => 'NCK register',
+            'final_decision_notes' => 'Verified.',
+        ], $adminToken);
+        $scheduled = $api('POST', '/api/admin/interviews', [
+            'application_id' => $applicationId,
+            'scheduled_start_at' => gmdate(DATE_ATOM, time() + 86400),
+            'scheduled_end_at' => gmdate(DATE_ATOM, time() + 90000),
+            'mode' => 'remote',
+        ], $adminToken);
+        $interviewId = (int) $scheduled->payload['data']['interview']['interview']['id'];
+        $completed = $api('PATCH', "/api/admin/interviews/{$interviewId}/complete", [
+            'recommendation' => InterviewRecommendation::Recommend->value,
+            'notes' => 'Ready for facility catalogue.',
+            'scores' => [
+                ['category' => 'professional_knowledge', 'score' => 5, 'max_score' => 5],
+                ['category' => 'communication', 'score' => 5, 'max_score' => 5],
+                ['category' => 'ethical_judgment', 'score' => 4, 'max_score' => 5],
+                ['category' => 'practical_readiness', 'score' => 4, 'max_score' => 5],
+                ['category' => 'role_fit', 'score' => 5, 'max_score' => 5],
+            ],
+        ], $adminToken);
+        expectTrue($completed->status === 200, 'candidate interview should qualify');
+
+        $publication = $api('POST', '/api/admin/candidate-publications', [
+            'application_id' => $applicationId,
+            'status' => CandidatePublicationStatus::Published->value,
+            'headline' => 'Verified registered nurse',
+            'summary' => 'Interview-qualified nurse available for placement.',
+        ], $adminToken);
+        expectTrue($publication->status === 200, 'admin should publish qualified candidate');
+        $publicationId = (int) $publication->payload['data']['publication']['id'];
+
+        $facilityRegistration = $api('POST', '/api/facility/auth/register', [
+            'name' => 'Facility Owner',
+            'email' => 'facility.owner@example.com',
+            'phone' => '0777777777',
+            'password' => 'StrongPass123',
+            'legal_name' => 'Nairobi Care Hospital Ltd',
+            'display_name' => 'Nairobi Care Hospital',
+            'facility_type' => 'hospital',
+            'registration_number' => 'FAC-M3-001',
+            'county' => 'Nairobi',
+            'location' => 'Westlands',
+            'physical_address' => 'Westlands Road',
+            'contact_person' => 'Facility Owner',
+        ]);
+        expectTrue($facilityRegistration->status === 200, 'facility owner should register with organization profile');
+        $facilityToken = (string) $facilityRegistration->payload['data']['token'];
+        $facilityId = (int) $facilityRegistration->payload['data']['facility']['id'];
+
+        $unapprovedBrowse = $api('GET', '/api/facility/candidates', [], $facilityToken);
+        expectTrue($unapprovedBrowse->status === 409, 'unapproved facility cannot browse candidates');
+
+        $submittedFacility = $api('POST', '/api/facility/submit', [], $facilityToken);
+        expectTrue($submittedFacility->status === 200 && $submittedFacility->payload['data']['facility']['review_status'] === FacilityReviewStatus::Submitted->value, 'facility should submit onboarding for review');
+        $approvedFacility = $api('PATCH', "/api/admin/facilities/{$facilityId}/review", [
+            'action' => 'approve',
+            'note' => 'Facility registration checked.',
+        ], $adminToken);
+        expectTrue($approvedFacility->status === 200 && $approvedFacility->payload['data']['facility']['review_status'] === FacilityReviewStatus::Approved->value, 'admin should approve facility');
+
+        $noAccessBrowse = $api('GET', '/api/facility/candidates', [], $facilityToken);
+        expectTrue($noAccessBrowse->status === 409, 'approved facility without active access cannot browse');
+        $subscription = $api('POST', '/api/facility/access/payment-intents', [
+            'idempotency_key' => 'facility-access-1',
+            'amount_cents' => 500000,
+        ], $facilityToken);
+        expectTrue($subscription->status === 200 && $subscription->payload['data']['subscription']['status'] === FacilityAccessStatus::PendingPayment->value, 'facility should create access payment intent');
+        $active = $api('PATCH', "/api/admin/facilities/{$facilityId}/subscription", [
+            'subscription_id' => $subscription->payload['data']['subscription']['id'],
+            'status' => FacilityAccessStatus::Active->value,
+            'note' => 'Manual staging access activated.',
+            'admin_override' => true,
+        ], $adminToken);
+        expectTrue($active->status === 200 && $active->payload['data']['access']['active'] === true, 'admin should activate facility access');
+
+        $browse = $api('GET', '/api/facility/candidates', [], $facilityToken, ['profession' => 'Nurse', 'county' => 'Nairobi']);
+        expectTrue($browse->status === 200 && count($browse->payload['data']['candidates']) === 1, 'active approved facility can browse published candidates');
+        $candidateDetail = $api('GET', "/api/facility/candidates/{$publicationId}", [], $facilityToken);
+        expectTrue($candidateDetail->status === 200, 'facility can open candidate detail');
+        expectFalse(array_key_exists('storage_key', $candidateDetail->payload['data']), 'candidate detail must not expose raw storage keys');
+        expectTrue(($candidateDetail->payload['data']['watermark']['viewer_email'] ?? '') === 'facility.owner@example.com', 'candidate detail should include viewer-bound watermark');
+
+        $appointment = $api('POST', '/api/facility/requests/appointments', [
+            'title' => 'Discuss ICU nurse hiring',
+            'role_needed' => 'ICU nurse',
+            'candidate_publication_ids' => [$publicationId],
+            'preferred_timing' => 'Tomorrow morning',
+            'notes' => 'Need two nurses for night shifts.',
+        ], $facilityToken);
+        expectTrue($appointment->status === 200 && $appointment->payload['data']['request']['status'] === FacilityRequestStatus::Submitted->value, 'facility should submit appointment request');
+
+        $recommendationRequest = $api('POST', '/api/facility/recommendation-requests', [
+            'role_needed' => 'Registered Nurse',
+            'county' => 'Nairobi',
+            'urgency' => 'high',
+            'experience_level' => '5+ years',
+            'candidate_publication_ids' => [$publicationId],
+            'notes' => 'Recommend professionals for ward coverage.',
+        ], $facilityToken);
+        expectTrue($recommendationRequest->status === 200, 'facility should submit recommendation request');
+        $recommendationRequestId = (int) $recommendationRequest->payload['data']['recommendation_request']['id'];
+        $package = $api('POST', '/api/admin/recommendation-packages', [
+            'recommendation_request_id' => $recommendationRequestId,
+            'title' => 'Recommended nurses for Nairobi Care',
+            'rationale' => 'Candidate has passed Afyalink verification and interview scoring.',
+            'status' => RecommendationPackageStatus::Shared->value,
+            'candidate_publication_ids' => [$publicationId],
+        ], $adminToken);
+        expectTrue($package->status === 200 && $package->payload['data']['recommendation_package']['status'] === RecommendationPackageStatus::Shared->value, 'admin should share recommendation package');
+        $facilityPackages = $api('GET', '/api/facility/recommendation-packages', [], $facilityToken);
+        expectTrue(count($facilityPackages->payload['data']['recommendation_packages']) === 1, 'facility should see shared recommendation package');
+
+        $professionalDashboard = $api('GET', '/api/professional/dashboard', [], $professionalToken);
+        expectTrue($professionalDashboard->payload['data']['facility_visibility']['published'] === true, 'professional should see catalogue visibility');
+        expectTrue($professionalDashboard->payload['data']['facility_visibility']['view_count'] === 1, 'professional should see high-level view count');
+
+        $auditActions = array_map(static fn (array $row): string => (string) $row['action'], $store->all('audit_logs'));
+        expectTrue(in_array('facility.review_status_changed', $auditActions, true), 'facility approval should be audited');
+        expectTrue(in_array('facility_subscription.status_changed', $auditActions, true), 'facility subscription change should be audited');
+        expectTrue(in_array('candidate.profile_viewed', $auditActions, true), 'candidate profile view should be audited');
+        expectTrue(in_array('recommendation_package.created', $auditActions, true), 'recommendation package lifecycle should be audited');
+
+        $notificationTypes = array_map(static fn (array $row): string => (string) $row['type'], $store->all('notification_outbox'));
+        expectTrue(in_array('facility_onboarding_submitted', $notificationTypes, true), 'facility onboarding submission should queue notification');
+        expectTrue(in_array('facility_subscription_status_changed', $notificationTypes, true), 'facility access update should queue notification');
+        expectTrue(in_array('recommendation_package_shared', $notificationTypes, true), 'shared package should queue notification');
     },
     'configuration defaults to postgresql and supports explicit json adapter' => function (): void {
         $config = AppConfig::fromEnv([], __DIR__);
