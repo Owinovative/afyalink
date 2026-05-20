@@ -9,6 +9,7 @@ use Afyalink\Core\Application\Auth\AuthenticatedUser;
 use Afyalink\Core\Application\Consent\ConsentService;
 use Afyalink\Core\Application\Notifications\NotificationService;
 use Afyalink\Core\Domain\Enums\ApplicationStatus;
+use Afyalink\Core\Domain\Enums\ApplicantTrack;
 use Afyalink\Core\Domain\Enums\CandidatePublicationStatus;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
 use Afyalink\Core\Domain\Enums\InterviewRecommendation;
@@ -335,6 +336,13 @@ final readonly class CandidatePublicationService
         if (!in_array((string) ($application['status'] ?? ''), [ApplicationStatus::Qualified->value, ApplicationStatus::Approved->value], true)) {
             throw new DomainException('Only qualified or approved candidates can be published.');
         }
+        $profile = $this->profileForUser((int) $application['user_id']);
+        if ($profile === null) {
+            throw new DomainException('Professional profile is required before publication.');
+        }
+        if (($profile['applicant_track'] ?? ApplicantTrack::LicensedProfessional->value) !== ApplicantTrack::LicensedProfessional->value) {
+            throw new DomainException('Waiting-license applicants cannot be published to the facility catalogue.');
+        }
         if (!$this->consents->hasCurrentConsent((int) $application['user_id'])) {
             throw new DomainException('Candidate consent must be current before publication.');
         }
@@ -363,6 +371,9 @@ final readonly class CandidatePublicationService
         $profile = $this->profileForUser((int) $application['user_id']);
         if ($profile === null) {
             throw new DomainException('Professional profile is required before publication.');
+        }
+        if (($profile['applicant_track'] ?? ApplicantTrack::LicensedProfessional->value) !== ApplicantTrack::LicensedProfessional->value) {
+            throw new DomainException('Waiting-license applicants cannot be published to the facility catalogue.');
         }
         $verification = $this->store->first('verification_cases', static fn (array $row): bool => (int) $row['application_id'] === (int) $application['id']);
         $interview = $this->latestInterview((int) $application['id']);

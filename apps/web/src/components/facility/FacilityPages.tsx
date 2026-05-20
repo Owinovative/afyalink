@@ -22,6 +22,18 @@ type FacilitySection =
   | "recommendations"
   | "packages";
 
+const facilitySectionTitles: Record<FacilitySection, string> = {
+  home: "Facility workspace",
+  dashboard: "Dashboard",
+  onboarding: "Onboarding",
+  access: "Access",
+  candidates: "Candidates",
+  "candidate-detail": "Candidate detail",
+  appointments: "Appointments",
+  recommendations: "Recommendations",
+  packages: "Packages",
+};
+
 function csvIds(value: unknown) {
   return String(value ?? "")
     .split(",")
@@ -43,7 +55,7 @@ export function FacilityPage({ section, publicationId }: { section: FacilitySect
     <>
       <PageHeader
         eyebrow="Facility portal"
-        title={section === "home" ? "Facility workspace" : section.replace("-", " ")}
+        title={facilitySectionTitles[section]}
         body="Facility pages stay gated by backend approval, membership, active access, and candidate publication rules."
       />
       {resource.loading ? <div className="notice">Loading facility dashboard...</div> : null}
@@ -521,7 +533,6 @@ function RequestForm({
                 meta={[
                   { label: "County", value: row.county },
                   { label: "Urgency", value: row.urgency },
-                  { label: "Admin note", value: row.admin_note },
                 ]}
               />
             ))

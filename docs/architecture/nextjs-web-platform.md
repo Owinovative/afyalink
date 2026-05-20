@@ -9,6 +9,7 @@ Public pages are separate routes rather than sections in one static page:
 - `/`
 - `/how-it-works`
 - `/professionals`
+- `/students`
 - `/facilities`
 - `/trust-security`
 - `/verification`
@@ -21,6 +22,7 @@ Authentication routes are explicit:
 
 - `/auth/login`
 - `/auth/register/professional`
+- `/auth/register/student`
 - `/auth/register/facility`
 - `/auth/verify-email`
 - `/auth/forgot-password`
@@ -33,6 +35,12 @@ Portal routes are split by role:
 - `/portal/admin/*`
 
 Each portal has its own shell navigation so professional onboarding, facility marketplace access, and admin operations are not compressed into one screen.
+
+The professional portal includes `/portal/professional/waiting-license` for students and recent graduates in the pre-licensure track. The admin portal includes `/portal/admin/pre-licensure` so reviewers can monitor waiting-license applicants separately from licensed professional application queues.
+
+## Visual System
+
+The web frontend now uses a shared premium visual system documented in `docs/frontend/design-system.md`. Public pages use local SVG image compositions, full-width editorial bands, shared section primitives, and route-specific hero treatments instead of relying on one generic card grid.
 
 ## API Integration
 
@@ -56,8 +64,11 @@ The Next.js app does not move sensitive workflow rules into the frontend. Backen
 - facility approval and subscription gating;
 - candidate publication eligibility;
 - candidate marketplace authorization.
+- student waiting-license conversion into the licensed professional track.
 
 Facility candidate detail pages retain visible watermark UI and call the secure detail API, which records the view audit. The frontend does not expose raw private document URLs, storage keys, internal admin notes, tokens, payment idempotency secrets, or notification action URLs.
+
+Student awaiting-license applicants are intentionally blocked from normal application submission, verification, interview, and facility publication until backend conversion moves their applicant track to `licensed_professional`.
 
 ## Deployment
 

@@ -15,6 +15,7 @@ import { useApiResource } from "@/lib/hooks/useApiResource";
 type AdminSection =
   | "dashboard"
   | "applications"
+  | "pre-licensure"
   | "application-detail"
   | "credentials"
   | "payments"
@@ -30,15 +31,36 @@ type AdminSection =
   | "recommendations"
   | "audit";
 
+const adminSectionTitles: Record<AdminSection, string> = {
+  dashboard: "Admin dashboard",
+  applications: "Applications",
+  "pre-licensure": "Pre-licensure",
+  "application-detail": "Application detail",
+  credentials: "Credentials",
+  payments: "Payments",
+  verifications: "Verifications",
+  "verification-detail": "Verification detail",
+  interviews: "Interviews",
+  "interview-detail": "Interview detail",
+  facilities: "Facilities",
+  "facility-detail": "Facility detail",
+  publications: "Publications",
+  subscriptions: "Subscriptions",
+  appointments: "Appointments",
+  recommendations: "Recommendations",
+  audit: "Audit",
+};
+
 export function AdminPage({ section, id }: { section: AdminSection; id?: string }) {
   return (
     <>
       <PageHeader
         eyebrow="Admin operations"
-        title={section.replace("-", " ")}
+        title={adminSectionTitles[section]}
         body="Admin pages expose queue and detail workflows while controllers and services enforce state transitions."
       />
       {section === "dashboard" ? <AdminDashboard /> : null}
+      {section === "pre-licensure" ? <PrelicensureQueue /> : null}
       {section === "applications" || section === "credentials" || section === "payments" ? (
         <ApplicationList mode={section} />
       ) : null}
@@ -66,11 +88,12 @@ function AdminDashboard() {
     if (!token) return;
     setError("");
     try {
-      const [applications, facilities, verifications, interviews] = await Promise.all([
+      const [applications, facilities, verifications, interviews, prelicensure] = await Promise.all([
         apiRequest("/api/admin/applications", { token }),
         apiRequest("/api/admin/facility-operations/overview", { token }),
         apiRequest("/api/admin/verifications", { token }),
         apiRequest("/api/admin/interviews", { token }),
+        apiRequest("/api/admin/pre-licensure", { token }),
       ]);
       setData({
         applications: asRecord(applications).overview,
@@ -80,6 +103,7 @@ function AdminDashboard() {
         engagements: asRecord(facilities).engagements,
         verifications: asRecord(verifications).overview,
         interviews: asRecord(interviews).overview,
+        prelicensure: asRecord(prelicensure).overview,
       });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not load admin dashboard.");
@@ -103,12 +127,14 @@ function AdminDashboard() {
           { label: "Interviews", value: asRecord(data.interviews).total },
           { label: "Active access", value: asRecord(data.access).active },
           { label: "Profile views", value: asRecord(data.publications).candidate_profile_views },
+          { label: "Waiting-license", value: asRecord(data.prelicensure).total },
         ]}
       />
       <div className="grid-3">
         <QuickLink title="Application review" href="/portal/admin/applications" body="Open professional submissions and credential review workflows." />
         <QuickLink title="Facility operations" href="/portal/admin/facilities" body="Approve facilities and manage subscription access." />
         <QuickLink title="Recommendations" href="/portal/admin/recommendations" body="Prepare and share curated candidate packages." />
+        <QuickLink title="Pre-licensure queue" href="/portal/admin/pre-licensure" body="Track students and graduates waiting for professional licenses." />
       </div>
     </div>
   );
@@ -125,6 +151,84 @@ function QuickLink({ title, href, body }: { title: string; href: string; body: s
         </Link>
       </div>
     </article>
+  );
+}
+
+function PrelicensureQueue() {
+  const resource = useApiResource<Record<string, unknown>>("admin", "/api/admin/pre-licensure");
+  const students = asArray<Record<string, unknown>>(asRecord(resource.data).students);
+  const overview = asRecord(asRecord(resource.data).overview);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function convert(profileId: unknown) {
+    setMessage("");
+    setError("");
+    try {
+      await apiRequest(`/api/admin/pre-licensure/${profileId}/convert`, {
+        method: "PATCH",
+        token: resource.token,
+        body: { note: "Converted from routed pre-licensure admin queue." },
+      });
+      setMessage("Applicant converted to licensed professional track.");
+      await resource.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not convert applicant.");
+    }
+  }
+
+  return (
+    <div className="data-list">
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      {message ? <Feedback message={message} /> : null}
+      {error ? <Feedback message={error} tone="error" /> : null}
+      <MetricGrid
+        metrics={[
+          { label: "Waiting-license total", value: overview.total },
+          { label: "Still waiting", value: overview.waiting_for_license },
+          { label: "License submitted", value: overview.license_submitted },
+          { label: "Converted", value: overview.converted },
+        ]}
+      />
+      <section className="card">
+        <h2>Students and graduates awaiting license</h2>
+        <div className="data-list">
+          {students.length ? (
+            students.map((student) => (
+              <DataRow
+                key={String(student.id)}
+                title={display(student.name)}
+                status={student.conversion_review_status}
+                meta={[
+                  { label: "Profession", value: student.target_profession },
+                  { label: "Institution", value: student.institution_name },
+                  { label: "County", value: student.county },
+                  { label: "Regulatory body", value: student.expected_regulatory_body },
+                  { label: "License", value: student.license_number },
+                  { label: "Can convert", value: student.can_convert },
+                ]}
+              >
+                <div className="data-list">
+                  <div className="table-lite">
+                    {asArray<Record<string, unknown>>(student.document_checklist).map((item) => (
+                      <div key={String(item.document_type)}>
+                        <span>{display(item.document_type)}</span>
+                        <span className={item.uploaded ? "badge green" : "badge gold"}>{item.uploaded ? display(item.review_status) : "Missing"}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="button secondary" type="button" disabled={!resource.token || !student.can_convert} onClick={() => convert(student.id)}>
+                    Convert to licensed track
+                  </button>
+                </div>
+              </DataRow>
+            ))
+          ) : (
+            <EmptyState title="No waiting-license applicants" body="Student and recent graduate applicants appear here after registration." />
+          )}
+        </div>
+      </section>
+    </div>
   );
 }
 

@@ -6,6 +6,8 @@ namespace Afyalink\Core\Application\Auth;
 
 use Afyalink\Core\Application\Audit\AuditLogger;
 use Afyalink\Core\Domain\Enums\UserRole;
+use Afyalink\Core\Domain\Enums\ApplicantTrack;
+use Afyalink\Core\Domain\Enums\StudentStatus;
 use Afyalink\Core\Infrastructure\Persistence\DataStore;
 use Afyalink\Core\Support\Exceptions\AuthorizationException;
 use Afyalink\Core\Support\Exceptions\ValidationException;
@@ -50,6 +52,84 @@ final readonly class AuthService
         ], $ipAddress, $userAgent);
 
         return $this->createSession($user, $ipAddress, $userAgent);
+    }
+
+    /**
+     * @param array<string, mixed> $studentProfile
+     * @return array{token: string, user: AuthenticatedUser, profile: array<string, mixed>}
+     */
+    public function registerStudentApplicant(
+        string $name,
+        string $email,
+        string $phone,
+        string $password,
+        array $studentProfile,
+        ?string $ipAddress = null,
+        ?string $userAgent = null,
+    ): array {
+        $this->assertPassword($password);
+        $email = strtolower(trim($email));
+        $phone = trim($phone);
+
+        if ($this->store->first('users', static fn (array $row): bool => strtolower((string) $row['email']) === $email) !== null) {
+            throw new ValidationException(['email' => ['An account already exists for this email.']]);
+        }
+        if ($this->store->first('users', static fn (array $row): bool => (string) $row['phone'] === $phone) !== null) {
+            throw new ValidationException(['phone' => ['An account already exists for this phone number.']]);
+        }
+
+        $studentStatus = StudentStatus::tryFrom((string) ($studentProfile['student_status'] ?? ''));
+        if ($studentStatus === null) {
+            throw new ValidationException(['student_status' => ['Choose a valid student or graduate status.']]);
+        }
+
+        foreach (['target_profession', 'institution_name', 'programme_or_course', 'county'] as $field) {
+            if (trim((string) ($studentProfile[$field] ?? '')) === '') {
+                throw new ValidationException([$field => ['This field is required for waiting-license registration.']]);
+            }
+        }
+
+        $user = $this->insertUser(trim($name), $email, $phone, $password, [UserRole::Professional], null);
+        $profile = $this->store->insert('profiles', [
+            'user_id' => (int) $user['id'],
+            'applicant_track' => ApplicantTrack::StudentAwaitingLicense->value,
+            'student_status' => $studentStatus->value,
+            'name' => trim($name),
+            'email' => $email,
+            'phone' => $phone,
+            'profession' => trim((string) $studentProfile['target_profession']),
+            'target_profession' => trim((string) $studentProfile['target_profession']),
+            'regulatory_body' => trim((string) ($studentProfile['expected_regulatory_body'] ?? '')),
+            'expected_regulatory_body' => trim((string) ($studentProfile['expected_regulatory_body'] ?? '')),
+            'license_number' => '',
+            'county' => trim((string) $studentProfile['county']),
+            'years_experience' => 0,
+            'institution_name' => trim((string) $studentProfile['institution_name']),
+            'programme_or_course' => trim((string) $studentProfile['programme_or_course']),
+            'graduation_or_completion_date' => trim((string) ($studentProfile['graduation_or_completion_date'] ?? '')) ?: null,
+            'prelicensure_note' => trim((string) ($studentProfile['notes'] ?? '')),
+            'conversion_review_status' => 'waiting_for_license',
+            'license_uploaded_at' => null,
+            'converted_to_licensed_at' => null,
+            'availability' => trim((string) ($studentProfile['availability_after_licensure'] ?? '')),
+            'work_preferences' => [
+                'availability_after_licensure' => trim((string) ($studentProfile['availability_after_licensure'] ?? '')),
+                'placement_type' => trim((string) ($studentProfile['placement_type'] ?? '')),
+            ],
+            'created_at' => gmdate(DATE_ATOM),
+            'updated_at' => gmdate(DATE_ATOM),
+        ]);
+
+        $this->audit->record((int) $user['id'], 'student_awaiting_license.registered', 'User', (string) $user['id'], [
+            'email' => $email,
+            'target_profession' => $profile['target_profession'],
+            'student_status' => $profile['student_status'],
+        ], $ipAddress, $userAgent);
+
+        return [
+            ...$this->createSession($user, $ipAddress, $userAgent),
+            'profile' => $profile,
+        ];
     }
 
     /**

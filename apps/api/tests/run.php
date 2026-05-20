@@ -15,6 +15,7 @@ use Afyalink\Core\Domain\Credentials\CredentialRecord;
 use Afyalink\Core\Domain\Credentials\CredentialRequirementRegistry;
 use Afyalink\Core\Domain\Documents\PrivateDocumentUrlFactory;
 use Afyalink\Core\Domain\Enums\ApplicationStatus;
+use Afyalink\Core\Domain\Enums\ApplicantTrack;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
 use Afyalink\Core\Domain\Enums\CandidatePublicationStatus;
 use Afyalink\Core\Domain\Enums\DocumentType;
@@ -91,6 +92,31 @@ $tests = [
         expectFalse($notReady->ready, 'missing credentials should block submission');
         expectTrue(in_array('credential.cv', $notReady->missing, true), 'cv should be required');
         expectTrue(in_array('account.email_verified', $notReady->missing, true), 'email verification should be required');
+    },
+    'student waiting-license readiness stays out of licensed submission pipeline' => function (): void {
+        $checker = new SubmissionReadinessChecker(new CredentialRequirementRegistry());
+        $profile = [
+            'applicant_track' => ApplicantTrack::StudentAwaitingLicense->value,
+            'name' => 'Student Nurse',
+            'email' => 'student@example.com',
+            'phone' => '0700000100',
+            'target_profession' => 'Registered Nurse',
+            'student_status' => 'completed_training_waiting_license',
+            'institution_name' => 'Afya Training College',
+            'programme_or_course' => 'Diploma in Nursing',
+            'county' => 'Nairobi',
+        ];
+        $credentials = [
+            DocumentType::CurriculumVitae->value => CredentialReviewStatus::Uploaded,
+            DocumentType::NationalIdOrPassport->value => CredentialReviewStatus::Uploaded,
+            DocumentType::StudentIdOrTrainingProof->value => CredentialReviewStatus::Uploaded,
+            DocumentType::TranscriptOrCompletionEvidence->value => CredentialReviewStatus::Uploaded,
+        ];
+
+        $ready = $checker->evaluate($profile, $credentials, true, true, PaymentStatus::Confirmed);
+        expectFalse($ready->ready, 'waiting-license applicants must not become full application ready');
+        expectTrue(in_array('track.licensed_professional_conversion_required', $ready->missing, true), 'conversion should be required');
+        expectFalse(in_array('credential.professional_license', $ready->missing, true), 'student preliminary readiness should not require professional license');
     },
     'professional can submit complete milestone 1 package' => function (): void {
         $profile = new ProfessionalProfile(
@@ -408,6 +434,85 @@ $tests = [
         $store->update('email_verification_tokens', (int) $expiredToken['id'], ['expires_at' => gmdate(DATE_ATOM, time() - 60)]);
         $expiredVerify = $api('POST', '/api/auth/email/verify', ['token' => (string) $expiredQuery['token']]);
         expectTrue($expiredVerify->status === 422, 'expired verification token should be rejected');
+    },
+    'api student waiting-license flow blocks submission and supports admin conversion' => function (): void {
+        $root = sys_get_temp_dir() . '/afyalink-student-test-' . bin2hex(random_bytes(4));
+        mkdir($root . '/storage/private/credentials', 0770, true);
+        $store = new JsonDataStore($root . '/storage/runtime/database.json');
+        $kernel = new ApiKernel(
+            $store,
+            new LocalPrivateCredentialStorage($root . '/storage/private/credentials'),
+        );
+
+        $api = static function (string $method, string $path, array $body = [], ?string $token = null, array $query = []) use ($kernel): JsonResponse {
+            $headers = $token === null ? [] : ['authorization' => "Bearer {$token}"];
+
+            return $kernel->handle(new Request($method, $path, $headers, $body, $query, ipAddress: '127.0.0.1', userAgent: 'student-test'));
+        };
+
+        $registered = $api('POST', '/api/auth/register/student', [
+            'name' => 'Waiting License Nurse',
+            'email' => 'waiting.license@example.com',
+            'phone' => '0712222222',
+            'password' => 'StrongPass123',
+            'student_status' => 'completed_training_waiting_license',
+            'target_profession' => 'Registered Nurse',
+            'institution_name' => 'Afya Training College',
+            'programme_or_course' => 'Diploma in Nursing',
+            'graduation_or_completion_date' => '2026-03-30',
+            'expected_regulatory_body' => 'Nursing Council of Kenya',
+            'county' => 'Nairobi',
+        ]);
+        expectTrue($registered->status === 200, 'student registration should succeed');
+        $token = (string) $registered->payload['data']['token'];
+        $profileId = (int) $registered->payload['data']['profile']['id'];
+
+        $dashboard = $api('GET', '/api/professional/dashboard', [], $token);
+        expectTrue($dashboard->payload['data']['prelicensure']['active'] === true, 'student dashboard should expose pre-licensure state');
+
+        $blocked = $api('POST', '/api/professional/application/submit', [], $token);
+        expectTrue($blocked->status === 409, 'student cannot submit licensed application before conversion');
+
+        foreach ([DocumentType::CurriculumVitae, DocumentType::NationalIdOrPassport, DocumentType::StudentIdOrTrainingProof, DocumentType::TranscriptOrCompletionEvidence, DocumentType::ProfessionalLicense] as $type) {
+            $upload = $api('POST', '/api/professional/credentials', [
+                'document_type' => $type->value,
+                'original_name' => $type->value . '.pdf',
+                'mime_type' => 'application/pdf',
+                'content_base64' => base64_encode('%PDF-1.4 student'),
+            ], $token);
+            expectTrue($upload->status === 200, "student credential {$type->value} should upload");
+        }
+
+        $updatedProfile = $api('PUT', '/api/professional/profile', [
+            'applicant_track' => ApplicantTrack::StudentAwaitingLicense->value,
+            'name' => 'Waiting License Nurse',
+            'phone' => '0712222222',
+            'student_status' => 'completed_training_waiting_license',
+            'target_profession' => 'Registered Nurse',
+            'institution_name' => 'Afya Training College',
+            'programme_or_course' => 'Diploma in Nursing',
+            'expected_regulatory_body' => 'Nursing Council of Kenya',
+            'regulatory_body' => 'Nursing Council of Kenya',
+            'license_number' => 'NCK-STUDENT-001',
+            'county' => 'Nairobi',
+        ], $token);
+        expectTrue($updatedProfile->status === 200, 'student can add license details once issued');
+
+        $kernel->auth()->createUser('Student Admin', 'student.admin@example.com', '0799999911', 'AdminPass123', [UserRole::Admin]);
+        $adminLogin = $api('POST', '/api/auth/login', ['email' => 'student.admin@example.com', 'password' => 'AdminPass123']);
+        $adminToken = (string) $adminLogin->payload['data']['token'];
+
+        $queue = $api('GET', '/api/admin/pre-licensure', [], $adminToken);
+        expectTrue($queue->status === 200 && count($queue->payload['data']['students']) === 1, 'admin pre-licensure queue should include student');
+        expectTrue($queue->payload['data']['students'][0]['can_convert'] === true, 'student should be convertible after license evidence');
+
+        $converted = $api('PATCH', "/api/admin/pre-licensure/{$profileId}/convert", ['note' => 'License reviewed.'], $adminToken);
+        expectTrue($converted->status === 200, 'admin should convert waiting-license applicant');
+        expectTrue($converted->payload['data']['student']['applicant_track'] === ApplicantTrack::LicensedProfessional->value, 'profile should become licensed professional track');
+
+        $auditActions = array_map(static fn (array $row): string => (string) $row['action'], $store->all('audit_logs'));
+        expectTrue(in_array('student_awaiting_license.registered', $auditActions, true), 'student registration should be audited');
+        expectTrue(in_array('student_awaiting_license.converted', $auditActions, true), 'student conversion should be audited');
     },
     'credential replacement loop supersedes prior document and queues notification' => function (): void {
         $root = sys_get_temp_dir() . '/afyalink-replacement-test-' . bin2hex(random_bytes(4));

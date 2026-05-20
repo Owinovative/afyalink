@@ -108,6 +108,8 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - Premium public landing page positioning Afyalink as trusted healthcare verification infrastructure.
 - GitHub Actions CI foundation.
 - Next.js App Router web platform with multi-page public site, routed auth, and separate professional, facility, and admin portals.
+- Premium image-led frontend visual system with local SVG healthcare/trust illustrations, wide desktop sections, refined portal chrome, and public pages for professionals, facilities, students, verification, security, pricing, about, contact, and FAQ.
+- Student / graduate awaiting-license track for pre-licensure applicants, including student registration, preliminary credential requirements, waiting-license dashboard guidance, admin pre-licensure queue, and controlled conversion into the licensed professional track.
 
 ## Run Locally
 
@@ -181,6 +183,7 @@ The current tests verify:
 - candidate publication requires qualified/approved application state, passed verification, completed recommended interview, and current consent;
 - candidate profile views are watermarked and audited;
 - facility requests and recommendation packages persist through admin-managed workflows.
+- students awaiting license can register without a professional license, cannot submit licensed applications or enter facility publication, and can be converted by admin only after license details and evidence are available.
 
 ## Render Staging
 
@@ -206,6 +209,9 @@ Read the deployment guide before using staging credential uploads:
 - [Secure Candidate Viewing](docs/security/secure-candidate-viewing.md)
 - [Recommendation Workflow](docs/workflows/recommendation-workflow.md)
 - [Public Landing Page](docs/product/public-landing-page.md)
+- [Student Awaiting License Experience](docs/product/student-awaiting-license-experience.md)
+- [Pre-Licensure Student Workflow](docs/workflows/pre-licensure-student-track.md)
+- [Frontend Design System](docs/frontend/design-system.md)
 - [Next.js Web Platform Architecture](docs/architecture/nextjs-web-platform.md)
 - [Local Setup](docs/setup.md)
 - [Milestone 1 API Endpoints](docs/api/milestone-1-endpoints.md)

@@ -7,6 +7,7 @@ const requiredRoutes = [
   "src/app/(marketing)/page.tsx",
   "src/app/(marketing)/how-it-works/page.tsx",
   "src/app/(marketing)/professionals/page.tsx",
+  "src/app/(marketing)/students/page.tsx",
   "src/app/(marketing)/facilities/page.tsx",
   "src/app/(marketing)/trust-security/page.tsx",
   "src/app/(marketing)/verification/page.tsx",
@@ -16,6 +17,7 @@ const requiredRoutes = [
   "src/app/(marketing)/faq/page.tsx",
   "src/app/auth/login/page.tsx",
   "src/app/auth/register/professional/page.tsx",
+  "src/app/auth/register/student/page.tsx",
   "src/app/auth/register/facility/page.tsx",
   "src/app/auth/verify-email/page.tsx",
   "src/app/auth/forgot-password/page.tsx",
@@ -23,6 +25,7 @@ const requiredRoutes = [
   "src/app/portal/professional/dashboard/page.tsx",
   "src/app/portal/professional/profile/page.tsx",
   "src/app/portal/professional/credentials/page.tsx",
+  "src/app/portal/professional/waiting-license/page.tsx",
   "src/app/portal/professional/consent-payment/page.tsx",
   "src/app/portal/professional/application/page.tsx",
   "src/app/portal/professional/verification/page.tsx",
@@ -38,6 +41,7 @@ const requiredRoutes = [
   "src/app/portal/facility/packages/page.tsx",
   "src/app/portal/admin/dashboard/page.tsx",
   "src/app/portal/admin/applications/page.tsx",
+  "src/app/portal/admin/pre-licensure/page.tsx",
   "src/app/portal/admin/applications/[id]/page.tsx",
   "src/app/portal/admin/credentials/page.tsx",
   "src/app/portal/admin/payments/page.tsx",
@@ -57,6 +61,7 @@ const requiredRoutes = [
 const requiredFiles = [
   "src/components/layout/MarketingLayout.tsx",
   "src/components/layout/PortalLayout.tsx",
+  "src/components/marketing/VisualSystem.tsx",
   "src/components/auth/AuthForms.tsx",
   "src/components/professional/ProfessionalPages.tsx",
   "src/components/facility/FacilityPages.tsx",
@@ -65,7 +70,19 @@ const requiredFiles = [
   "src/lib/auth/session.ts",
 ];
 
-const missing = [...requiredRoutes, ...requiredFiles].filter((file) => !existsSync(join(root, file)));
+const requiredVisualAssets = [
+  "public/images/hero/healthcare-trust-canvas.svg",
+  "public/images/professionals/professional-verification.svg",
+  "public/images/students/waiting-license-track.svg",
+  "public/images/facilities/facility-marketplace.svg",
+  "public/images/verification/verification-operations.svg",
+  "public/images/security/secure-candidate-viewing.svg",
+  "public/images/marketplace/candidate-marketplace.svg",
+  "public/images/recommendations/recommendation-package.svg",
+  "public/images/backgrounds/clinical-grid.svg",
+];
+
+const missing = [...requiredRoutes, ...requiredFiles, ...requiredVisualAssets].filter((file) => !existsSync(join(root, file)));
 
 if (missing.length > 0) {
   console.error(`Missing routed platform files:\n${missing.map((file) => `- ${file}`).join("\n")}`);
@@ -88,6 +105,14 @@ const facilityClient = readFileSync(join(root, "src/components/facility/Facility
 if (!facilityClient.includes("secure-profile") || !facilityClient.includes("data-watermark")) {
   console.error("Facility candidate detail must preserve secure profile watermark UI.");
   process.exit(1);
+}
+
+const globalCss = readFileSync(join(root, "src/app/globals.css"), "utf8");
+for (const className of ["hero-shell", "feature-split", "image-panel", "proof-strip", "large-cta"]) {
+  if (!globalCss.includes(className)) {
+    console.error(`Premium visual system class .${className} is missing from globals.css.`);
+    process.exit(1);
+  }
 }
 
 const legacyFiles = ["index.html", "src/app.js", "src/styles.css", "scripts/build-render.mjs"];

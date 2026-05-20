@@ -7,7 +7,10 @@ export function MarketingNav() {
       <div className="nav-inner">
         <Link className="brand" href="/">
           <img alt="" src="/brand/afyalink-logo.png" />
-          <span>Afyalink</span>
+          <span className="brand-lockup">
+            <span>Afyalink</span>
+            <span className="brand-kicker">Healthcare trust platform</span>
+          </span>
         </Link>
         <nav className="nav-links" aria-label="Public navigation">
           {marketingLinks.slice(0, 6).map((link) => (
@@ -20,8 +23,8 @@ export function MarketingNav() {
           <Link className="button ghost" href="/auth/login">
             Login
           </Link>
-          <Link className="button" href="/auth/register/professional">
-            Get started
+          <Link className="button" href="/auth/register/facility">
+            Join Afyalink
           </Link>
         </div>
       </div>

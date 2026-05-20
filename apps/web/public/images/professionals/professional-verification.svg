@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 720" role="img" aria-labelledby="title desc">
+  <title id="title">Professional verification journey illustration</title>
+  <desc id="desc">A healthcare professional profile moving through credential, consent, payment, verification, and interview steps.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#fbf7ee"/>
+      <stop offset="1" stop-color="#d7ece8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#0b2f35" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <rect width="900" height="720" rx="44" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <rect x="82" y="78" width="286" height="544" rx="34" fill="#fff"/>
+    <circle cx="225" cy="198" r="70" fill="#dbece8"/>
+    <circle cx="225" cy="166" r="31" fill="#0b6f72"/>
+    <path d="M147 292c16-66 140-66 156 0" fill="#0b6f72"/>
+    <rect x="130" y="354" width="190" height="16" rx="8" fill="#a8c7c2"/>
+    <rect x="130" y="398" width="158" height="14" rx="7" fill="#d5e6e2"/>
+    <rect x="130" y="438" width="198" height="14" rx="7" fill="#d5e6e2"/>
+    <rect x="130" y="506" width="126" height="34" rx="17" fill="#e6f5ea"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="432" y="98" width="356" height="92" rx="24" fill="#fff"/>
+    <circle cx="482" cy="144" r="24" fill="#0b6f72"/>
+    <path d="M472 145l8 8 18-23" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="526" y="128" width="182" height="13" rx="7" fill="#6f9993"/>
+    <rect x="526" y="154" width="112" height="10" rx="5" fill="#c8dbd8"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="476" y="234" width="312" height="92" rx="24" fill="#fff"/>
+    <circle cx="526" cy="280" r="24" fill="#2e8b57"/>
+    <path d="M516 281l8 8 18-23" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="570" y="264" width="142" height="13" rx="7" fill="#6f9993"/>
+    <rect x="570" y="290" width="172" height="10" rx="5" fill="#c8dbd8"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="432" y="370" width="356" height="92" rx="24" fill="#fff"/>
+    <circle cx="482" cy="416" r="24" fill="#bd8b2f"/>
+    <path d="M472 417l8 8 18-23" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="526" y="400" width="198" height="13" rx="7" fill="#6f9993"/>
+    <rect x="526" y="426" width="148" height="10" rx="5" fill="#c8dbd8"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="476" y="506" width="312" height="92" rx="24" fill="#0b2f35"/>
+    <circle cx="526" cy="552" r="24" fill="#d0a24d"/>
+    <path d="M516 553l8 8 18-23" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="570" y="536" width="150" height="13" rx="7" fill="#e7f4f1"/>
+    <rect x="570" y="562" width="112" height="10" rx="5" fill="#83aaa5"/>
+  </g>
+  <path d="M386 190c48 44 48 112 0 156M386 462c48 44 48 112 0 156" fill="none" stroke="#9bbab5" stroke-width="8" stroke-linecap="round"/>
+</svg>

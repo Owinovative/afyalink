@@ -49,6 +49,47 @@ final readonly class AuthController
     /**
      * @return array<string, mixed>
      */
+    public function registerStudent(Request $request): array
+    {
+        Validator::requireFields($request->body, [
+            'name',
+            'email',
+            'phone',
+            'password',
+            'student_status',
+            'target_profession',
+            'institution_name',
+            'programme_or_course',
+            'county',
+        ]);
+        Validator::email('email', $request->body['email']);
+
+        $session = $this->auth->registerStudentApplicant(
+            name: (string) $request->body['name'],
+            email: (string) $request->body['email'],
+            phone: (string) $request->body['phone'],
+            password: (string) $request->body['password'],
+            studentProfile: $request->body,
+            ipAddress: $request->ipAddress,
+            userAgent: $request->userAgent,
+        );
+        $verification = $this->accounts->sendEmailVerificationForUserId(
+            $session['user']->id,
+            $request->ipAddress,
+            $request->userAgent,
+        );
+
+        return [
+            'token' => $session['token'],
+            'user' => $session['user']->toArray(),
+            'profile' => $session['profile'],
+            'email_verification' => $verification,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function login(Request $request): array
     {
         Validator::requireFields($request->body, ['email', 'password']);

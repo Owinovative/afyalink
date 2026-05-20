@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { apiRequest, asRecord, type ApiRole } from "@/lib/api/client";
 import { setToken } from "@/lib/auth/session";
 
-type AuthMode = "login" | "professional-register" | "facility-register" | "verify-email" | "forgot" | "reset";
+type AuthMode = "login" | "professional-register" | "student-register" | "facility-register" | "verify-email" | "forgot" | "reset";
 
 const portalByRole: Record<ApiRole, string> = {
   professional: "/portal/professional/dashboard",
@@ -21,6 +21,8 @@ function titleFor(mode: AuthMode) {
   switch (mode) {
     case "professional-register":
       return "Create a professional account";
+    case "student-register":
+      return "Create a waiting-license account";
     case "facility-register":
       return "Create a facility account";
     case "verify-email":
@@ -78,6 +80,15 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         return;
       }
 
+      if (mode === "student-register") {
+        const data = asRecord(await apiRequest("/api/auth/register/student", { method: "POST", body: values }));
+        const token = String(data.token ?? "");
+        if (token) setToken("professional", token);
+        setMessage("Student awaiting-license account created. Continue your pre-licensure checklist.");
+        router.push("/portal/professional/waiting-license");
+        return;
+      }
+
       if (mode === "facility-register") {
         const data = asRecord(await apiRequest("/api/facility/auth/register", { method: "POST", body: values }));
         const token = String(data.token ?? "");
@@ -130,16 +141,35 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               </select>
             </label>
           ) : null}
-          {mode === "professional-register" || mode === "facility-register" ? (
+          {mode === "professional-register" || mode === "student-register" || mode === "facility-register" ? (
             <>
               <Field label="Full name" name="name" required />
               <Field label="Phone" name="phone" required />
             </>
           ) : null}
-          {mode === "login" || mode === "professional-register" || mode === "facility-register" || mode === "forgot" ? (
+          {mode === "student-register" ? (
+            <>
+              <label>
+                Student or graduate status
+                <select name="student_status" required defaultValue="completed_training_waiting_license">
+                  <option value="currently_studying">Currently studying</option>
+                  <option value="completed_training_waiting_license">Completed training, waiting for license</option>
+                  <option value="internship_or_attachment">Internship or attachment</option>
+                </select>
+              </label>
+              <Field label="Target profession" name="target_profession" required placeholder="Registered Nurse, Clinical Officer..." />
+              <Field label="Institution or training school" name="institution_name" required />
+              <Field label="Programme or course" name="programme_or_course" required />
+              <Field label="Graduation/completion date" name="graduation_or_completion_date" type="date" />
+              <Field label="Expected regulatory body" name="expected_regulatory_body" />
+              <Field label="County or location" name="county" required />
+              <Field label="Availability after licensure" name="availability_after_licensure" />
+            </>
+          ) : null}
+          {mode === "login" || mode === "professional-register" || mode === "student-register" || mode === "facility-register" || mode === "forgot" ? (
             <Field label="Email" name="email" type="email" required />
           ) : null}
-          {mode === "login" || mode === "professional-register" || mode === "facility-register" || mode === "reset" ? (
+          {mode === "login" || mode === "professional-register" || mode === "student-register" || mode === "facility-register" || mode === "reset" ? (
             <Field label="Password" name="password" type="password" required />
           ) : null}
           {mode === "verify-email" || mode === "reset" ? (
@@ -161,6 +191,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         <div className="table-lite" style={{ marginTop: 20 }}>
           <div>
             <Link href="/auth/register/professional">Professional registration</Link>
+            <span />
+          </div>
+          <div>
+            <Link href="/auth/register/student">Student awaiting-license registration</Link>
             <span />
           </div>
           <div>
