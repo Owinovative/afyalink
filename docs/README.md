@@ -2,7 +2,7 @@
 
 This folder contains the initial project documentation extracted from the Afyalink blueprint and engineering specification.
 
-The current implementation documents executable account lifecycle, notification outbox, replacement workflow, PostgreSQL persistence, private credential storage behavior, facility marketplace operations, secure candidate access, and the public landing page.
+The current implementation documents executable account lifecycle, notification outbox, replacement workflow, PostgreSQL persistence, private credential storage behavior, facility marketplace operations, secure candidate access, the public website, and the routed Next.js portal platform.
 
 ## Current Docs
 
@@ -15,6 +15,7 @@ The current implementation documents executable account lifecycle, notification 
 - [Secure Candidate Viewing and Watermarking](security/secure-candidate-viewing.md)
 - [Recommendation Workflow](workflows/recommendation-workflow.md)
 - [Public Landing Page](product/public-landing-page.md)
+- [Next.js Web Platform Architecture](architecture/nextjs-web-platform.md)
 - [Local Setup](setup.md)
 - [Milestone 1 API Endpoints](api/milestone-1-endpoints.md)
 - [Milestone 3 API Endpoints](api/milestone-3-endpoints.md)
