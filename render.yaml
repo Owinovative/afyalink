@@ -34,11 +34,12 @@ services:
 
   - type: web
     name: afyalink-web-staging
-    runtime: static
+    runtime: node
     rootDir: apps/web
-    buildCommand: npm install && npm run build:render
-    staticPublishPath: ./dist
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm run start -- -p $PORT
     envVars:
-      - key: AFYA_API_BASE
+      - key: NEXT_PUBLIC_AFYA_API_BASE
         sync: false
 

@@ -30,6 +30,16 @@
 - Premium public landing page and role-aware portal entry
 - Product polish for disabled actions, empty states, watermarked views, and clearer next steps
 
+## Web Platform Megasprint
+
+- Next.js App Router frontend replatform
+- Multi-page public marketing website
+- Routed authentication pages
+- Routed professional, facility, and admin portals
+- Shared design system primitives for cards, forms, badges, notices, layout shells, and data rows
+- Render web deployment migration from static publish to Node-backed Next service
+- Production build, typecheck, and routed-platform contract checks
+
 ## Later
 
 - Regulatory integration automation where APIs exist
@@ -37,4 +47,4 @@
 - AI-assisted matching, only after core trust workflows are stable
 - Production M-PESA callbacks and automatic subscription reconciliation
 - Viewer-bound signed document preview endpoints where business rules allow document previews
-- Full framework migration for the static frontend into Next.js or Laravel Inertia when product routing requires it
+- Server-managed browser sessions or cookie-based frontend auth if backend auth architecture changes

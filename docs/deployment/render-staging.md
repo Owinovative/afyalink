@@ -3,7 +3,7 @@
 This guide deploys Afyalink staging to Render using:
 
 - Render Docker web service for the PHP API.
-- Render static site for the web console.
+- Render Node web service for the Next.js public site and routed portals.
 - Neon PostgreSQL through `DATABASE_URL`.
 - Temporary local credential storage on the API container filesystem.
 
@@ -58,10 +58,20 @@ Do not set S3 credentials while using temporary local staging storage.
 Set this in Render for `afyalink-web-staging`:
 
 ```text
-AFYA_API_BASE=https://YOUR-API-STAGING.onrender.com
+NEXT_PUBLIC_AFYA_API_BASE=https://YOUR-API-STAGING.onrender.com
 ```
 
-The static web build writes this value into `dist/src/env.js` so the browser calls the deployed API rather than localhost.
+The Next.js browser client reads this public build/runtime value so routed pages call the deployed API rather than localhost. Render should build the web service with:
+
+```bash
+npm install && npm run build
+```
+
+and start it with:
+
+```bash
+npm run start -- -p $PORT
+```
 
 ## Admin Bootstrap
 
@@ -97,7 +107,7 @@ Expected response:
 
 After deployment:
 
-1. Open the web staging URL.
+1. Open the web staging URL and confirm `/`, `/professionals`, `/facilities`, `/trust-security`, and `/auth/login` render.
 2. Register a professional.
 3. Inspect `notification_outbox` in Neon to retrieve the verification URL while no mail worker exists.
 4. Complete profile, credential upload, consent, payment reference, and application submission.
@@ -105,7 +115,7 @@ After deployment:
 6. Complete verification and interview qualification for one candidate.
 7. Publish the candidate from the admin facility operations console.
 8. Register a facility, submit it for review, approve it as admin, and activate facility access.
-9. Confirm the facility can browse/open the published candidate and that `candidate_profile_views` and `audit_logs` receive view records.
+9. Confirm the facility can browse/open the published candidate at `/portal/facility/candidates/:publicationId` and that `candidate_profile_views` and `audit_logs` receive view records.
 
 ## Production Changes Required Later
 

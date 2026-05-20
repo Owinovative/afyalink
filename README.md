@@ -107,7 +107,7 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - Facility marketplace platform covering facility onboarding, admin approval, access subscriptions, candidate publication, gated candidate browsing, watermarked candidate detail views, appointment requests, recommendation requests/packages, and facility operations counters.
 - Premium public landing page positioning Afyalink as trusted healthcare verification infrastructure.
 - GitHub Actions CI foundation.
-- Static web product foundation for professional, facility, and admin workflows.
+- Next.js App Router web platform with multi-page public site, routed auth, and separate professional, facility, and admin portals.
 
 ## Run Locally
 
@@ -134,9 +134,17 @@ Frontend:
 cd apps/web
 npm install
 npm.cmd run check
+npm.cmd run typecheck
+npm.cmd run build
 ```
 
-Open `apps/web/index.html` in a browser. The page calls `http://localhost:8000` by default.
+Run the routed Next.js frontend:
+
+```bash
+npm.cmd run dev
+```
+
+The browser API client calls `http://localhost:8000` by default. Set `NEXT_PUBLIC_AFYA_API_BASE` to point it at another API.
 
 ## Local Checks
 
@@ -148,6 +156,8 @@ composer check
 
 cd ../web
 npm.cmd run check
+npm.cmd run typecheck
+npm.cmd run build
 ```
 
 The current tests verify:
@@ -178,7 +188,7 @@ This repository now includes `render.yaml` and an API `Dockerfile` for Render st
 
 - API: Render Docker web service running PHP 8.3, PostgreSQL migrations, and the API public router.
 - Database: Neon PostgreSQL through `DATABASE_URL`.
-- Web: Render static site built from `apps/web`.
+- Web: Render Node web service running the Next.js frontend from `apps/web`.
 - Credential files: temporary local staging storage at `/tmp/afyalink/credentials`.
 
 Read the deployment guide before using staging credential uploads:
@@ -196,6 +206,7 @@ Read the deployment guide before using staging credential uploads:
 - [Secure Candidate Viewing](docs/security/secure-candidate-viewing.md)
 - [Recommendation Workflow](docs/workflows/recommendation-workflow.md)
 - [Public Landing Page](docs/product/public-landing-page.md)
+- [Next.js Web Platform Architecture](docs/architecture/nextjs-web-platform.md)
 - [Local Setup](docs/setup.md)
 - [Milestone 1 API Endpoints](docs/api/milestone-1-endpoints.md)
 - [Milestone 3 API Endpoints](docs/api/milestone-3-endpoints.md)

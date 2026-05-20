@@ -1,17 +1,17 @@
-# Afyalink Web Platform Console
+# Afyalink Next.js Web Platform
 
-Frontend product foundation for Afyalink.
+Route-based frontend product platform for Afyalink.
 
-This folder contains a static public landing page plus professional, facility, and admin workspaces wired to the backend API contract. It can later become a Next.js App Router or Laravel Inertia React app without moving sensitive workflow logic into the browser.
+This folder contains a Next.js App Router application with a multi-page public website, routed authentication pages, and separate professional, facility, and admin portals wired to the backend API contract. Sensitive workflow logic remains in backend services.
 
-The public page includes:
+The public website includes:
 
-- premium Afyalink positioning and trust messaging;
+- premium Afyalink positioning and trust messaging across distinct pages;
 - professional, facility, and admin entry paths;
 - workflow explanation;
 - security and controlled-access messaging.
 
-The application console includes forms for:
+The routed portals include forms for:
 
 - professional registration and login;
 - profile completion;
@@ -34,17 +34,33 @@ cd ../api
 php -S localhost:8000 -t public
 ```
 
-Then open `index.html` directly or serve this folder with a static server. For asset-accurate staging parity, run `npm.cmd run build:render` and serve `dist/`.
+Then run the Next.js frontend:
+
+```bash
+npm install
+npm.cmd run dev
+```
+
+The browser API client defaults to `http://localhost:8000`. Set `NEXT_PUBLIC_AFYA_API_BASE` when pointing the frontend at staging or another API.
 
 ## Run Checks
 
 ```bash
 npm.cmd run check
+npm.cmd run typecheck
+npm.cmd run build
 ```
 
-## Future Implementation Path
+## Route Map
 
-1. Move the static landing page and console into Next.js or Laravel Inertia + React.
-2. Add route-level guards and real layout components.
-3. Keep facility candidate views read-only, watermarked, and audited.
-4. Keep document access private and avoid exposing raw credential storage keys.
+Public pages: `/`, `/how-it-works`, `/professionals`, `/facilities`, `/trust-security`, `/verification`, `/pricing-access`, `/about`, `/contact`, `/faq`.
+
+Auth pages: `/auth/login`, `/auth/register/professional`, `/auth/register/facility`, `/auth/verify-email`, `/auth/forgot-password`, `/auth/reset-password`.
+
+Portals:
+
+- `/portal/professional/*`
+- `/portal/facility/*`
+- `/portal/admin/*`
+
+Facility candidate detail remains read-only, watermarked, and audit-backed through the API. The frontend does not expose raw credential storage keys or public document URLs.

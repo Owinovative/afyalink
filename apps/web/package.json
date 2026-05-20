@@ -1,10 +1,28 @@
 {
-  "name": "afyalink-web-foundation",
+  "name": "afyalink-web-platform",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
-    "build:render": "node scripts/build-render.mjs",
-    "check": "node tests/check-static.mjs"
+    "dev": "next dev",
+    "build": "next build",
+    "build:render": "next build",
+    "start": "next start",
+    "check": "node tests/check-routes.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^16.1.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
   }
 }
