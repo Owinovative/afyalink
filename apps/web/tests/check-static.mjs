@@ -5,7 +5,12 @@ const css = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
 const js = readFileSync(new URL("../src/app.js", import.meta.url), "utf8");
 
 const requiredText = [
-  "Credential intake that shows every requirement before submission",
+  "Trusted healthcare professionals, verified before facilities ever make contact",
+  "Apply as a Professional",
+  "Join as a Facility",
+  "Private documents stay private",
+  "Choose your workspace",
+  "Credential intake, verification, and facility access in one workflow",
   "Register, verify, recover",
   "Complete each step before submission",
   "Queues, documents, payment state, and timeline",
@@ -19,7 +24,24 @@ for (const text of requiredText) {
   }
 }
 
-for (const token of ["--navy", "--blue", "--teal", ".credential-layout", ".admin-layout", ".step-grid", ".counter-grid", ".watermark-panel", ".empty-state", "button:disabled"]) {
+for (const token of [
+  "--navy",
+  "--blue",
+  "--teal",
+  ".landing-hero",
+  ".trust-strip",
+  ".feature-grid",
+  ".portal-card",
+  ".security-section",
+  ".session-chip",
+  ".credential-layout",
+  ".admin-layout",
+  ".step-grid",
+  ".counter-grid",
+  ".watermark-panel",
+  ".empty-state",
+  "button:disabled",
+]) {
   if (!css.includes(token)) {
     throw new Error(`Missing expected CSS token: ${token}`);
   }
@@ -59,10 +81,10 @@ for (const endpoint of [
   }
 }
 
-for (const guard of ["friendlyError", "requireId", "setButtonState", "candidate.profile_viewed"]) {
+for (const guard of ["friendlyError", "requireId", "setButtonState", "updateSessionState", "candidate.profile_viewed"]) {
   if (!js.includes(guard)) {
     throw new Error(`Missing staging hardening or audit UI marker: ${guard}`);
   }
 }
 
-console.log("Afyalink web milestone 1 intake check passed.");
+console.log("Afyalink web platform expansion static check passed.");

@@ -27,6 +27,8 @@
 - Facility appointment/hiring requests
 - Afyalink recommendation requests and shared recommendation packages
 - Professional visibility awareness
+- Premium public landing page and role-aware portal entry
+- Product polish for disabled actions, empty states, watermarked views, and clearer next steps
 
 ## Later
 
@@ -35,3 +37,4 @@
 - AI-assisted matching, only after core trust workflows are stable
 - Production M-PESA callbacks and automatic subscription reconciliation
 - Viewer-bound signed document preview endpoints where business rules allow document previews
+- Full framework migration for the static frontend into Next.js or Laravel Inertia when product routing requires it

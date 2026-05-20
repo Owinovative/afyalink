@@ -14,6 +14,7 @@ The platform has progressed beyond intake into facility marketplace operations:
 
 - professional onboarding, profile, credentials, consent, payment, admin review, verification, interview, and qualification;
 - facility onboarding, admin approval, active access subscriptions, candidate publication, controlled candidate browsing, appointment requests, recommendation requests, and shared recommendation packages;
+- public landing and role-aware entry paths for professionals, facilities, and admins;
 - audit and notification outbox coverage for sensitive workflows.
 
 ## Safety Rules
