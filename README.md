@@ -2,9 +2,9 @@
 
 ![Afyalink logo](assets/brand/afyalink-logo.png)
 
-Afyalink is a secure healthcare professional verification and placement platform.
+Afyalink is a secure healthcare professional verification, assessment, and placement platform.
 
-The platform is designed to help healthcare professionals submit credential records, give consent for verification, pay required review/interview fees, and track application status. It also prepares the foundation for Afyalink administrators to review credentials, record verification evidence, manage audit logs, and later expose approved professional profiles to authorized healthcare facilities.
+The platform is designed to help healthcare professionals submit credential records, give consent for verification, pay required review/interview fees, and track application status. It also gives Afyalink administrators verification/interview workbenches and gives approved healthcare facilities subscription-gated access to published, read-only, watermarked candidate profiles.
 
 ## Product Direction
 
@@ -14,7 +14,7 @@ Afyalink is not just a recruitment site. It is a trust infrastructure layer for 
 - protect sensitive documents using private storage and controlled access;
 - record consent, payment, review, and workflow decisions;
 - support admin review, interview scoring, and recommendation workflows;
-- prepare for future facility subscriptions and controlled candidate viewing.
+- operate facility subscriptions, controlled candidate viewing, recommendations, and placement requests.
 
 ## Milestone 1 Scope
 
@@ -105,8 +105,9 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - Professional and admin workflow endpoints.
 - Interactive web intake/admin console with step-based onboarding, replacement request visibility, admin counters, review timeline, and account recovery forms.
 - Facility marketplace platform covering facility onboarding, admin approval, access subscriptions, candidate publication, gated candidate browsing, watermarked candidate detail views, appointment requests, recommendation requests/packages, and facility operations counters.
+- Premium public landing page positioning Afyalink as trusted healthcare verification infrastructure.
 - GitHub Actions CI foundation.
-- Web product foundation for the Afyalink Milestone 1 workflow.
+- Static web product foundation for professional, facility, and admin workflows.
 
 ## Run Locally
 
@@ -189,7 +190,12 @@ Read the deployment guide before using staging credential uploads:
 - [Milestone 1 Plan](docs/milestones/milestone-1.md)
 - [Milestone 3 Facility Marketplace](docs/milestones/milestone-3.md)
 - [Technical Direction](docs/architecture/technical-direction.md)
+- [Facility Platform Architecture](docs/architecture/facility-platform-architecture.md)
+- [Candidate Publication and Access Control](docs/architecture/candidate-publication-access-control.md)
 - [Security Foundation](docs/security/security-foundation.md)
+- [Secure Candidate Viewing](docs/security/secure-candidate-viewing.md)
+- [Recommendation Workflow](docs/workflows/recommendation-workflow.md)
+- [Public Landing Page](docs/product/public-landing-page.md)
 - [Local Setup](docs/setup.md)
 - [Milestone 1 API Endpoints](docs/api/milestone-1-endpoints.md)
 - [Milestone 3 API Endpoints](docs/api/milestone-3-endpoints.md)

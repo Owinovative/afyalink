@@ -13,7 +13,7 @@ Afyalink is a healthcare professional verification and placement platform. Treat
 
 ## Milestone Boundaries
 
-Current implemented milestones cover professional credential intake, regulatory verification/interviews, and facility marketplace operations.
+Current implemented milestones cover professional credential intake, regulatory verification/interviews, facility marketplace operations, and a public landing page with role-aware portal entry.
 
 Milestone 1 is professional credential intake:
 
@@ -29,6 +29,8 @@ Milestone 1 is professional credential intake:
 - audit logging.
 
 Milestone 3 adds facility onboarding, facility access subscriptions, candidate publication, controlled candidate viewing, appointment requests, and recommendation packages. Keep facility candidate access approval-gated, subscription-gated, read-only, watermarked, and audited. Production M-PESA callbacks and document preview endpoints should be added only behind clean extension points.
+
+The web app currently has a public marketing layer followed by static professional, facility, and admin workspaces. Preserve the public landing page as the first screen, keep role entry paths clear, and keep internal workbench controls dense and state-aware.
 
 ## Security Rules
 

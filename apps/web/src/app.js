@@ -30,6 +30,7 @@ const adminPublicationList = document.querySelector("#adminPublicationList");
 const adminFacilityRequestList = document.querySelector("#adminFacilityRequestList");
 const adminRecommendationRequestList = document.querySelector("#adminRecommendationRequestList");
 const adminRecommendationPackageList = document.querySelector("#adminRecommendationPackageList");
+const sessionState = document.querySelector("#sessionState");
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -112,6 +113,22 @@ function setButtonState(selector, disabled, reason = "") {
   if (!button) return;
   button.disabled = Boolean(disabled);
   button.title = disabled ? reason : "";
+}
+
+function updateSessionState() {
+  document.body.classList.toggle("has-professional-session", Boolean(professionalToken));
+  document.body.classList.toggle("has-facility-session", Boolean(facilityToken));
+  document.body.classList.toggle("has-admin-session", Boolean(adminToken));
+  if (!sessionState) return;
+
+  const sessions = [
+    ["Professional", professionalToken],
+    ["Facility", facilityToken],
+    ["Admin", adminToken],
+  ];
+  sessionState.innerHTML = sessions
+    .map(([label, token]) => `<span class="session-chip ${token ? "active" : ""}">${escapeHtml(label)} ${token ? "signed in" : "not signed in"}</span>`)
+    .join("");
 }
 
 function requireId(value, label) {
@@ -233,6 +250,7 @@ bindAsync("#registerForm", "submit", async (event) => {
   });
   professionalToken = data.token;
   localStorage.setItem("afyalink.professionalToken", professionalToken);
+  updateSessionState();
   log("Professional registered. Verification message queued.", data.email_verification);
   await refreshDashboard();
 });
@@ -246,6 +264,7 @@ bindAsync("#loginForm", "submit", async (event) => {
   });
   professionalToken = data.token;
   localStorage.setItem("afyalink.professionalToken", professionalToken);
+  updateSessionState();
   log("Professional signed in.", data.user);
   await refreshDashboard();
 });
@@ -286,6 +305,7 @@ bindAsync("#resetPasswordForm", "submit", async (event) => {
   });
   professionalToken = "";
   localStorage.removeItem("afyalink.professionalToken");
+  updateSessionState();
   log("Password reset completed. Sign in with the new password.", data);
 });
 
@@ -357,6 +377,7 @@ bindAsync("#adminLoginForm", "submit", async (event) => {
   });
   adminToken = data.token;
   localStorage.setItem("afyalink.adminToken", adminToken);
+  updateSessionState();
   log("Admin signed in.", data.user);
   await loadApplications();
 });
@@ -874,6 +895,7 @@ bindAsync("#facilityRegisterForm", "submit", async (event) => {
   });
   facilityToken = data.token;
   localStorage.setItem("afyalink.facilityToken", facilityToken);
+  updateSessionState();
   renderFacilityDashboard(data);
   log("Facility registered. Submit onboarding when details are ready.", data.facility);
 });
@@ -887,6 +909,7 @@ bindAsync("#facilityLoginForm", "submit", async (event) => {
   });
   facilityToken = data.token;
   localStorage.setItem("afyalink.facilityToken", facilityToken);
+  updateSessionState();
   log("Facility signed in.", data.user);
   await refreshFacilityDashboard();
 });
@@ -1204,3 +1227,5 @@ bindAsync("#adminRecommendationPackageForm", "submit", async (event) => {
 });
 
 bindAsync("#loadFacilityOperations", "click", loadAdminFacilityOperations);
+
+updateSessionState();
