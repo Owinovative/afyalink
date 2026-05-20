@@ -7,10 +7,13 @@ export function PublicFooter() {
       <div className="footer-grid">
         <div>
           <Link className="brand" href="/">
-            <span className="brand-mark">A</span>
-            <span>Afyalink</span>
+            <img alt="" src="/brand/afyalink-logo.png" />
+            <span className="brand-lockup">
+              <span>Afyalink</span>
+              <span className="brand-kicker">Healthcare trust platform</span>
+            </span>
           </Link>
-          <p style={{ marginTop: 14 }}>
+          <p style={{ marginTop: 16 }}>
             Secure healthcare verification, controlled facility access, and audited candidate recommendation workflows.
           </p>
         </div>
@@ -35,7 +38,7 @@ export function PublicFooter() {
           <Link href="/pricing-access">Facility access</Link>
         </div>
       </div>
-      <div className="container" style={{ marginTop: 34, color: "#9db5b4", fontSize: "0.88rem" }}>
+      <div className="footer-note">
         Afyalink protects sensitive credential data through private storage, authorization, audit trails, and controlled
         viewing workflows.
       </div>

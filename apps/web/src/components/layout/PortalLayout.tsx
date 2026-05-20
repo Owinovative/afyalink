@@ -26,7 +26,10 @@ export function PortalLayout({
         <div className="portal-topbar">
           <Link className="brand" href="/">
             <img alt="" src="/brand/afyalink-logo.png" />
-            <span>{title}</span>
+            <span className="brand-lockup">
+              <span>{title}</span>
+              <span className="brand-kicker">Routed Afyalink workspace</span>
+            </span>
           </Link>
           <div className="nav-actions">
             <Link className="button secondary" href={loginHref}>

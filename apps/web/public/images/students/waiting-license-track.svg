@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="title desc">
+  <title id="title">Waiting-license student track illustration</title>
+  <desc id="desc">A recent healthcare graduate preparing an Afyalink profile while a professional license is still pending.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#fbf7ee"/>
+      <stop offset="0.58" stop-color="#eef8f5"/>
+      <stop offset="1" stop-color="#cfe5df"/>
+    </linearGradient>
+    <linearGradient id="deep" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0b2f35"/>
+      <stop offset="1" stop-color="#0b6f72"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#0b2f35" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <rect width="960" height="720" rx="44" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <rect x="104" y="112" width="352" height="496" rx="36" fill="#ffffff"/>
+    <circle cx="202" cy="220" r="58" fill="#dcefeb"/>
+    <circle cx="202" cy="194" r="26" fill="#0b6f72"/>
+    <path d="M148 294c13-50 95-50 108 0" fill="#0b6f72"/>
+    <rect x="282" y="190" width="112" height="14" rx="7" fill="#719d97"/>
+    <rect x="282" y="220" width="86" height="10" rx="5" fill="#c4d8d5"/>
+    <rect x="150" y="370" width="258" height="58" rx="18" fill="#f2f7f5"/>
+    <circle cx="182" cy="399" r="13" fill="#2e8b57"/>
+    <rect x="210" y="392" width="134" height="12" rx="6" fill="#7a9f99"/>
+    <rect x="150" y="454" width="258" height="58" rx="18" fill="#f2f7f5"/>
+    <circle cx="182" cy="483" r="13" fill="#bd8b2f"/>
+    <rect x="210" y="476" width="158" height="12" rx="6" fill="#7a9f99"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="504" y="120" width="326" height="210" rx="34" fill="url(#deep)"/>
+    <rect x="552" y="172" width="146" height="16" rx="8" fill="#e7f4f1"/>
+    <rect x="552" y="214" width="220" height="12" rx="6" fill="#9fc5c0"/>
+    <rect x="552" y="246" width="166" height="12" rx="6" fill="#9fc5c0"/>
+    <circle cx="760" cy="246" r="36" fill="#d0a24d"/>
+    <path d="M748 247l10 10 24-31" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="520" y="392" width="284" height="176" rx="32" fill="#ffffff"/>
+    <path d="M570 474h174" stroke="#c2d9d5" stroke-width="12" stroke-linecap="round"/>
+    <path d="M570 514h126" stroke="#c2d9d5" stroke-width="12" stroke-linecap="round"/>
+    <rect x="570" y="438" width="108" height="14" rx="7" fill="#0b6f72"/>
+    <path d="M494 356c-55 18-83 58-83 120" fill="none" stroke="#9ab8b4" stroke-width="10" stroke-linecap="round"/>
+    <path d="M466 344l30 10-20 24" fill="none" stroke="#9ab8b4" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

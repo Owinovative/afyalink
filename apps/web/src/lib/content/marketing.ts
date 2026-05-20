@@ -62,6 +62,32 @@ export const marketingPages: Record<string, MarketingPageContent> = {
       },
     ],
   },
+  students: {
+    slug: "students",
+    eyebrow: "Students and graduates",
+    title: "Still waiting for your healthcare license? Start building your Afyalink profile now.",
+    description:
+      "Students and recent graduates can join Afyalink early, complete a pre-licensure profile, upload preliminary credentials, and move into the licensed professional workflow once their license is issued.",
+    primaryCta: { label: "Register as a student", href: "/auth/register/student" },
+    secondaryCta: { label: "Licensed professional path", href: "/professionals" },
+    highlights: [
+      { title: "Start early", body: "Create a profile, add school and programme details, and upload preliminary documents before licensure." },
+      { title: "Stay clearly marked", body: "Waiting-license applicants are not described as licensed professionals and are not facility-publishable." },
+      { title: "Convert safely", body: "When your license is issued, upload license evidence and move through admin conversion into the licensed workflow." },
+    ],
+    sections: [
+      {
+        title: "What you can complete now",
+        body: "Afyalink captures your training history, target profession, expected regulatory body, location, and preliminary credentials.",
+        points: ["Student or graduate status", "Institution and programme", "National ID or passport", "Training proof or completion evidence"],
+      },
+      {
+        title: "What waits for license issuance",
+        body: "Full application submission, regulatory verification, interview qualification, and facility publication stay locked until license conversion.",
+        points: ["Professional license upload", "Admin conversion review", "Licensed application readiness", "Facility catalogue eligibility"],
+      },
+    ],
+  },
   facilities: {
     slug: "facilities",
     eyebrow: "Facility portal",
@@ -227,6 +253,9 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     primaryCta: { label: "Open professional portal", href: "/portal/professional" },
     secondaryCta: { label: "Open facility portal", href: "/portal/facility" },
     highlights: [
+      { title: "Can I register before my license is issued?", body: "Yes. Use the student awaiting-license path to prepare your Afyalink profile early." },
+      { title: "Will facilities see me before I am licensed?", body: "No. Waiting-license applicants are not published to the facility marketplace." },
+      { title: "What happens when I receive my license?", body: "Upload license details and evidence, then Afyalink can convert you into the licensed professional track." },
       { title: "Can facilities see every professional?", body: "No. Only published candidates are visible, and access requires approval plus active entitlement." },
       { title: "Can screenshots be blocked?", body: "No system can make screenshots impossible. Afyalink uses watermarking, access control, warnings, and audit logs." },
       { title: "Who decides workflow state?", body: "The backend remains authoritative for application, verification, interview, subscription, and publication decisions." },

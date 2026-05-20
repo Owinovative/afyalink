@@ -19,6 +19,7 @@ use Afyalink\Core\Application\Interviews\InterviewService;
 use Afyalink\Core\Application\Notifications\NotificationService;
 use Afyalink\Core\Application\Payments\PaymentService;
 use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
+use Afyalink\Core\Application\Professionals\StudentPrelicensureService;
 use Afyalink\Core\Application\Verification\VerificationService;
 use Afyalink\Core\Domain\Permissions\Permission;
 use Afyalink\Core\Domain\Enums\UserRole;
@@ -73,7 +74,8 @@ final class ApiKernel
         $credentials = new CredentialService($this->store, $storage, $audit, new FileUploadPolicy($this->maxUploadBytes), $notifications);
         $consents = new ConsentService($this->store, $audit);
         $payments = new PaymentService($this->store, $audit);
-        $workflow = new ApplicationWorkflowService($this->store, $profiles, $credentials, $consents, $payments, $audit, notifications: $notifications);
+        $prelicensure = new StudentPrelicensureService($this->store, $audit);
+        $workflow = new ApplicationWorkflowService($this->store, $profiles, $credentials, $consents, $payments, $audit, notifications: $notifications, prelicensure: $prelicensure);
         $verifications = new VerificationService($this->store, $workflow, $audit, $notifications);
         $interviews = new InterviewService($this->store, $workflow, $audit, $notifications);
         $facilities = new FacilityService($this->store, $audit, $notifications);
@@ -87,7 +89,7 @@ final class ApiKernel
         $consentController = new ConsentController($consents);
         $paymentController = new PaymentController($payments);
         $applicationController = new ApplicationController($workflow);
-        $adminController = new AdminController($workflow, $credentials, $payments, $this->store, $verifications, $interviews);
+        $adminController = new AdminController($workflow, $credentials, $payments, $this->store, $verifications, $interviews, $prelicensure);
         $facilityController = new FacilityController($this->auth, $facilities, $facilityAccess, $candidatePublications, $facilityEngagements);
         $adminFacilityController = new AdminFacilityController($facilities, $facilityAccess, $candidatePublications, $facilityEngagements);
 
@@ -157,6 +159,7 @@ final class ApiKernel
     ): void {
         $this->router->add('GET', '/api/health', static fn (): array => ['status' => 'ok']);
         $this->router->add('POST', '/api/auth/register', [$auth, 'register']);
+        $this->router->add('POST', '/api/auth/register/student', [$auth, 'registerStudent']);
         $this->router->add('POST', '/api/auth/login', [$auth, 'login']);
         $this->router->add('POST', '/api/auth/email/verify', [$auth, 'verifyEmail']);
         $this->router->add('POST', '/api/auth/password/forgot', [$auth, 'forgotPassword']);
@@ -215,6 +218,8 @@ final class ApiKernel
         $this->router->add('POST', '/api/admin/recommendation-packages', $this->protected([$adminFacility, 'createRecommendationPackage'], Permission::RecommendationPackageManage));
         $this->router->add('PATCH', '/api/admin/recommendation-packages/{id}', $this->protected([$adminFacility, 'updateRecommendationPackage'], Permission::RecommendationPackageManage));
         $this->router->add('GET', '/api/admin/audit-logs', $this->protected([$admin, 'auditLogs'], Permission::AuditRead));
+        $this->router->add('GET', '/api/admin/pre-licensure', $this->protected([$admin, 'prelicensureApplicants'], Permission::PrelicensureManage));
+        $this->router->add('PATCH', '/api/admin/pre-licensure/{id}/convert', $this->protected([$admin, 'convertPrelicensureApplicant'], Permission::PrelicensureManage));
     }
 
     /**

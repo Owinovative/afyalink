@@ -16,17 +16,34 @@ type ProfessionalSection =
   | "dashboard"
   | "profile"
   | "credentials"
+  | "waiting-license"
   | "consent-payment"
   | "application"
   | "verification"
   | "interview"
   | "publication";
 
+const professionalSectionTitles: Record<ProfessionalSection, string> = {
+  home: "Professional workspace",
+  dashboard: "Dashboard",
+  profile: "Profile",
+  credentials: "Credentials",
+  "waiting-license": "Waiting License",
+  "consent-payment": "Consent & Payment",
+  application: "Application",
+  verification: "Verification",
+  interview: "Interview",
+  publication: "Publication",
+};
+
 const documentTypes = [
   ["cv", "Curriculum vitae"],
   ["national_id_or_passport", "National ID or passport"],
   ["professional_license", "Professional license"],
   ["academic_certificate", "Academic certificate"],
+  ["student_id_or_training_proof", "Student ID or training proof"],
+  ["transcript_or_completion_evidence", "Transcript or completion evidence"],
+  ["internship_or_attachment_evidence", "Internship or attachment evidence"],
   ["experience_letter", "Experience letter"],
   ["passport_photo", "Passport photo"],
   ["payment_evidence", "Payment evidence"],
@@ -52,12 +69,13 @@ export function ProfessionalPage({ section }: { section: ProfessionalSection }) 
   const verificationCases = asArray<Record<string, unknown>>(data.verification_cases);
   const interviews = asArray<Record<string, unknown>>(data.interviews);
   const facilityVisibility = asRecord(data.facility_visibility);
+  const prelicensure = asRecord(data.prelicensure);
 
   return (
     <>
       <PageHeader
         eyebrow="Professional portal"
-        title={section === "home" ? "Professional workspace" : section.replace("-", " ")}
+        title={professionalSectionTitles[section]}
         body="Each page maps to one professional workflow stage. The backend decides readiness and valid transitions."
         actions={<Link className="button secondary" href="/portal/professional/dashboard">Refresh view</Link>}
       />
@@ -72,9 +90,13 @@ export function ProfessionalPage({ section }: { section: ProfessionalSection }) 
           payments={payments}
           consent={consent}
           visibility={facilityVisibility}
+          prelicensure={prelicensure}
         />
       ) : null}
       {section === "profile" ? <ProfileForm token={resource.token} profile={profile} refresh={resource.refresh} /> : null}
+      {section === "waiting-license" ? (
+        <WaitingLicensePanel token={resource.token} profile={profile} prelicensure={prelicensure} credentials={credentials} refresh={resource.refresh} />
+      ) : null}
       {section === "credentials" ? (
         <CredentialsPanel token={resource.token} credentials={credentials} refresh={resource.refresh} />
       ) : null}
@@ -99,6 +121,7 @@ function DashboardSummary({
   payments,
   consent,
   visibility,
+  prelicensure,
 }: {
   account: Record<string, unknown>;
   readiness: Record<string, unknown>;
@@ -107,6 +130,7 @@ function DashboardSummary({
   payments: Record<string, unknown>[];
   consent: Record<string, unknown>;
   visibility: Record<string, unknown>;
+  prelicensure: Record<string, unknown>;
 }) {
   const missing = asArray<string>(readiness.missing);
   const warnings = asArray<string>(readiness.warnings);
@@ -119,6 +143,7 @@ function DashboardSummary({
           { label: "Profile", value: profile.id ? "Started" : "Not started" },
           { label: "Credentials", value: credentials.length },
           { label: "Application readiness", value: readiness.ready ? "Ready" : "Blocked" },
+          { label: "Applicant track", value: profile.applicant_track ?? prelicensure.track ?? "licensed_professional" },
         ]}
       />
       <div className="grid-2">
@@ -150,6 +175,28 @@ function DashboardSummary({
             ]}
           />
         </div>
+        {prelicensure.active ? (
+          <div className="card">
+            <h3>Waiting-license track</h3>
+            <p>
+              You can prepare your profile and preliminary documents now. Full application submission and facility
+              publication unlock only after license conversion.
+            </p>
+            <MetaGrid
+              items={[
+                { label: "Status", value: prelicensure.student_status },
+                { label: "Conversion", value: prelicensure.conversion_review_status },
+                { label: "License pending", value: prelicensure.license_pending },
+                { label: "Ready for conversion", value: prelicensure.can_request_conversion },
+              ]}
+            />
+            <div className="action-row" style={{ marginTop: 18 }}>
+              <Link className="button secondary" href="/portal/professional/waiting-license">
+                Open checklist
+              </Link>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -166,6 +213,7 @@ function ProfileForm({
 }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const isStudent = (profile.applicant_track ?? "") === "student_awaiting_license";
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -186,16 +234,41 @@ function ProfileForm({
     <section className="form-card">
       <h2>Profile details</h2>
       <form className="form-grid" key={String(profile.updated_at ?? profile.id ?? "new")} onSubmit={submit}>
+        {isStudent ? <input type="hidden" name="applicant_track" value="student_awaiting_license" /> : null}
         <Field label="Full name" name="name" required defaultValue={String(profile.name ?? "")} />
         <Field label="Phone" name="phone" required defaultValue={String(profile.phone ?? "")} />
-        <Field label="Profession" name="profession" required defaultValue={String(profile.profession ?? "")} />
-        <Field label="Regulatory body" name="regulatory_body" required defaultValue={String(profile.regulatory_body ?? "")} />
-        <Field label="License number" name="license_number" required defaultValue={String(profile.license_number ?? "")} />
-        <Field label="County" name="county" required defaultValue={String(profile.county ?? "")} />
-        <Field label="Years experience" name="years_experience" type="number" defaultValue={String(profile.years_experience ?? "0")} />
-        <Field label="Availability" name="availability" defaultValue={String(profile.availability ?? "")} />
-        <Field label="Preferred counties" name="preferred_counties" defaultValue={String(profile.preferred_counties ?? "")} />
-        <Field label="Placement type" name="placement_type" defaultValue={String(profile.placement_type ?? "")} />
+        {isStudent ? (
+          <>
+            <label>
+              Student or graduate status
+              <select name="student_status" required defaultValue={String(profile.student_status ?? "completed_training_waiting_license")}>
+                <option value="currently_studying">Currently studying</option>
+                <option value="completed_training_waiting_license">Completed training, waiting for license</option>
+                <option value="internship_or_attachment">Internship or attachment</option>
+              </select>
+            </label>
+            <Field label="Target profession" name="target_profession" required defaultValue={String(profile.target_profession ?? profile.profession ?? "")} />
+            <Field label="Institution" name="institution_name" required defaultValue={String(profile.institution_name ?? "")} />
+            <Field label="Programme or course" name="programme_or_course" required defaultValue={String(profile.programme_or_course ?? "")} />
+            <Field label="Graduation/completion date" name="graduation_or_completion_date" type="date" defaultValue={String(profile.graduation_or_completion_date ?? "")} />
+            <Field label="Expected regulatory body" name="expected_regulatory_body" defaultValue={String(profile.expected_regulatory_body ?? profile.regulatory_body ?? "")} />
+            <Field label="County" name="county" required defaultValue={String(profile.county ?? "")} />
+            <Field label="License number once issued" name="license_number" defaultValue={String(profile.license_number ?? "")} />
+            <Field label="Regulatory body once issued" name="regulatory_body" defaultValue={String(profile.regulatory_body ?? "")} />
+            <Field label="Availability after licensure" name="availability_after_licensure" defaultValue={String(profile.availability ?? "")} />
+          </>
+        ) : (
+          <>
+            <Field label="Profession" name="profession" required defaultValue={String(profile.profession ?? "")} />
+            <Field label="Regulatory body" name="regulatory_body" required defaultValue={String(profile.regulatory_body ?? "")} />
+            <Field label="License number" name="license_number" required defaultValue={String(profile.license_number ?? "")} />
+            <Field label="County" name="county" required defaultValue={String(profile.county ?? "")} />
+            <Field label="Years experience" name="years_experience" type="number" defaultValue={String(profile.years_experience ?? "0")} />
+            <Field label="Availability" name="availability" defaultValue={String(profile.availability ?? "")} />
+            <Field label="Preferred counties" name="preferred_counties" defaultValue={String(profile.preferred_counties ?? "")} />
+            <Field label="Placement type" name="placement_type" defaultValue={String(profile.placement_type ?? "")} />
+          </>
+        )}
         <div className="form-actions full">
           <button className="button" type="submit" disabled={!token}>
             Save profile
@@ -207,6 +280,76 @@ function ProfileForm({
         {error ? <Feedback message={error} tone="error" /> : null}
       </div>
     </section>
+  );
+}
+
+function WaitingLicensePanel({
+  token,
+  profile,
+  prelicensure,
+  credentials,
+  refresh,
+}: {
+  token: string;
+  profile: Record<string, unknown>;
+  prelicensure: Record<string, unknown>;
+  credentials: Record<string, unknown>[];
+  refresh: () => Promise<void>;
+}) {
+  if (!prelicensure.active) {
+    return (
+      <section className="card">
+        <h2>Waiting-license track</h2>
+        <p>Your current profile is on the licensed professional path. Use this page only if Afyalink registered you before licensure.</p>
+      </section>
+    );
+  }
+
+  return (
+    <div className="data-list">
+      <section className="secure-profile" data-watermark="Afyalink waiting-license track">
+        <div className="eyebrow">Pre-licensure pathway</div>
+        <h2>You are registered in the Waiting for License track.</h2>
+        <p>
+          Complete preliminary profile and document requirements now. Application submission, verification, interview,
+          candidate publication, and facility marketplace visibility remain blocked until license conversion.
+        </p>
+        <MetaGrid
+          items={[
+            { label: "Target profession", value: profile.target_profession ?? profile.profession },
+            { label: "Institution", value: profile.institution_name },
+            { label: "Programme", value: profile.programme_or_course },
+            { label: "Conversion status", value: prelicensure.conversion_review_status },
+            { label: "License pending", value: prelicensure.license_pending },
+            { label: "Ready for conversion", value: prelicensure.can_request_conversion },
+          ]}
+        />
+      </section>
+      <section className="card">
+        <h2>Preliminary credential checklist</h2>
+        <div className="data-list">
+          {asArray<Record<string, unknown>>(prelicensure.required_documents).map((item) => (
+            <DataRow
+              key={String(item.document_type)}
+              title={display(item.document_type)}
+              status={item.uploaded ? item.review_status ?? "uploaded" : "missing"}
+              meta={[
+                { label: "Purpose", value: item.unlocks ? "Unlocks conversion after license review" : "Pre-licensure readiness" },
+              ]}
+            />
+          ))}
+        </div>
+        <div className="action-row" style={{ marginTop: 18 }}>
+          <Link className="button secondary" href="/portal/professional/credentials">
+            Upload documents
+          </Link>
+          <Link className="button secondary" href="/portal/professional/profile">
+            Update license details
+          </Link>
+        </div>
+      </section>
+      <CredentialsPanel token={token} credentials={credentials} refresh={refresh} />
+    </div>
   );
 }
 

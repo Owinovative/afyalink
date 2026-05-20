@@ -34,11 +34,24 @@
 
 - Next.js App Router frontend replatform
 - Multi-page public marketing website
+- Dedicated students / awaiting-license public page
 - Routed authentication pages
 - Routed professional, facility, and admin portals
-- Shared design system primitives for cards, forms, badges, notices, layout shells, and data rows
+- Premium image-led visual system with local healthcare/trust SVG assets, wide desktop composition, refined nav/footer, and polished portal shells
+- Shared design system primitives for cards, forms, badges, notices, layout shells, image panels, proof strips, feature splits, and data rows
 - Render web deployment migration from static publish to Node-backed Next service
 - Production build, typecheck, and routed-platform contract checks
+
+## Pre-Licensure Student Track
+
+- Student/recent graduate registration before license issuance
+- Applicant track field separating `licensed_professional` from `student_awaiting_license`
+- Student profile fields for training institution, programme, status, target profession, expected regulatory body, county, and availability after licensure
+- Preliminary credential bundle distinct from licensed professional requirements
+- Professional license not required until conversion
+- Student dashboard guidance and waiting-license checklist
+- Admin pre-licensure queue with conversion control
+- Students blocked from licensed application submission, interview/publication pipeline, and facility marketplace visibility until converted
 
 ## Later
 

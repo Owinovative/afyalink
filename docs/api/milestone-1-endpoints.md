@@ -10,6 +10,7 @@ The current implementation is framework-light and Laravel-ready. It uses bearer 
 | --- | --- | --- |
 | `GET` | `/api/health` | Process health check |
 | `POST` | `/api/auth/register` | Register a professional and return a bearer token |
+| `POST` | `/api/auth/register/student` | Register a student/recent graduate awaiting license and return a professional bearer token |
 | `POST` | `/api/auth/login` | Login professional or admin |
 | `POST` | `/api/auth/email/verify` | Verify an email verification token |
 | `POST` | `/api/auth/password/forgot` | Queue a password reset notification with anti-enumeration response |
@@ -30,6 +31,8 @@ The current implementation is framework-light and Laravel-ready. It uses bearer 
 | `POST` | `/api/professional/payments` | Create an idempotency-aware payment intent/reference |
 | `POST` | `/api/professional/application/submit` | Submit application when readiness conditions pass |
 
+Waiting-license applicants use the same authenticated professional routes for dashboard, profile, credentials, and consent. `GET /api/professional/dashboard` includes a `prelicensure` object when the profile `applicant_track` is `student_awaiting_license`. `POST /api/professional/application/submit` is blocked until admin conversion to `licensed_professional`.
+
 ## Admin
 
 | Method | Path | Purpose |
@@ -39,6 +42,8 @@ The current implementation is framework-light and Laravel-ready. It uses bearer 
 | `PATCH` | `/api/admin/applications/{id}/action` | Run review action: `start_review`, `request_replacement`, `verify`, `approve`, `reject` |
 | `PATCH` | `/api/admin/credentials/{id}/review` | Set credential status: `accepted`, `rejected`, `needs_replacement`, etc. |
 | `PATCH` | `/api/admin/payments/{id}/status` | Move payment through allowed state transitions |
+| `GET` | `/api/admin/pre-licensure` | List students/graduates awaiting license, with document checklist and conversion readiness |
+| `PATCH` | `/api/admin/pre-licensure/{id}/convert` | Convert a waiting-license profile to licensed professional after license details and evidence are available |
 | `GET` | `/api/admin/audit-logs` | Latest audit records |
 
 `GET /api/admin/applications` also returns an `overview` object with total, awaiting review, replacement, ready, approved, and rejected counters.
@@ -89,7 +94,7 @@ Credential upload uses JSON in this milestone implementation:
 }
 ```
 
-Allowed document types include `cv`, `national_id_or_passport`, `professional_license`, `academic_certificate`, and optional experience/payment/regulatory evidence types.
+Allowed document types include `cv`, `national_id_or_passport`, `professional_license`, `academic_certificate`, student/pre-licensure types (`student_id_or_training_proof`, `transcript_or_completion_evidence`, `internship_or_attachment_evidence`), and optional experience/payment/regulatory evidence types.
 
 The API stores the file through a private credential storage adapter, records checksum and metadata, and never returns a public direct file URL. Supported storage drivers are local private storage and S3-compatible object storage for MinIO/S3/R2 style providers.
 

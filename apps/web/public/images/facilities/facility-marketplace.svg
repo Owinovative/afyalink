@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="title desc">
+  <title id="title">Facility marketplace illustration</title>
+  <desc id="desc">A healthcare facility reviewing secure candidate cards through an approved marketplace interface.</desc>
+  <defs>
+    <linearGradient id="facilityBg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#eef8f5"/>
+      <stop offset="1" stop-color="#f9efe0"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0b2f35"/>
+      <stop offset="1" stop-color="#0b6f72"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#0b2f35" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect width="960" height="720" rx="44" fill="url(#facilityBg)"/>
+  <path d="M94 600h772V247L480 84 94 247z" fill="#fff" opacity="0.62"/>
+  <path d="M184 284h592v316H184z" fill="#ffffff" filter="url(#shadow)"/>
+  <path d="M256 284V182h448v102" fill="url(#panel)"/>
+  <rect x="308" y="222" width="114" height="14" rx="7" fill="#9bc5bf"/>
+  <rect x="450" y="222" width="202" height="14" rx="7" fill="#e7f4f1"/>
+  <g fill="#eaf4f1">
+    <rect x="230" y="342" width="92" height="86" rx="16"/>
+    <rect x="354" y="342" width="92" height="86" rx="16"/>
+    <rect x="478" y="342" width="92" height="86" rx="16"/>
+    <rect x="602" y="342" width="92" height="86" rx="16"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="256" y="484" width="448" height="116" rx="26" fill="#fff"/>
+    <circle cx="316" cy="542" r="28" fill="#0b6f72"/>
+    <rect x="364" y="520" width="178" height="14" rx="7" fill="#719d97"/>
+    <rect x="364" y="550" width="124" height="11" rx="6" fill="#c9dedb"/>
+    <rect x="578" y="518" width="82" height="34" rx="17" fill="#e7f6ec"/>
+    <path d="M612 561l14 14 30-38" fill="none" stroke="#2e8b57" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="602" y="164" width="220" height="142" rx="28" fill="#ffffff"/>
+    <rect x="638" y="204" width="118" height="13" rx="7" fill="#719d97"/>
+    <rect x="638" y="235" width="82" height="10" rx="5" fill="#c9dedb"/>
+    <rect x="638" y="260" width="126" height="24" rx="12" fill="#e6f5ea"/>
+  </g>
+</svg>

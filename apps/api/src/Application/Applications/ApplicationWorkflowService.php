@@ -11,6 +11,7 @@ use Afyalink\Core\Application\Credentials\CredentialService;
 use Afyalink\Core\Application\Notifications\NotificationService;
 use Afyalink\Core\Application\Payments\PaymentService;
 use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
+use Afyalink\Core\Application\Professionals\StudentPrelicensureService;
 use Afyalink\Core\Domain\Applications\AdminReviewService;
 use Afyalink\Core\Domain\Applications\ApplicationRecord;
 use Afyalink\Core\Domain\Applications\ApplicationSubmissionService;
@@ -18,6 +19,7 @@ use Afyalink\Core\Domain\Applications\ApplicationStateMachine;
 use Afyalink\Core\Domain\Applications\ApplicationTimelineEvent;
 use Afyalink\Core\Domain\Applications\SubmissionReadinessChecker;
 use Afyalink\Core\Domain\Credentials\CredentialRequirementRegistry;
+use Afyalink\Core\Domain\Enums\ApplicantTrack;
 use Afyalink\Core\Domain\Enums\ApplicationStatus;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
 use Afyalink\Core\Domain\Enums\PaymentStatus;
@@ -36,6 +38,7 @@ final readonly class ApplicationWorkflowService
         private PaymentService $payments,
         private AuditLogger $audit,
         private ?NotificationService $notifications = null,
+        private ?StudentPrelicensureService $prelicensure = null,
         private ApplicationSubmissionService $submission = new ApplicationSubmissionService(),
         private AdminReviewService $adminReview = new AdminReviewService(),
     ) {}
@@ -79,6 +82,10 @@ final readonly class ApplicationWorkflowService
             'payments' => $payments,
             'application' => $application,
             'readiness' => $readiness->toArray(),
+            'prelicensure' => $this->prelicensure?->dashboardState($profile, $credentials) ?? [
+                'active' => false,
+                'track' => (string) ($profile['applicant_track'] ?? ApplicantTrack::LicensedProfessional->value),
+            ],
         ];
     }
 
@@ -95,6 +102,11 @@ final readonly class ApplicationWorkflowService
             ApplicationStatus::Withdrawn->value,
         ], true)) {
             throw new DomainException('An active application already exists for this professional.');
+        }
+
+        $profileRow = $this->profiles->findForUser($user->id);
+        if (($profileRow['applicant_track'] ?? ApplicantTrack::LicensedProfessional->value) === ApplicantTrack::StudentAwaitingLicense->value) {
+            throw new DomainException('Waiting-license applicants must be converted to the licensed professional track before application submission.');
         }
 
         $profile = $this->profiles->requireForUser($user->id);

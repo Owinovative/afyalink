@@ -1,6 +1,7 @@
 export const marketingLinks = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/professionals", label: "Professionals" },
+  { href: "/students", label: "Students" },
   { href: "/facilities", label: "Facilities" },
   { href: "/trust-security", label: "Trust & Security" },
   { href: "/verification", label: "Verification" },
@@ -14,6 +15,7 @@ export const professionalLinks = [
   { href: "/portal/professional/dashboard", label: "Dashboard" },
   { href: "/portal/professional/profile", label: "Profile" },
   { href: "/portal/professional/credentials", label: "Credentials" },
+  { href: "/portal/professional/waiting-license", label: "Waiting License" },
   { href: "/portal/professional/consent-payment", label: "Consent & Payment" },
   { href: "/portal/professional/application", label: "Application" },
   { href: "/portal/professional/verification", label: "Verification" },
@@ -34,6 +36,7 @@ export const facilityLinks = [
 export const adminLinks = [
   { href: "/portal/admin/dashboard", label: "Dashboard" },
   { href: "/portal/admin/applications", label: "Applications" },
+  { href: "/portal/admin/pre-licensure", label: "Pre-Licensure" },
   { href: "/portal/admin/credentials", label: "Credentials" },
   { href: "/portal/admin/payments", label: "Payments" },
   { href: "/portal/admin/verifications", label: "Verifications" },

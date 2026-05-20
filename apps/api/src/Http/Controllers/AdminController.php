@@ -9,6 +9,7 @@ use Afyalink\Core\Application\Auth\AuthenticatedUser;
 use Afyalink\Core\Application\Credentials\CredentialService;
 use Afyalink\Core\Application\Interviews\InterviewService;
 use Afyalink\Core\Application\Payments\PaymentService;
+use Afyalink\Core\Application\Professionals\StudentPrelicensureService;
 use Afyalink\Core\Application\Verification\VerificationService;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
 use Afyalink\Core\Domain\Enums\InterviewRecommendation;
@@ -27,6 +28,7 @@ final readonly class AdminController
         private DataStore $store,
         private ?VerificationService $verifications = null,
         private ?InterviewService $interviews = null,
+        private ?StudentPrelicensureService $prelicensure = null,
     ) {}
 
     /**
@@ -121,6 +123,39 @@ final readonly class AdminController
     {
         return [
             'audit_logs' => array_slice(array_reverse($this->store->all('audit_logs')), 0, 100),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function prelicensureApplicants(Request $request): array
+    {
+        return [
+            'overview' => $this->prelicensureService()->overview(),
+            'students' => $this->prelicensureService()->listForAdmin(
+                search: isset($request->query['search']) ? (string) $request->query['search'] : null,
+                status: isset($request->query['status']) ? (string) $request->query['status'] : null,
+            ),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function convertPrelicensureApplicant(Request $request): array
+    {
+        /** @var AuthenticatedUser $admin */
+        $admin = $request->user;
+
+        return [
+            'student' => $this->prelicensureService()->convertToLicensed(
+                admin: $admin,
+                profileId: (int) $request->params['id'],
+                note: isset($request->body['note']) ? (string) $request->body['note'] : null,
+                ipAddress: $request->ipAddress,
+                userAgent: $request->userAgent,
+            ),
         ];
     }
 
@@ -277,5 +312,14 @@ final readonly class AdminController
         }
 
         return $this->interviews;
+    }
+
+    private function prelicensureService(): StudentPrelicensureService
+    {
+        if ($this->prelicensure === null) {
+            throw new \LogicException('Pre-licensure service is not configured.');
+        }
+
+        return $this->prelicensure;
     }
 }

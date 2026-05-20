@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Afyalink\Core\Domain\Credentials;
 
 use Afyalink\Core\Domain\Enums\DocumentType;
+use Afyalink\Core\Domain\Enums\ApplicantTrack;
 
 final class CredentialRequirementRegistry
 {
@@ -13,12 +14,29 @@ final class CredentialRequirementRegistry
      */
     public function minimumRequiredDocuments(string $profession): array
     {
+        return $this->minimumRequiredDocumentsForTrack(ApplicantTrack::LicensedProfessional->value, $profession);
+    }
+
+    /**
+     * @return list<DocumentType>
+     */
+    public function minimumRequiredDocumentsForTrack(string $applicantTrack, string $profession): array
+    {
         $base = [
             DocumentType::CurriculumVitae,
             DocumentType::NationalIdOrPassport,
             DocumentType::ProfessionalLicense,
             DocumentType::AcademicCertificate,
         ];
+
+        if ($applicantTrack === ApplicantTrack::StudentAwaitingLicense->value) {
+            return [
+                DocumentType::CurriculumVitae,
+                DocumentType::NationalIdOrPassport,
+                DocumentType::StudentIdOrTrainingProof,
+                DocumentType::TranscriptOrCompletionEvidence,
+            ];
+        }
 
         $normalized = strtolower(trim($profession));
 
@@ -45,4 +63,3 @@ final class CredentialRequirementRegistry
         ];
     }
 }
-

@@ -555,7 +555,7 @@ final readonly class FacilityEngagementService
      */
     private function safeFacilityRequest(array $row, bool $includeFacility = false): array
     {
-        return [
+        $safe = [
             'id' => (int) $row['id'],
             'facility_id' => (int) $row['facility_id'],
             'facility' => $includeFacility ? $this->facilityLabel((int) $row['facility_id']) : null,
@@ -570,10 +570,15 @@ final readonly class FacilityEngagementService
             'notes' => $row['notes'] ?? null,
             'candidate_publication_ids' => is_array($row['candidate_publication_ids'] ?? null) ? $row['candidate_publication_ids'] : [],
             'status' => (string) $row['status'],
-            'admin_note' => $row['admin_note'] ?? null,
             'created_at' => (string) $row['created_at'],
             'updated_at' => (string) $row['updated_at'],
         ];
+
+        if ($includeFacility) {
+            $safe['admin_note'] = $row['admin_note'] ?? null;
+        }
+
+        return $safe;
     }
 
     /**
@@ -582,7 +587,7 @@ final readonly class FacilityEngagementService
      */
     private function safeRecommendationRequest(array $row, bool $includeFacility = false): array
     {
-        return [
+        $safe = [
             'id' => (int) $row['id'],
             'facility_id' => (int) $row['facility_id'],
             'facility' => $includeFacility ? $this->facilityLabel((int) $row['facility_id']) : null,
@@ -594,10 +599,15 @@ final readonly class FacilityEngagementService
             'criteria' => is_array($row['criteria'] ?? null) ? $row['criteria'] : [],
             'candidate_publication_ids' => is_array($row['candidate_publication_ids'] ?? null) ? $row['candidate_publication_ids'] : [],
             'status' => (string) $row['status'],
-            'admin_note' => $row['admin_note'] ?? null,
             'created_at' => (string) $row['created_at'],
             'updated_at' => (string) $row['updated_at'],
         ];
+
+        if ($includeFacility) {
+            $safe['admin_note'] = $row['admin_note'] ?? null;
+        }
+
+        return $safe;
     }
 
     /**
