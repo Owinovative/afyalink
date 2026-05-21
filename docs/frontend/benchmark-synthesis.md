@@ -45,6 +45,21 @@ Stripe is strongest in complex product explanation: dense but clean section rhyt
 
 Afyalink should feel like a high-trust healthcare infrastructure company: human, warm, serious, photo-led, and operationally precise. Photography should carry the emotional credibility, while the layout and copy communicate backend-governed verification, private credentials, facility gating, student pre-licensure safety, and auditability.
 
+## Invinceible Core HMS V2 Design Lessons
+
+Invinceible Core HMS V2 is now the primary internal visual benchmark for Afyalink. Its landing page works because it is compact, healthcare-specific, and disciplined: a full-screen clinical hero, strong dark overlay, contained header, short copy, grouped metrics, and photo tiles that support the message without turning every section into a large billboard.
+
+Afyalink should transfer these ideas:
+
+- Use a confident healthcare-blue/teal foundation with crisp white panels.
+- Keep hero content and metrics close together so the first screen feels intentional.
+- Prefer compact operational cards over loose decorative cards.
+- Use moderate image panels with fixed aspect ratios and max-heights.
+- Keep public pages wide and dense enough for desktop without making text columns too long.
+- Make portals feel like operating consoles, with compact metrics and clear queue panels.
+
+Afyalink should not transfer HMS-specific hospital-management concepts, module claims, SHA/M-PESA billing copy, creator content, or HMS naming. Afyalink remains a verification, pre-licensure, facility access, candidate marketplace, and recommendation platform.
+
 ## Photo Asset Policy
 
 This pass uses locally bundled royalty-free photography from Pexels image delivery URLs. The assets are stored under `apps/web/public/images/...` with descriptive filenames and should be replaced later with commissioned Afyalink photography when available.

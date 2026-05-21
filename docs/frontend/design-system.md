@@ -1,13 +1,14 @@
 # Afyalink Frontend Design System
 
-The Next.js frontend uses a benchmark-synthesized, photo-led healthcare technology design system. The system is intentionally classic and restrained: deep navy/teal, natural green, warm gold, ivory/stone surfaces, subtle borders, and disciplined spacing.
+The Next.js frontend uses an HMS-inspired, benchmark-synthesized healthcare technology design system. The system is classic and restrained: deep navy/teal, natural green, warm gold, ivory/stone surfaces, subtle borders, compact metrics, and disciplined spacing.
 
 ## Layout Principles
 
-- Public pages use wide desktop compositions through `--wide-max` and `--hero-max`.
-- The homepage hero is near full viewport height on desktop and pairs focused copy with a large real healthcare photograph.
-- Public content should avoid repeated generic cards. Prefer image panels, proof strips, feature splits, timelines, and strong CTA bands.
-- Portal surfaces stay dense enough for repeated operations, but use clearer hierarchy, refined metrics, stronger page headers, and a darker sidebar shell.
+- Public pages use wide desktop compositions through `--wide-max` and `--hero-max`, but avoid loose dead space.
+- The homepage borrows Invinceible Core HMS V2 rhythm: dark healthcare hero, compact proof strip, short copy, and one controlled photo panel.
+- Non-home public pages use moderate photo panels instead of oversized billboard images.
+- Public content should avoid repeated generic cards. Prefer compact proof strips, feature splits, process bands, and strong CTA bands.
+- Portal surfaces stay dense enough for repeated operations, with count-aware metric grids, shorter page headers, and a darker sidebar shell.
 
 ## Core Primitives
 
@@ -16,10 +17,12 @@ The Next.js frontend uses a benchmark-synthesized, photo-led healthcare technolo
 - `ImagePanel`: local photo or SVG visual frame with stable dimensions and responsive `next/image` rendering.
 - `FeatureSplit`: editorial copy plus visual panel.
 - `ProofStrip`: compact trust/value proof band.
+- `CompactMetricStrip`: tighter proof band for HMS-style section metrics.
 - `ProcessTimeline`: numbered operational steps.
 - `VisualCard`: elevated but restrained content card.
 - `LargeCTA`: full-width conversion band.
 - `EditorialPhoto`: wide human healthcare photography panel with a short overlay caption.
+- `BrandLockup`: lightweight CSS/text brand mark used in runtime headers and footers so the oversized full logo PNG is not loaded for navigation.
 
 ## Image Strategy
 
@@ -47,7 +50,7 @@ SVGs remain available for structured workflow support where diagrams are useful:
 - `recommendations/recommendation-package.svg`
 - `backgrounds/clinical-grid.svg`
 
-No external hotlinked stock assets are used at runtime. Commissioned Afyalink photography should replace the royalty-free placeholders when available.
+No external hotlinked stock assets are used at runtime. Source photos are kept below 250 KB each, and non-home pages lazy-load image panels. Commissioned Afyalink photography should replace the royalty-free placeholders when available.
 
 ## Accessibility
 

@@ -1,10 +1,9 @@
 import Link from "next/link";
 import {
-  EditorialPhoto,
+  CompactMetricStrip,
   FeatureSplit,
   ImagePanel,
   LargeCTA,
-  ProofStrip,
   SectionFrame,
   SectionIntro,
   VisualCard,
@@ -20,10 +19,10 @@ export default function HomePage() {
         <div className="hero-container hero-shell">
           <div className="hero-copy">
             <div className="eyebrow">Healthcare trust infrastructure</div>
-            <h1>Verified healthcare talent, governed from intake to placement.</h1>
+            <h1>Verified healthcare talent. Controlled from intake to placement.</h1>
             <p className="lead">
-              Afyalink gives professionals, facilities, and operators a secure way to verify credentials, manage
-              interviews, publish qualified candidates, and coordinate trusted healthcare hiring.
+              Afyalink helps professionals, facilities, and review teams manage credentials, verification,
+              interviews, publication, and trusted placement.
             </p>
             <div className="hero-actions">
               <Link className="button" href="/auth/register/professional">
@@ -42,18 +41,18 @@ export default function HomePage() {
               <span>Watermarked candidate access</span>
             </div>
           </div>
-          <ImagePanel src={heroVisual.src} alt={heroVisual.alt} tone={heroVisual.tone} priority />
+          <ImagePanel src={heroVisual.src} alt={heroVisual.alt} tone={heroVisual.tone} priority variant="hero" />
         </div>
       </section>
 
       <SectionFrame tone="soft">
         <div className="wide-container">
-          <ProofStrip
+          <CompactMetricStrip
             items={[
-              { value: "Verify", label: "Credential and regulatory review", body: "Private intake, replacement requests, and audit-backed review." },
-              { value: "Interview", label: "Structured assessment", body: "Scheduling, scoring, outcomes, and qualification controls." },
-              { value: "Publish", label: "Candidate catalogue gate", body: "Admin publication only after eligibility and consent checks." },
-              { value: "Connect", label: "Facility marketplace", body: "Approved, active facilities browse secure read-only profiles." },
+              { value: "Verify", label: "Credential review", body: "Private intake and audit-backed review." },
+              { value: "Interview", label: "Assessment", body: "Scheduling, scoring, and outcomes." },
+              { value: "Publish", label: "Catalogue gate", body: "Admin-controlled visibility." },
+              { value: "Connect", label: "Facility access", body: "Approved facilities only." },
             ]}
           />
         </div>
@@ -64,10 +63,10 @@ export default function HomePage() {
           <div className="portal-preview">
             <div>
               <div className="eyebrow">Three-sided platform</div>
-              <h2>One trust operating system for professionals, facilities, and Afyalink teams.</h2>
+              <h2>One trust workspace for professionals, facilities, and Afyalink teams.</h2>
               <p>
-                The product is designed around healthcare risk: every role has its own workspace, every sensitive
-                transition is owned by the backend, and every marketplace view is intentionally shaped.
+                Each role has a focused workspace. Sensitive transitions stay backend-owned. Marketplace access stays
+                gated.
               </p>
             </div>
             <div className="table-lite">
@@ -88,29 +87,20 @@ export default function HomePage() {
           <div className="platform-stack">
             <VisualCard
               eyebrow="Professionals"
-              title="A clear route from profile to publishable qualification."
-              body="Professionals see the next valid step without guessing whether credentials, consent, payment, verification, or interview records are ready."
+              title="Profile to qualification."
+              body="Professionals see the next valid step across profile, credentials, consent, payment, verification, and interview."
             />
             <VisualCard
               eyebrow="Facilities"
-              title="A controlled marketplace, not a public directory."
-              body="Facilities need approval and active access before viewing published candidates, recommendation packages, or secure profiles."
+              title="Controlled marketplace."
+              body="Facilities need approval and active access before viewing published candidates or recommendations."
             />
             <VisualCard
               eyebrow="Operators"
-              title="Review, verification, interviews, publication, and audit in one console."
-              body="Admin screens remain operationally dense while the product surface becomes easier to scan and manage."
+              title="Review console."
+              body="Admin screens keep applications, verification, interviews, publication, and audit in one operational view."
             />
           </div>
-        </div>
-      </SectionFrame>
-
-      <SectionFrame className="photo-story-section">
-        <div className="wide-container">
-          <EditorialPhoto
-            visual={getVisualForSlug("recommendations")}
-            caption="Afyalink is designed for real clinical environments: hiring teams need confidence, candidates need dignity, and every sensitive record needs governance."
-          />
         </div>
       </SectionFrame>
 
@@ -118,9 +108,9 @@ export default function HomePage() {
         <div className="wide-container">
           <FeatureSplit
             eyebrow="Professional journey"
-            title="A respectful verification path for healthcare professionals."
-            body="Afyalink separates account readiness, profile completion, private credential upload, current consent, payment reference creation, application submission, verification, interview, and publication status."
-            points={["Profile and credential readiness", "Consent and payment reference state", "Verification and interview visibility", "High-level facility catalogue awareness"]}
+            title="A respectful path for licensed professionals."
+            body="Profile, credentials, consent, payment reference, submission, verification, interview, and publication stay clearly separated."
+            points={["Profile and credential readiness", "Consent and payment state", "Verification and interview visibility", "Catalogue awareness"]}
             visual={getVisualForSlug("professionals")}
             cta={{ label: "Professional portal", href: "/professionals" }}
           />
@@ -131,9 +121,9 @@ export default function HomePage() {
         <div className="wide-container">
           <FeatureSplit
             eyebrow="Students and recent graduates"
-            title="Still waiting for your license? Start building your Afyalink profile now."
-            body="Afyalink now supports a waiting-license track for students and graduates who want to prepare early without being misrepresented as licensed, verified, or facility-publishable candidates."
-            points={["Pre-licensure profile and training history", "Student ID, training proof, transcript, and completion evidence", "Professional license upload when issued", "Admin conversion before full application workflow"]}
+            title="Waiting for a license? Start early without being misrepresented."
+            body="Students and graduates can prepare a pre-licensure profile and convert only after license evidence is ready."
+            points={["Training history", "Preliminary documents", "License upload when issued", "Admin conversion before full workflow"]}
             visual={getVisualForSlug("students")}
             reverse
             cta={{ label: "Student waiting-license path", href: "/students" }}
@@ -145,9 +135,9 @@ export default function HomePage() {
         <div className="wide-container">
           <FeatureSplit
             eyebrow="Facility marketplace"
-            title="Approved facilities get secure access to curated candidate profiles."
-            body="Facility onboarding, access subscription status, candidate publication, profile viewing, appointment requests, and recommendation packages are kept behind explicit authorization gates."
-            points={["Approved organizations only", "Active access required", "Published candidates only", "Profile views watermarked and audited"]}
+            title="Approved facilities review published candidates securely."
+            body="Facility onboarding, access status, candidate publication, appointments, and recommendations stay behind explicit authorization gates."
+            points={["Approved organizations only", "Active access required", "Published candidates only", "Watermarked profile views"]}
             visual={getVisualForSlug("facilities")}
             cta={{ label: "Facility platform", href: "/facilities" }}
           />
@@ -159,7 +149,7 @@ export default function HomePage() {
           <FeatureSplit
             eyebrow="Security and privacy"
             title="Candidate access is controlled, visible, and accountable."
-            body="Afyalink does not expose raw private documents publicly. Secure candidate views use authorization, deterrent watermarking, legal warning UX, and audit trails. Screenshots cannot be made impossible, so the product focuses on realistic controls and accountability."
+            body="Afyalink avoids public raw document exposure. Candidate views use authorization, watermarking, warnings, and audit trails."
             points={["No permanent public credential URLs", "Facility and viewer-bound access checks", "Dynamic watermark overlays", "Profile and sensitive views audited"]}
             visual={getVisualForSlug("trust-security")}
             cta={{ label: "Trust and security", href: "/trust-security" }}
@@ -172,17 +162,17 @@ export default function HomePage() {
           <SectionIntro
             eyebrow="Platform capabilities"
             title="Built around real healthcare staffing workflows."
-            body="The product surface is polished, but the underlying experience stays operational: readiness checks, state machines, access gates, and audit logs remain the source of product trust."
+            body="The product surface stays clean while readiness checks, access gates, state machines, and audit logs carry the trust model."
             align="center"
           />
           <div className="grid-4">
             {[
-              ["Credential intake", "Private upload and admin review workflows with replacement paths."],
+              ["Credential intake", "Private upload, review, and replacement paths."],
               ["Verification cases", "Regulatory body registry, assignments, statuses, and evidence handling."],
               ["Interview scoring", "Scheduling, rescheduling, rubric scoring, and qualification outcomes."],
               ["Facility access", "Onboarding approval and subscription-gated marketplace entry."],
               ["Candidate publication", "Admin-controlled catalogue visibility for qualified professionals."],
-              ["Secure profiles", "Read-only, watermarked candidate details with audit records."],
+              ["Secure profiles", "Read-only, watermarked candidate details."],
               ["Recommendations", "Role-based requests and curated candidate packages."],
               ["Appointments", "Facility consultation and hiring request lifecycle management."],
             ].map(([title, body]) => (

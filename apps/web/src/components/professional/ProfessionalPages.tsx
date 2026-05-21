@@ -36,6 +36,19 @@ const professionalSectionTitles: Record<ProfessionalSection, string> = {
   publication: "Publication",
 };
 
+const professionalSectionBodies: Record<ProfessionalSection, string> = {
+  home: "Your verification workspace.",
+  dashboard: "Track readiness, credentials, payment, consent, and publication state.",
+  profile: "Keep professional and pre-licensure details current.",
+  credentials: "Upload private documents for Afyalink review.",
+  "waiting-license": "Prepare early while license evidence is still pending.",
+  "consent-payment": "Accept consent and create the required payment reference.",
+  application: "Submit only after backend readiness is complete.",
+  verification: "Follow regulatory verification without internal notes.",
+  interview: "Track interview schedule and outcome.",
+  publication: "See high-level facility catalogue visibility.",
+};
+
 const documentTypes = [
   ["cv", "Curriculum vitae"],
   ["national_id_or_passport", "National ID or passport"],
@@ -76,7 +89,7 @@ export function ProfessionalPage({ section }: { section: ProfessionalSection }) 
       <PageHeader
         eyebrow="Professional portal"
         title={professionalSectionTitles[section]}
-        body="Each page maps to one professional workflow stage. The backend decides readiness and valid transitions."
+        body={professionalSectionBodies[section]}
         actions={<Link className="button secondary" href="/portal/professional/dashboard">Refresh view</Link>}
       />
       {resource.loading ? <div className="notice">Loading professional dashboard...</div> : null}
@@ -178,10 +191,7 @@ function DashboardSummary({
         {prelicensure.active ? (
           <div className="card">
             <h3>Waiting-license track</h3>
-            <p>
-              You can prepare your profile and preliminary documents now. Full application submission and facility
-              publication unlock only after license conversion.
-            </p>
+            <p>Prepare your profile now. Full application and facility visibility unlock only after license conversion.</p>
             <MetaGrid
               items={[
                 { label: "Status", value: prelicensure.student_status },
@@ -310,10 +320,7 @@ function WaitingLicensePanel({
       <section className="secure-profile" data-watermark="Afyalink waiting-license track">
         <div className="eyebrow">Pre-licensure pathway</div>
         <h2>You are registered in the Waiting for License track.</h2>
-        <p>
-          Complete preliminary profile and document requirements now. Application submission, verification, interview,
-          candidate publication, and facility marketplace visibility remain blocked until license conversion.
-        </p>
+        <p>Complete preliminary profile and documents now. Application, verification, interview, and publication stay locked until conversion.</p>
         <MetaGrid
           items={[
             { label: "Target profession", value: profile.target_profession ?? profile.profession },
