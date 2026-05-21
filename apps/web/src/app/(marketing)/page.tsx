@@ -1,6 +1,8 @@
 import Link from "next/link";
 import {
+  EditorialPhoto,
   FeatureSplit,
+  ImagePanel,
   LargeCTA,
   ProofStrip,
   SectionFrame,
@@ -40,9 +42,7 @@ export default function HomePage() {
               <span>Watermarked candidate access</span>
             </div>
           </div>
-          <div className="product-visual" aria-label={heroVisual.alt}>
-            <img src={heroVisual.src} alt={heroVisual.alt} loading="eager" />
-          </div>
+          <ImagePanel src={heroVisual.src} alt={heroVisual.alt} tone={heroVisual.tone} priority />
         </div>
       </section>
 
@@ -102,6 +102,15 @@ export default function HomePage() {
               body="Admin screens remain operationally dense while the product surface becomes easier to scan and manage."
             />
           </div>
+        </div>
+      </SectionFrame>
+
+      <SectionFrame className="photo-story-section">
+        <div className="wide-container">
+          <EditorialPhoto
+            visual={getVisualForSlug("recommendations")}
+            caption="Afyalink is designed for real clinical environments: hiring teams need confidence, candidates need dignity, and every sensitive record needs governance."
+          />
         </div>
       </SectionFrame>
 

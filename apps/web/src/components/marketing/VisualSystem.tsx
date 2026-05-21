@@ -1,67 +1,68 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 export type VisualTone = "teal" | "green" | "gold" | "deep";
 
 const visualBySlug: Record<string, { src: string; alt: string; tone: VisualTone }> = {
   home: {
-    src: "/images/hero/healthcare-trust-canvas.svg",
-    alt: "Illustration of Afyalink healthcare verification, facility access, and secure candidate review workflows.",
+    src: "/images/hero/healthcare-professional-reviewing-records.jpg",
+    alt: "Healthcare professionals reviewing a patient record in a clinical setting.",
     tone: "deep",
   },
   "how-it-works": {
-    src: "/images/verification/verification-operations.svg",
-    alt: "Illustration of professional intake, Afyalink review, and facility access workflow stages.",
+    src: "/images/verification/admin-verification-desk.jpg",
+    alt: "Clinical administrator reviewing healthcare records for verification.",
     tone: "teal",
   },
   professionals: {
-    src: "/images/professionals/professional-verification.svg",
-    alt: "Illustration of a healthcare professional moving through credential verification and interview steps.",
+    src: "/images/professionals/clinical-professional-consultation.jpg",
+    alt: "Healthcare professional consulting with a patient in a clinic.",
     tone: "green",
   },
   students: {
-    src: "/images/students/waiting-license-track.svg",
-    alt: "Illustration of a healthcare student preparing an Afyalink profile while waiting for a professional license.",
+    src: "/images/students/nursing-student-training-lab.jpg",
+    alt: "Healthcare students practicing clinical skills in a training lab.",
     tone: "gold",
   },
   facilities: {
-    src: "/images/facilities/facility-marketplace.svg",
-    alt: "Illustration of a healthcare facility reviewing secure marketplace candidate profiles.",
+    src: "/images/facilities/hospital-facility-team.jpg",
+    alt: "Healthcare facility team standing together in a hospital corridor.",
     tone: "deep",
   },
   "trust-security": {
-    src: "/images/security/secure-candidate-viewing.svg",
-    alt: "Illustration of a watermarked candidate profile protected by audit logging and access controls.",
+    src: "/images/security/credential-security-review.jpg",
+    alt: "Healthcare worker reviewing protected records on a clinical workstation.",
     tone: "teal",
   },
   verification: {
-    src: "/images/verification/verification-operations.svg",
-    alt: "Illustration of credential review, regulatory verification, interview scoring, and publication approval.",
+    src: "/images/verification/admin-verification-desk.jpg",
+    alt: "Credential verification desk with healthcare records under review.",
     tone: "green",
   },
   "pricing-access": {
-    src: "/images/marketplace/candidate-marketplace.svg",
-    alt: "Illustration of subscription-gated candidate marketplace access.",
+    src: "/images/marketplace/facility-candidate-review.jpg",
+    alt: "Healthcare team reviewing candidate and staffing information together.",
     tone: "gold",
   },
   recommendations: {
-    src: "/images/recommendations/recommendation-package.svg",
-    alt: "Illustration of an Afyalink recommendation package with shortlisted candidates and rationale.",
+    src: "/images/trust/hospital-corridor-care-team.jpg",
+    alt: "Healthcare team in a hospital corridor discussing care operations.",
     tone: "gold",
   },
   about: {
-    src: "/images/hero/healthcare-trust-canvas.svg",
-    alt: "Illustration of Afyalink as healthcare trust infrastructure across professionals, facilities, and operations.",
+    src: "/images/trust/hospital-corridor-care-team.jpg",
+    alt: "Hospital care team working together in a clinical corridor.",
     tone: "deep",
   },
   contact: {
-    src: "/images/recommendations/recommendation-package.svg",
-    alt: "Illustration of Afyalink contact and recommendation workflow packaging.",
+    src: "/images/contact/clinic-director-conversation.jpg",
+    alt: "Healthcare professionals in conversation about clinical operations.",
     tone: "gold",
   },
   faq: {
-    src: "/images/security/secure-candidate-viewing.svg",
-    alt: "Illustration of secure candidate access and workflow answers.",
+    src: "/images/security/credential-security-review.jpg",
+    alt: "Clinical record review representing secure workflow questions.",
     tone: "teal",
   },
 };
@@ -113,9 +114,43 @@ export function ImagePanel({
   tone?: VisualTone;
   priority?: boolean;
 }) {
+  const isVector = src.endsWith(".svg");
+
   return (
-    <figure className={`image-panel tone-${tone}`}>
-      <img src={src} alt={alt} loading={priority ? "eager" : "lazy"} />
+    <figure className={`image-panel tone-${tone} ${isVector ? "is-vector" : "is-photo"}`}>
+      <Image
+        src={src}
+        alt={alt}
+        width={1400}
+        height={980}
+        priority={priority}
+        loading={priority ? "eager" : "lazy"}
+        sizes="(max-width: 1080px) calc(100vw - 32px), 48vw"
+        unoptimized={isVector}
+        className="media-image"
+      />
+    </figure>
+  );
+}
+
+export function EditorialPhoto({
+  visual,
+  caption,
+}: {
+  visual: { src: string; alt: string; tone?: VisualTone };
+  caption: string;
+}) {
+  return (
+    <figure className={`editorial-photo tone-${visual.tone ?? "teal"}`}>
+      <Image
+        src={visual.src}
+        alt={visual.alt}
+        width={1400}
+        height={920}
+        sizes="(max-width: 900px) calc(100vw - 32px), 62vw"
+        className="media-image"
+      />
+      <figcaption>{caption}</figcaption>
     </figure>
   );
 }

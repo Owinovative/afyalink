@@ -72,13 +72,22 @@ const requiredFiles = [
 
 const requiredVisualAssets = [
   "public/images/hero/healthcare-trust-canvas.svg",
+  "public/images/hero/healthcare-professional-reviewing-records.jpg",
   "public/images/professionals/professional-verification.svg",
+  "public/images/professionals/clinical-professional-consultation.jpg",
   "public/images/students/waiting-license-track.svg",
+  "public/images/students/nursing-student-training-lab.jpg",
   "public/images/facilities/facility-marketplace.svg",
+  "public/images/facilities/hospital-facility-team.jpg",
   "public/images/verification/verification-operations.svg",
+  "public/images/verification/admin-verification-desk.jpg",
   "public/images/security/secure-candidate-viewing.svg",
+  "public/images/security/credential-security-review.jpg",
   "public/images/marketplace/candidate-marketplace.svg",
+  "public/images/marketplace/facility-candidate-review.jpg",
   "public/images/recommendations/recommendation-package.svg",
+  "public/images/trust/hospital-corridor-care-team.jpg",
+  "public/images/contact/clinic-director-conversation.jpg",
   "public/images/backgrounds/clinical-grid.svg",
 ];
 
@@ -108,11 +117,17 @@ if (!facilityClient.includes("secure-profile") || !facilityClient.includes("data
 }
 
 const globalCss = readFileSync(join(root, "src/app/globals.css"), "utf8");
-for (const className of ["hero-shell", "feature-split", "image-panel", "proof-strip", "large-cta"]) {
+for (const className of ["hero-shell", "feature-split", "image-panel", "editorial-photo", "proof-strip", "large-cta"]) {
   if (!globalCss.includes(className)) {
     console.error(`Premium visual system class .${className} is missing from globals.css.`);
     process.exit(1);
   }
+}
+
+const visualSystem = readFileSync(join(root, "src/components/marketing/VisualSystem.tsx"), "utf8");
+if (!visualSystem.includes("next/image") || !visualSystem.includes("EditorialPhoto")) {
+  console.error("Marketing visual system must use next/image and expose editorial photo compositions.");
+  process.exit(1);
 }
 
 const legacyFiles = ["index.html", "src/app.js", "src/styles.css", "scripts/build-render.mjs"];

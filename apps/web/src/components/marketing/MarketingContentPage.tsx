@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  EditorialPhoto,
   FeatureSplit,
   ImagePanel,
   LargeCTA,
@@ -20,8 +21,8 @@ const companionVisuals: Record<string, ReturnType<typeof getVisualForSlug>> = {
   "trust-security": getVisualForSlug("verification"),
   verification: getVisualForSlug("professionals"),
   "pricing-access": getVisualForSlug("recommendations"),
-  about: getVisualForSlug("professionals"),
-  contact: getVisualForSlug("facilities"),
+  about: getVisualForSlug("facilities"),
+  contact: getVisualForSlug("contact"),
   faq: getVisualForSlug("how-it-works"),
 };
 
@@ -71,6 +72,17 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
           />
         </div>
       </SectionFrame>
+
+      {page.slug !== "faq" ? (
+        <SectionFrame className="photo-story-section">
+          <div className="wide-container">
+            <EditorialPhoto
+              visual={companion}
+              caption={`Afyalink presents ${page.eyebrow.toLowerCase()} through real healthcare work: people, records, facilities, and trust operations rather than abstract product decoration.`}
+            />
+          </div>
+        </SectionFrame>
+      ) : null}
 
       <SectionFrame>
         <div className="wide-container">

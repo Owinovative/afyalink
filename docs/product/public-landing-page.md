@@ -11,7 +11,7 @@ The Afyalink public page positions the platform as healthcare verification infra
 
 ## Page Structure
 
-- Hero: Afyalink as verified healthcare talent infrastructure.
+- Hero: Afyalink as verified healthcare talent infrastructure, led by real clinical photography.
 - Trust strip: verify, interview, recommend, connect.
 - How it works: professional intake, Afyalink verification/interview, facility access.
 - Professional section: readiness, verification, publication awareness.
@@ -30,5 +30,9 @@ The Afyalink public page positions the platform as healthcare verification infra
 - Keep workbench panels dense, predictable, and useful for repeated tasks.
 - Avoid fake claims or unsupported metrics.
 - Do not imply screenshots are impossible to capture.
-- Use local image/illustration assets only; do not rely on external stock hotlinks.
+- Use local photo assets and only supporting illustrations; do not rely on external stock hotlinks at runtime.
 - Public pages should feel individually art-directed rather than copies of one card grid.
+
+## Benchmark-Synthesized Photo Direction
+
+The current public site follows the benchmark synthesis in `docs/frontend/benchmark-synthesis.md`: Apple-like hero discipline, Airbnb/Maven/Oscar human warmth, Mayo-style healthcare credibility, and Stripe-like product hierarchy. The result should feel photographic and clinical first, with product UI and vector diagrams used only as supporting material.

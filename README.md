@@ -108,7 +108,7 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - Premium public landing page positioning Afyalink as trusted healthcare verification infrastructure.
 - GitHub Actions CI foundation.
 - Next.js App Router web platform with multi-page public site, routed auth, and separate professional, facility, and admin portals.
-- Premium image-led frontend visual system with local SVG healthcare/trust illustrations, wide desktop sections, refined portal chrome, and public pages for professionals, facilities, students, verification, security, pricing, about, contact, and FAQ.
+- Benchmark-synthesized, photo-led frontend visual system with locally bundled healthcare photography, wide desktop sections, refined portal chrome, and public pages for professionals, facilities, students, verification, security, pricing, about, contact, and FAQ.
 - Student / graduate awaiting-license track for pre-licensure applicants, including student registration, preliminary credential requirements, waiting-license dashboard guidance, admin pre-licensure queue, and controlled conversion into the licensed professional track.
 
 ## Run Locally
