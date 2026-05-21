@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.cwd();
@@ -61,6 +61,7 @@ const requiredRoutes = [
 const requiredFiles = [
   "src/components/layout/MarketingLayout.tsx",
   "src/components/layout/PortalLayout.tsx",
+  "src/components/layout/BrandLockup.tsx",
   "src/components/marketing/VisualSystem.tsx",
   "src/components/auth/AuthForms.tsx",
   "src/components/professional/ProfessionalPages.tsx",
@@ -117,7 +118,7 @@ if (!facilityClient.includes("secure-profile") || !facilityClient.includes("data
 }
 
 const globalCss = readFileSync(join(root, "src/app/globals.css"), "utf8");
-for (const className of ["hero-shell", "feature-split", "image-panel", "editorial-photo", "proof-strip", "large-cta"]) {
+for (const className of ["hero-shell", "feature-split", "image-panel", "proof-strip", "large-cta", "process-band", "auth-shell"]) {
   if (!globalCss.includes(className)) {
     console.error(`Premium visual system class .${className} is missing from globals.css.`);
     process.exit(1);
@@ -125,8 +126,27 @@ for (const className of ["hero-shell", "feature-split", "image-panel", "editoria
 }
 
 const visualSystem = readFileSync(join(root, "src/components/marketing/VisualSystem.tsx"), "utf8");
-if (!visualSystem.includes("next/image") || !visualSystem.includes("EditorialPhoto")) {
-  console.error("Marketing visual system must use next/image and expose editorial photo compositions.");
+if (!visualSystem.includes("next/image") || !visualSystem.includes("CompactMetricStrip")) {
+  console.error("Marketing visual system must use next/image and expose compact metric compositions.");
+  process.exit(1);
+}
+
+const runtimeSources = [
+  "src/components/layout/MarketingNav.tsx",
+  "src/components/layout/PublicFooter.tsx",
+  "src/components/layout/PortalLayout.tsx",
+].map((file) => readFileSync(join(root, file), "utf8")).join("\n");
+if (runtimeSources.includes("afyalink-logo.png")) {
+  console.error("Runtime header/footer must not load the oversized full logo PNG.");
+  process.exit(1);
+}
+
+const rasterAssets = requiredVisualAssets.filter((file) => /\.(jpg|jpeg|png)$/i.test(file));
+const oversized = rasterAssets
+  .map((file) => ({ file, size: statSync(join(root, file)).size }))
+  .filter(({ file, size }) => !file.includes("/brand/") && size > 250 * 1024);
+if (oversized.length > 0) {
+  console.error(`Photo assets exceed the 250 KB page-image budget:\n${oversized.map(({ file, size }) => `- ${file}: ${Math.round(size / 1024)} KB`).join("\n")}`);
   process.exit(1);
 }
 

@@ -15,6 +15,8 @@ The current implementation documents executable account lifecycle, notification 
 - [Secure Candidate Viewing and Watermarking](security/secure-candidate-viewing.md)
 - [Recommendation Workflow](workflows/recommendation-workflow.md)
 - [Benchmark Synthesis](frontend/benchmark-synthesis.md)
+- [Visual Route Audit](frontend/visual-route-audit.md)
+- [Photo Asset Plan](frontend/photo-asset-plan.md)
 - [Public Landing Page](product/public-landing-page.md)
 - [Public Site Information Architecture](product/public-site-information-architecture.md)
 - [Student Awaiting License Experience](product/student-awaiting-license-experience.md)

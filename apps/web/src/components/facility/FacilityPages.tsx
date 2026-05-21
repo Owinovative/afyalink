@@ -34,6 +34,18 @@ const facilitySectionTitles: Record<FacilitySection, string> = {
   packages: "Packages",
 };
 
+const facilitySectionBodies: Record<FacilitySection, string> = {
+  home: "Your approved facility workspace.",
+  dashboard: "Track onboarding, access, requests, and shared packages.",
+  onboarding: "Keep organization details ready for Afyalink review.",
+  access: "Create access references and view entitlement state.",
+  candidates: "Browse published candidates after approval and active access.",
+  "candidate-detail": "Open a watermarked read-only candidate profile.",
+  appointments: "Request consultation or hiring support.",
+  recommendations: "Ask Afyalink to recommend professionals for a role.",
+  packages: "Review shared recommendation packages.",
+};
+
 function csvIds(value: unknown) {
   return String(value ?? "")
     .split(",")
@@ -56,7 +68,7 @@ export function FacilityPage({ section, publicationId }: { section: FacilitySect
       <PageHeader
         eyebrow="Facility portal"
         title={facilitySectionTitles[section]}
-        body="Facility pages stay gated by backend approval, membership, active access, and candidate publication rules."
+        body={facilitySectionBodies[section]}
       />
       {resource.loading ? <div className="notice">Loading facility dashboard...</div> : null}
       {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
@@ -313,7 +325,7 @@ function CandidateMarketplace({ token }: { token: string }) {
   return (
     <section className="card">
       <h2>Candidate marketplace</h2>
-      <p>Published candidate browsing is available only to approved facilities with active access.</p>
+      <p>Only approved facilities with active access can browse published candidates.</p>
       <form className="form-grid" onSubmit={search} style={{ marginTop: 18 }}>
         <Field label="Search profession, county, or summary" name="search" defaultValue={query} />
         <label>
@@ -350,7 +362,7 @@ function CandidateMarketplace({ token }: { token: string }) {
             </DataRow>
           ))
         ) : (
-          <EmptyState title="No candidates loaded" body="Use browse to request the current published candidate catalogue." />
+          <EmptyState title="No candidates loaded" body="Use Browse to request the current catalogue." />
         )}
       </div>
     </section>
@@ -400,7 +412,7 @@ function CandidateDetail({ publicationId }: { publicationId: string }) {
                 <DataRow key={String(item.id ?? item.document_type)} title={display(item.document_type)} status={item.review_status} />
               ))
             ) : (
-              <p>Approved credential metadata is not available. Raw private documents are not exposed here.</p>
+              <p>Approved metadata is not available. Raw private documents are not exposed.</p>
             )}
           </div>
         </div>

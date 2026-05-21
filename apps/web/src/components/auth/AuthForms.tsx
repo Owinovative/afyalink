@@ -36,6 +36,25 @@ function titleFor(mode: AuthMode) {
   }
 }
 
+function bodyFor(mode: AuthMode) {
+  switch (mode) {
+    case "professional-register":
+      return "Create your licensed professional account and continue to profile, credentials, consent, payment, and application readiness.";
+    case "student-register":
+      return "Start early as a waiting-license applicant. You will not be treated as licensed or facility-publishable until license conversion is complete.";
+    case "facility-register":
+      return "Create a facility owner account, complete onboarding, and wait for Afyalink approval before marketplace access.";
+    case "verify-email":
+      return "Paste the verification token from your email to unlock the next account step.";
+    case "forgot":
+      return "Enter your email. If an account exists, reset instructions will be queued.";
+    case "reset":
+      return "Use your reset token and choose a new password.";
+    default:
+      return "Sign in to the professional, facility, or admin workspace.";
+  }
+}
+
 export function AuthForm({ mode }: { mode: AuthMode }) {
   const router = useRouter();
   const [role, setRole] = useState<ApiRole>("professional");
@@ -124,11 +143,34 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
   return (
     <main className="auth-wrap">
-      <section className="auth-card form-card">
+      <div className="auth-shell">
+        <aside className="auth-aside">
+          <div className="eyebrow">Secure access</div>
+          <h1>Continue in the right Afyalink workspace.</h1>
+          <p>
+            Professionals, students, facilities, and admins use separate routes so workflow state and permissions stay
+            clear.
+          </p>
+          <div className="table-lite">
+            <div>
+              <span>Licensed professionals</span>
+              <span className="badge green">Verified path</span>
+            </div>
+            <div>
+              <span>Students awaiting license</span>
+              <span className="badge gold">Pre-licensure</span>
+            </div>
+            <div>
+              <span>Facilities</span>
+              <span className="badge green">Access gated</span>
+            </div>
+          </div>
+        </aside>
+        <section className="auth-card form-card">
         <PageHeader
           eyebrow="Afyalink account"
           title={titleFor(mode)}
-          body="Use the routed account pages for sessions, verification, and recovery. Backend authorization remains authoritative after sign-in."
+          body={bodyFor(mode)}
         />
         <form className="form-grid" onSubmit={submit}>
           {mode === "login" ? (
@@ -206,7 +248,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             <span />
           </div>
         </div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }

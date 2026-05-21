@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLockup } from "@/components/layout/BrandLockup";
 import { marketingLinks } from "@/lib/routes";
 
 export function MarketingNav() {
@@ -6,11 +7,7 @@ export function MarketingNav() {
     <header className="marketing-nav">
       <div className="nav-inner">
         <Link className="brand" href="/">
-          <img alt="" src="/brand/afyalink-logo.png" />
-          <span className="brand-lockup">
-            <span>Afyalink</span>
-            <span className="brand-kicker">Healthcare trust platform</span>
-          </span>
+          <BrandLockup />
         </Link>
         <nav className="nav-links" aria-label="Public navigation">
           {marketingLinks.slice(0, 6).map((link) => (
@@ -21,10 +18,10 @@ export function MarketingNav() {
         </nav>
         <div className="nav-actions">
           <Link className="button ghost" href="/auth/login">
-            Login
+            Sign in
           </Link>
-          <Link className="button" href="/auth/register/facility">
-            Join Afyalink
+          <Link className="button" href="/auth/register/professional">
+            Get started
           </Link>
         </div>
       </div>

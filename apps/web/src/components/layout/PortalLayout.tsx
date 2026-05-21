@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clearToken, useSessionToken } from "@/lib/auth/session";
+import { BrandLockup } from "@/components/layout/BrandLockup";
 import type { ApiRole } from "@/lib/api/client";
 
 export function PortalLayout({
@@ -25,11 +26,7 @@ export function PortalLayout({
       <header className="marketing-nav">
         <div className="portal-topbar">
           <Link className="brand" href="/">
-            <img alt="" src="/brand/afyalink-logo.png" />
-            <span className="brand-lockup">
-              <span>{title}</span>
-              <span className="brand-kicker">Routed Afyalink workspace</span>
-            </span>
+            <BrandLockup kicker={title} />
           </Link>
           <div className="nav-actions">
             <Link className="button secondary" href={loginHref}>

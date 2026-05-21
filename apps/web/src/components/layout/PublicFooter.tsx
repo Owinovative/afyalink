@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLockup } from "@/components/layout/BrandLockup";
 import { marketingLinks } from "@/lib/routes";
 
 export function PublicFooter() {
@@ -7,11 +8,7 @@ export function PublicFooter() {
       <div className="footer-grid">
         <div>
           <Link className="brand" href="/">
-            <img alt="" src="/brand/afyalink-logo.png" />
-            <span className="brand-lockup">
-              <span>Afyalink</span>
-              <span className="brand-kicker">Healthcare trust platform</span>
-            </span>
+            <BrandLockup />
           </Link>
           <p style={{ marginTop: 16 }}>
             Secure healthcare verification, controlled facility access, and audited candidate recommendation workflows.

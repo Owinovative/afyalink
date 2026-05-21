@@ -108,24 +108,26 @@ export function ImagePanel({
   alt,
   tone = "teal",
   priority = false,
+  variant = "compact",
 }: {
   src: string;
   alt: string;
   tone?: VisualTone;
   priority?: boolean;
+  variant?: "compact" | "hero" | "wide";
 }) {
   const isVector = src.endsWith(".svg");
 
   return (
-    <figure className={`image-panel tone-${tone} ${isVector ? "is-vector" : "is-photo"}`}>
+    <figure className={`image-panel image-${variant} tone-${tone} ${isVector ? "is-vector" : "is-photo"}`}>
       <Image
         src={src}
         alt={alt}
-        width={1400}
-        height={980}
+        width={variant === "hero" ? 1100 : 920}
+        height={variant === "hero" ? 760 : 620}
         priority={priority}
         loading={priority ? "eager" : "lazy"}
-        sizes="(max-width: 1080px) calc(100vw - 32px), 48vw"
+        sizes={variant === "hero" ? "(max-width: 1080px) calc(100vw - 32px), 46vw" : "(max-width: 1080px) calc(100vw - 32px), 38vw"}
         unoptimized={isVector}
         className="media-image"
       />
@@ -145,9 +147,9 @@ export function EditorialPhoto({
       <Image
         src={visual.src}
         alt={visual.alt}
-        width={1400}
-        height={920}
-        sizes="(max-width: 900px) calc(100vw - 32px), 62vw"
+        width={1080}
+        height={620}
+        sizes="(max-width: 900px) calc(100vw - 32px), 58vw"
         className="media-image"
       />
       <figcaption>{caption}</figcaption>
@@ -194,9 +196,9 @@ export function FeatureSplit({
   );
 }
 
-export function ProofStrip({ items }: { items: Array<{ label: string; value: string; body?: string }> }) {
+export function ProofStrip({ items, compact = false }: { items: Array<{ label: string; value: string; body?: string }>; compact?: boolean }) {
   return (
-    <div className="proof-strip">
+    <div className={`proof-strip ${compact ? "compact" : ""}`}>
       {items.map((item) => (
         <div className="proof-item" key={item.label}>
           <strong>{item.value}</strong>
@@ -206,6 +208,10 @@ export function ProofStrip({ items }: { items: Array<{ label: string; value: str
       ))}
     </div>
   );
+}
+
+export function CompactMetricStrip({ items }: { items: Array<{ label: string; value: string; body?: string }> }) {
+  return <ProofStrip items={items} compact />;
 }
 
 export function ProcessTimeline({ steps }: { steps: Array<{ title: string; body: string }> }) {
@@ -245,6 +251,26 @@ export function VisualCard({
   );
 }
 
+export function PhotoCard({
+  title,
+  body,
+  visual,
+}: {
+  title: string;
+  body: string;
+  visual: { src: string; alt: string; tone?: VisualTone };
+}) {
+  return (
+    <article className="photo-card">
+      <ImagePanel src={visual.src} alt={visual.alt} tone={visual.tone} />
+      <div>
+        <h3>{title}</h3>
+        <p>{body}</p>
+      </div>
+    </article>
+  );
+}
+
 export function LargeCTA({
   eyebrow,
   title,
@@ -278,3 +304,10 @@ export function LargeCTA({
     </section>
   );
 }
+
+export const CTASection = LargeCTA;
+export const CompactHero = ImagePanel;
+export const PhotoHero = ImagePanel;
+export const MediaSplit = FeatureSplit;
+export const ProcessSteps = ProcessTimeline;
+export const EditorialBand = EditorialPhoto;

@@ -3,7 +3,7 @@ import { display } from "@/lib/formatters";
 
 export function MetricGrid({ metrics }: { metrics: Array<{ label: string; value: unknown; body?: string }> }) {
   return (
-    <div className="grid-4">
+    <div className={`metric-grid count-${metrics.length}`}>
       {metrics.map((metric) => (
         <div className="metric-card" key={metric.label}>
           <strong>{display(metric.value, "0")}</strong>

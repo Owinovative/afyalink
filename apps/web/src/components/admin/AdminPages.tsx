@@ -51,13 +51,33 @@ const adminSectionTitles: Record<AdminSection, string> = {
   audit: "Audit",
 };
 
+const adminSectionBodies: Record<AdminSection, string> = {
+  dashboard: "Operational queues, access state, and review counters.",
+  applications: "Review submitted professional applications.",
+  "pre-licensure": "Track students and graduates awaiting license conversion.",
+  "application-detail": "Inspect one application and apply valid backend actions.",
+  credentials: "Review credential records and replacement needs.",
+  payments: "Confirm or reject payment references.",
+  verifications: "Manage regulatory verification cases.",
+  "verification-detail": "Update one verification case.",
+  interviews: "Schedule and review interviews.",
+  "interview-detail": "Record interview outcomes.",
+  facilities: "Approve facilities and inspect onboarding state.",
+  "facility-detail": "Manage one facility record.",
+  publications: "Publish, pause, or withdraw candidate catalogue entries.",
+  subscriptions: "Manage facility access entitlement.",
+  appointments: "Review facility appointment requests.",
+  recommendations: "Prepare and share recommendation packages.",
+  audit: "Inspect sensitive platform activity.",
+};
+
 export function AdminPage({ section, id }: { section: AdminSection; id?: string }) {
   return (
     <>
       <PageHeader
         eyebrow="Admin operations"
         title={adminSectionTitles[section]}
-        body="Admin pages expose queue and detail workflows while controllers and services enforce state transitions."
+        body={adminSectionBodies[section]}
       />
       {section === "dashboard" ? <AdminDashboard /> : null}
       {section === "pre-licensure" ? <PrelicensureQueue /> : null}
@@ -126,15 +146,14 @@ function AdminDashboard() {
           { label: "Verification cases", value: asRecord(data.verifications).total },
           { label: "Interviews", value: asRecord(data.interviews).total },
           { label: "Active access", value: asRecord(data.access).active },
-          { label: "Profile views", value: asRecord(data.publications).candidate_profile_views },
           { label: "Waiting-license", value: asRecord(data.prelicensure).total },
         ]}
       />
       <div className="grid-3">
-        <QuickLink title="Application review" href="/portal/admin/applications" body="Open professional submissions and credential review workflows." />
-        <QuickLink title="Facility operations" href="/portal/admin/facilities" body="Approve facilities and manage subscription access." />
-        <QuickLink title="Recommendations" href="/portal/admin/recommendations" body="Prepare and share curated candidate packages." />
-        <QuickLink title="Pre-licensure queue" href="/portal/admin/pre-licensure" body="Track students and graduates waiting for professional licenses." />
+        <QuickLink title="Application review" href="/portal/admin/applications" body="Open professional submissions and credentials." />
+        <QuickLink title="Facility operations" href="/portal/admin/facilities" body="Approve facilities and manage access." />
+        <QuickLink title="Recommendations" href="/portal/admin/recommendations" body="Prepare curated candidate packages." />
+        <QuickLink title="Pre-licensure queue" href="/portal/admin/pre-licensure" body="Track students waiting for licenses." />
       </div>
     </div>
   );

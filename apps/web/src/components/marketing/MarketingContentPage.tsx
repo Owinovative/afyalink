@@ -1,11 +1,10 @@
 import Link from "next/link";
 import {
-  EditorialPhoto,
   FeatureSplit,
   ImagePanel,
   LargeCTA,
   ProcessTimeline,
-  ProofStrip,
+  CompactMetricStrip,
   SectionFrame,
   SectionIntro,
   VisualCard,
@@ -57,32 +56,21 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
               ) : null}
             </div>
           </div>
-          <ImagePanel src={visual.src} alt={visual.alt} tone={visual.tone} priority />
+          <ImagePanel src={visual.src} alt={visual.alt} tone={visual.tone} />
         </div>
       </section>
 
       <SectionFrame tone={pageTone(page.slug)}>
         <div className="wide-container">
-          <ProofStrip
+          <CompactMetricStrip
             items={page.highlights.map((item) => ({
               value: item.title,
-              label: "Afyalink layer",
+              label: "Platform layer",
               body: item.body,
             }))}
           />
         </div>
       </SectionFrame>
-
-      {page.slug !== "faq" ? (
-        <SectionFrame className="photo-story-section">
-          <div className="wide-container">
-            <EditorialPhoto
-              visual={companion}
-              caption={`Afyalink presents ${page.eyebrow.toLowerCase()} through real healthcare work: people, records, facilities, and trust operations rather than abstract product decoration.`}
-            />
-          </div>
-        </SectionFrame>
-      ) : null}
 
       <SectionFrame>
         <div className="wide-container">
@@ -99,7 +87,7 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
 
       <SectionFrame tone="soft">
         <div className="wide-container">
-          <div className="feature-split reverse">
+          <div className="process-band">
             <div className="feature-copy">
               <div className="eyebrow">Operating detail</div>
               <h2>{page.sections[1]?.title ?? "Workflow controls stay explicit."}</h2>
@@ -111,7 +99,6 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
                 }))}
               />
             </div>
-            <ImagePanel src={visual.src} alt={visual.alt} tone={visual.tone} />
           </div>
         </div>
       </SectionFrame>
@@ -123,15 +110,15 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
         <div className="wide-container">
           <SectionIntro
             eyebrow="Role-aware paths"
-            title="Move through Afyalink from the portal that fits your role."
-            body="Public pages explain the product. Authenticated portals handle records, secure actions, and current workflow state."
+            title="Start from the workspace that fits your role."
+            body="Public pages explain Afyalink. Portals handle records, permissions, and live workflow state."
             align="center"
           />
           <div className="grid-3">
             <VisualCard
               eyebrow="Professional"
-              title="Complete verification readiness."
-              body="Create an account, upload credentials privately, accept consent, submit an application, and track progress."
+              title="Prepare for verification."
+              body="Build your profile, upload credentials, accept consent, and submit when ready."
             >
               <div className="action-row" style={{ marginTop: 18 }}>
                 <Link className="button secondary" href="/auth/register/professional">
@@ -141,8 +128,8 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
             </VisualCard>
             <VisualCard
               eyebrow="Facility"
-              title="Request controlled marketplace access."
-              body="Submit facility details, wait for review, activate access, browse candidates, and request recommendations."
+              title="Request access."
+              body="Submit facility details, activate access, browse candidates, and request recommendations."
             >
               <div className="action-row" style={{ marginTop: 18 }}>
                 <Link className="button secondary" href="/auth/register/facility">
@@ -152,8 +139,8 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
             </VisualCard>
             <VisualCard
               eyebrow="Operations"
-              title="Manage trust workflows."
-              body="Review applications, credentials, payments, verification cases, interviews, facilities, publications, and audit records."
+              title="Run review workflows."
+              body="Manage applications, credentials, interviews, facilities, publication, and audit."
             >
               <div className="action-row" style={{ marginTop: 18 }}>
                 <Link className="button secondary" href="/portal/admin">
@@ -169,8 +156,8 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
         <div className="wide-container">
           <LargeCTA
             eyebrow={page.eyebrow}
-            title="Afyalink keeps healthcare hiring workflows controlled, private, and accountable."
-            body="Start from the public page that matches your role, then continue in the routed portal where live records and permissions are enforced by the backend."
+            title="Move from public guidance to secure workflow."
+            body="Choose your role, then continue in the routed portal where permissions and state are enforced."
             primary={page.primaryCta ?? { label: "Start", href: "/" }}
             secondary={page.secondaryCta}
           />
