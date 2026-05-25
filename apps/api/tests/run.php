@@ -35,7 +35,14 @@ use Afyalink\Core\Domain\Profiles\ProfessionalProfile;
 use Afyalink\Core\Domain\Regulatory\RegulatoryBodyRegistry;
 use Afyalink\Core\Domain\Security\FileUploadPolicy;
 use Afyalink\Core\Application\Audit\AuditLogger;
+use Afyalink\Core\Application\AI\LocalRecommendationAssistant;
+use Afyalink\Core\Application\Consent\ConsentService;
+use Afyalink\Core\Application\Facilities\CandidatePublicationService;
+use Afyalink\Core\Application\Facilities\FacilityAccessService;
+use Afyalink\Core\Application\Facilities\FacilityService;
+use Afyalink\Core\Application\Integrations\FhirMappingService;
 use Afyalink\Core\Application\Notifications\NotificationDeliveryService;
+use Afyalink\Core\Application\Placements\PlacementService;
 use Afyalink\Core\Application\Payments\MpesaPaymentService;
 use Afyalink\Core\Application\Privacy\PrivacyRequestService;
 use Afyalink\Core\Application\Auth\AuthenticatedUser;
@@ -1102,6 +1109,395 @@ $tests = [
         expectTrue($request['subject_email'] === 'j***@example.com', 'privacy response should mask subject email');
         expectTrue($updated['status'] === 'under_review', 'privacy request should update through service');
         expectTrue(in_array('privacy_request.status_changed', array_map(static fn (array $row): string => (string) $row['action'], $store->all('audit_logs')), true), 'privacy request update should be audited');
+        @unlink($path);
+    },
+    'milestone 5 matching blocks students and scores eligible professionals transparently' => function (): void {
+        $path = sys_get_temp_dir() . '/afyalink-m5-matching-' . bin2hex(random_bytes(4)) . '.json';
+        $store = new JsonDataStore($path);
+        $audit = new AuditLogger($store);
+        $facilities = new FacilityService($store, $audit);
+        $access = new FacilityAccessService($store, $facilities, $audit);
+        $publications = new CandidatePublicationService($store, $facilities, $access, new ConsentService($store, $audit), $audit);
+        $placements = new PlacementService($store, $facilities, $access, $publications, $audit, null, new LocalRecommendationAssistant());
+        $now = gmdate(DATE_ATOM);
+        $admin = new AuthenticatedUser(90, 'Admin', 'admin@example.com', '0799999999', [UserRole::Admin]);
+
+        $facilityOwner = $store->insert('users', [
+            'name' => 'Facility Owner',
+            'email' => 'facility@example.com',
+            'phone' => '0700000001',
+            'password_hash' => 'hash',
+            'roles' => [UserRole::FacilityAdmin->value],
+            'is_active' => true,
+            'email_verified_at' => $now,
+            'last_login_at' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $facility = $store->insert('facilities', [
+            'legal_name' => 'Nairobi Care Hospital',
+            'display_name' => 'Nairobi Care',
+            'facility_type' => 'Hospital',
+            'registration_number' => 'FAC-M5',
+            'county' => 'Nairobi',
+            'location' => 'Westlands',
+            'email' => 'facility@example.com',
+            'phone' => '0700000001',
+            'physical_address' => 'Nairobi',
+            'contact_person' => 'Facility Owner',
+            'operational_status' => 'active',
+            'review_status' => FacilityReviewStatus::Approved->value,
+            'created_by' => (int) $facilityOwner['id'],
+            'reviewed_by' => 90,
+            'review_note' => null,
+            'submitted_at' => $now,
+            'reviewed_at' => $now,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $store->insert('facility_memberships', [
+            'facility_id' => (int) $facility['id'],
+            'user_id' => (int) $facilityOwner['id'],
+            'role' => UserRole::FacilityAdmin->value,
+            'status' => 'active',
+            'invited_by' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $store->insert('facility_access_subscriptions', [
+            'facility_id' => (int) $facility['id'],
+            'plan_code' => 'facility_marketplace',
+            'status' => FacilityAccessStatus::Active->value,
+            'payment_reference' => 'AFYA-FAC-M5',
+            'idempotency_key' => 'm5-access',
+            'amount_cents' => 500000,
+            'currency' => 'KES',
+            'method' => 'manual_reference',
+            'provider' => 'manual',
+            'provider_reference' => null,
+            'checkout_request_id' => null,
+            'merchant_request_id' => null,
+            'phone_number' => null,
+            'paid_at' => $now,
+            'external_reference' => null,
+            'starts_at' => $now,
+            'ends_at' => (new DateTimeImmutable('+30 days'))->format(DATE_ATOM),
+            'admin_override' => false,
+            'note' => null,
+            'created_by' => (int) $facilityOwner['id'],
+            'reviewed_by' => 90,
+            'reviewed_at' => $now,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $pro = $store->insert('users', [
+            'name' => 'Grace Nurse',
+            'email' => 'grace.m5@example.com',
+            'phone' => '0700000002',
+            'password_hash' => 'hash',
+            'roles' => [UserRole::Professional->value],
+            'is_active' => true,
+            'email_verified_at' => $now,
+            'last_login_at' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $student = $store->insert('users', [
+            'name' => 'Student Nurse',
+            'email' => 'student.m5@example.com',
+            'phone' => '0700000003',
+            'password_hash' => 'hash',
+            'roles' => [UserRole::Professional->value],
+            'is_active' => true,
+            'email_verified_at' => $now,
+            'last_login_at' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $application = $store->insert('applications', [
+            'user_id' => (int) $pro['id'],
+            'application_number' => 'AFYA-M5-001',
+            'status' => ApplicationStatus::Qualified->value,
+            'submitted_at' => $now,
+            'review_note' => null,
+            'timeline' => [],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $studentApplication = $store->insert('applications', [
+            'user_id' => (int) $student['id'],
+            'application_number' => 'AFYA-M5-STUDENT',
+            'status' => ApplicationStatus::Qualified->value,
+            'submitted_at' => $now,
+            'review_note' => null,
+            'timeline' => [],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $store->insert('profiles', [
+            'user_id' => (int) $pro['id'],
+            'applicant_track' => ApplicantTrack::LicensedProfessional->value,
+            'student_status' => null,
+            'name' => 'Grace Nurse',
+            'email' => 'grace.m5@example.com',
+            'phone' => '0700000002',
+            'profession' => 'Registered Nurse',
+            'target_profession' => 'Registered Nurse',
+            'regulatory_body' => 'Nursing Council of Kenya',
+            'expected_regulatory_body' => 'Nursing Council of Kenya',
+            'license_number' => 'NCK-M5',
+            'county' => 'Nairobi',
+            'years_experience' => 6,
+            'institution_name' => null,
+            'programme_or_course' => null,
+            'graduation_or_completion_date' => null,
+            'prelicensure_note' => null,
+            'conversion_review_status' => 'not_applicable',
+            'license_uploaded_at' => null,
+            'availability' => 'available_now',
+            'work_preferences' => [],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $store->insert('profiles', [
+            'user_id' => (int) $student['id'],
+            'applicant_track' => ApplicantTrack::StudentAwaitingLicense->value,
+            'student_status' => 'completed_training_waiting_license',
+            'name' => 'Student Nurse',
+            'email' => 'student.m5@example.com',
+            'phone' => '0700000003',
+            'profession' => 'Registered Nurse',
+            'target_profession' => 'Registered Nurse',
+            'regulatory_body' => '',
+            'expected_regulatory_body' => 'Nursing Council of Kenya',
+            'license_number' => '',
+            'county' => 'Nairobi',
+            'years_experience' => 0,
+            'institution_name' => 'Afya Training College',
+            'programme_or_course' => 'Diploma Nursing',
+            'graduation_or_completion_date' => null,
+            'prelicensure_note' => null,
+            'conversion_review_status' => 'waiting_for_license',
+            'license_uploaded_at' => null,
+            'availability' => '',
+            'work_preferences' => [],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        foreach ([$pro, $student] as $candidateUser) {
+            $store->insert('consents', [
+                'user_id' => (int) $candidateUser['id'],
+                'type' => 'credential_verification',
+                'version' => 'v1',
+                'text_hash' => str_repeat('a', 64),
+                'accepted_at' => $now,
+                'ip_address' => null,
+                'user_agent' => null,
+                'created_at' => $now,
+            ]);
+            $store->insert('professional_placement_preferences', [
+                'user_id' => (int) $candidateUser['id'],
+                'open_to_work' => true,
+                'availability_status' => 'available_now',
+                'available_from' => null,
+                'preferred_counties' => ['Nairobi'],
+                'preferred_facility_types' => ['Hospital'],
+                'employment_types' => ['full_time', 'locum'],
+                'shift_preferences' => ['day'],
+                'desired_roles' => ['Registered Nurse'],
+                'minimum_rate_or_salary' => null,
+                'relocation_willingness' => 'within_county',
+                'remote_or_telehealth_interest' => false,
+                'notes' => null,
+                'student_future_preferences' => [],
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+        $store->insert('verification_cases', [
+            'professional_user_id' => (int) $pro['id'],
+            'application_id' => (int) $application['id'],
+            'regulatory_body_code' => 'NCK',
+            'license_number' => 'NCK-M5',
+            'method' => 'manual_registry',
+            'assigned_reviewer_id' => 90,
+            'status' => VerificationStatus::Verified->value,
+            'evidence_reference' => 'Manual registry check',
+            'reviewer_notes' => 'Verified.',
+            'timeline' => [],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $store->insert('interviews', [
+            'professional_user_id' => (int) $pro['id'],
+            'application_id' => (int) $application['id'],
+            'scheduled_start_at' => $now,
+            'scheduled_end_at' => $now,
+            'mode' => 'remote',
+            'location' => null,
+            'interviewer_id' => 90,
+            'status' => 'completed',
+            'notes' => 'Good fit.',
+            'total_score' => 85,
+            'recommendation' => InterviewRecommendation::Recommend->value,
+            'timeline' => [],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $publication = $store->insert('candidate_publications', [
+            'application_id' => (int) $application['id'],
+            'professional_user_id' => (int) $pro['id'],
+            'status' => CandidatePublicationStatus::Published->value,
+            'summary_snapshot' => [
+                'candidate_code' => 'AFYA-M5-GRACE',
+                'name' => 'Grace Nurse',
+                'profession' => 'Registered Nurse',
+                'county' => 'Nairobi',
+                'years_experience' => 6,
+                'availability' => 'available_now',
+                'verification_status' => 'verified',
+                'qualification_status' => 'qualified',
+                'recommendation' => 'recommend',
+            ],
+            'private_admin_notes' => [],
+            'published_by' => 90,
+            'published_at' => $now,
+            'unpublished_by' => null,
+            'unpublished_at' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $store->insert('candidate_publications', [
+            'application_id' => (int) $studentApplication['id'],
+            'professional_user_id' => (int) $student['id'],
+            'status' => CandidatePublicationStatus::Published->value,
+            'summary_snapshot' => ['candidate_code' => 'AFYA-M5-STUDENT', 'name' => 'Student Nurse', 'profession' => 'Registered Nurse', 'county' => 'Nairobi'],
+            'private_admin_notes' => [],
+            'published_by' => 90,
+            'published_at' => $now,
+            'unpublished_by' => null,
+            'unpublished_at' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $requisition = $placements->createFacilityRequisition(new AuthenticatedUser((int) $facilityOwner['id'], 'Facility Owner', 'facility@example.com', '0700000001', [UserRole::FacilityAdmin]), [
+            'title' => 'Ward nurse cover',
+            'profession_required' => 'Registered Nurse',
+            'employment_type' => 'full_time',
+            'county' => 'Nairobi',
+            'minimum_experience_years' => 3,
+            'urgency' => 'high',
+            'submit' => true,
+        ], true);
+        $matches = $placements->runMatching($admin, (int) $requisition['id']);
+        $eligible = array_values(array_filter($matches['matches'], static fn (array $row): bool => (int) $row['professional_user_id'] === (int) $pro['id']))[0] ?? null;
+        $blocked = array_values(array_filter($matches['matches'], static fn (array $row): bool => (int) $row['professional_user_id'] === (int) $student['id']))[0] ?? null;
+
+        expectTrue($eligible !== null && $eligible['match_band'] !== 'ineligible', 'qualified published professional should match');
+        expectTrue((float) $eligible['match_score'] >= 70, 'qualified professional should score strongly');
+        expectTrue(isset($eligible['score_breakdown']['profession_match']), 'score explanation should include profession match');
+        expectTrue($blocked !== null && $blocked['match_band'] === 'ineligible', 'student awaiting license must not enter normal matching');
+        expectTrue(in_array('applicant is licensed professional track', $blocked['eligibility_reasons'], true), 'student block reason should be explicit');
+
+        $draft = $placements->draftAiRationale($admin, (int) $eligible['id']);
+        expectTrue(($draft['draft']['draft'] ?? false) === true, 'AI assistance must be draft-only');
+        expectTrue(count($store->all('ai_assistance_logs')) === 1, 'AI draft should be logged');
+
+        $shortlist = $placements->createShortlist($admin, [
+            'requisition_id' => (int) $requisition['id'],
+            'title' => 'Ward nurse shortlist',
+            'status' => 'shared',
+            'candidate_match_ids' => [(int) $eligible['id']],
+            'admin_rationale' => 'Verified and strong match.',
+        ]);
+        expectTrue($shortlist['status'] === 'shared', 'admin should share shortlist');
+        expectTrue(count($shortlist['candidates']) === 1, 'shortlist should include selected candidate');
+
+        $placement = $placements->createPlacement($admin, [
+            'facility_id' => (int) $facility['id'],
+            'requisition_id' => (int) $requisition['id'],
+            'professional_user_id' => (int) $pro['id'],
+            'candidate_publication_id' => (int) $publication['id'],
+            'employment_type' => 'full_time',
+        ]);
+        expectTrue($placement['placement']['status'] === 'proposed', 'placement starts proposed');
+        expectTrue(count($store->all('placement_events')) >= 1, 'placement timeline should be recorded');
+        expectTrue(in_array('matching.run_completed', array_map(static fn (array $row): string => (string) $row['action'], $store->all('audit_logs')), true), 'matching run should be audited');
+        @unlink($path);
+    },
+    'milestone 5 facility team and FHIR metadata foundations avoid unsafe secrets' => function (): void {
+        $path = sys_get_temp_dir() . '/afyalink-m5-team-' . bin2hex(random_bytes(4)) . '.json';
+        $store = new JsonDataStore($path);
+        $audit = new AuditLogger($store);
+        $facilities = new FacilityService($store, $audit);
+        $access = new FacilityAccessService($store, $facilities, $audit);
+        $publications = new CandidatePublicationService($store, $facilities, $access, new ConsentService($store, $audit), $audit);
+        $placements = new PlacementService($store, $facilities, $access, $publications, $audit, null, new LocalRecommendationAssistant());
+        $now = gmdate(DATE_ATOM);
+        $owner = $store->insert('users', [
+            'name' => 'Facility Owner',
+            'email' => 'team-owner@example.com',
+            'phone' => '0700000100',
+            'password_hash' => 'hash',
+            'roles' => [UserRole::FacilityAdmin->value],
+            'is_active' => true,
+            'email_verified_at' => $now,
+            'last_login_at' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $facility = $store->insert('facilities', [
+            'legal_name' => 'Team Hospital',
+            'display_name' => 'Team Hospital',
+            'facility_type' => 'Hospital',
+            'registration_number' => 'TEAM-M5',
+            'county' => 'Kisumu',
+            'location' => 'Kisumu',
+            'email' => 'team@example.com',
+            'phone' => '0700000100',
+            'physical_address' => 'Kisumu',
+            'contact_person' => 'Owner',
+            'operational_status' => 'active',
+            'review_status' => FacilityReviewStatus::Approved->value,
+            'created_by' => (int) $owner['id'],
+            'reviewed_by' => 1,
+            'review_note' => null,
+            'submitted_at' => $now,
+            'reviewed_at' => $now,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $store->insert('facility_memberships', [
+            'facility_id' => (int) $facility['id'],
+            'user_id' => (int) $owner['id'],
+            'role' => UserRole::FacilityAdmin->value,
+            'status' => 'active',
+            'invited_by' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $invitation = $placements->inviteFacilityMember(new AuthenticatedUser((int) $owner['id'], 'Facility Owner', 'team-owner@example.com', '0700000100', [UserRole::FacilityAdmin]), [
+            'email' => 'recruiter@example.com',
+            'role' => 'recruiter',
+        ]);
+        $storedInvitation = $store->all('facility_invitations')[0];
+        expectTrue($invitation['email'] === 'recruiter@example.com', 'invitation response should include invited email');
+        expectTrue(strlen((string) $storedInvitation['token_hash']) === 64, 'invitation token should be hashed');
+        expectFalse(array_key_exists('token', $invitation), 'raw invitation token must not be returned');
+
+        $mapping = new FhirMappingService();
+        $documentReference = $mapping->documentReferenceFromCredentialMetadata([
+            'document_type' => 'professional_license',
+            'original_name' => 'license.pdf',
+            'mime_type' => 'application/pdf',
+            'checksum' => str_repeat('b', 64),
+            'storage_key' => 'professionals/1/license.pdf',
+        ]);
+        $encoded = json_encode($documentReference, JSON_UNESCAPED_SLASHES);
+        expectTrue(str_contains((string) $encoded, 'credential metadata only'), 'FHIR document reference should state metadata-only scope');
+        expectFalse(str_contains((string) $encoded, 'storage_key'), 'FHIR mapping must not expose private storage keys');
         @unlink($path);
     },
     's3-compatible storage rejects unsafe keys before network access' => function (): void {

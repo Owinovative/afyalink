@@ -21,7 +21,10 @@ type ProfessionalSection =
   | "application"
   | "verification"
   | "interview"
-  | "publication";
+  | "publication"
+  | "placement-preferences"
+  | "opportunities"
+  | "opportunity-detail";
 
 const professionalSectionTitles: Record<ProfessionalSection, string> = {
   home: "Professional workspace",
@@ -34,6 +37,9 @@ const professionalSectionTitles: Record<ProfessionalSection, string> = {
   verification: "Verification",
   interview: "Interview",
   publication: "Publication",
+  "placement-preferences": "Placement preferences",
+  opportunities: "Opportunities",
+  "opportunity-detail": "Opportunity detail",
 };
 
 const professionalSectionBodies: Record<ProfessionalSection, string> = {
@@ -47,6 +53,9 @@ const professionalSectionBodies: Record<ProfessionalSection, string> = {
   verification: "Follow regulatory verification without internal notes.",
   interview: "Track interview schedule and outcome.",
   publication: "See high-level facility catalogue visibility.",
+  "placement-preferences": "Control availability and placement preferences.",
+  opportunities: "Review admin-approved placement opportunities.",
+  "opportunity-detail": "Inspect one placement opportunity.",
 };
 
 const documentTypes = [
@@ -70,7 +79,7 @@ async function fileToBase64(file: File) {
   return btoa(binary);
 }
 
-export function ProfessionalPage({ section }: { section: ProfessionalSection }) {
+export function ProfessionalPage({ section, id }: { section: ProfessionalSection; id?: string }) {
   const resource = useApiResource<Record<string, unknown>>("professional", "/api/professional/dashboard");
   const data = asRecord(resource.data);
   const profile = asRecord(data.profile);
@@ -122,6 +131,9 @@ export function ProfessionalPage({ section }: { section: ProfessionalSection }) 
       {section === "verification" ? <VerificationPanel cases={verificationCases} /> : null}
       {section === "interview" ? <InterviewPanel interviews={interviews} /> : null}
       {section === "publication" ? <PublicationPanel visibility={facilityVisibility} /> : null}
+      {section === "placement-preferences" ? <PlacementPreferences /> : null}
+      {section === "opportunities" ? <ProfessionalOpportunities /> : null}
+      {section === "opportunity-detail" && id ? <ProfessionalOpportunityDetail id={id} /> : null}
     </>
   );
 }
@@ -208,6 +220,137 @@ function DashboardSummary({
           </div>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function PlacementPreferences() {
+  const resource = useApiResource<Record<string, unknown>>("professional", "/api/professional/placement");
+  const preferences = asRecord(asRecord(resource.data).preferences);
+  const profile = asRecord(asRecord(resource.data).profile);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    setError("");
+    try {
+      await apiRequest("/api/professional/placement/preferences", { method: "PUT", token: resource.token, body: formValues(event) });
+      setMessage("Placement preferences saved.");
+      await resource.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not save placement preferences.");
+    }
+  }
+
+  return (
+    <div className="data-list">
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      {message ? <Feedback message={message} /> : null}
+      {error ? <Feedback message={error} tone="error" /> : null}
+      <section className="card">
+        <h2>Match readiness</h2>
+        <MetaGrid
+          items={[
+            { label: "Applicant track", value: profile.applicant_track },
+            { label: "Open to work", value: preferences.open_to_work },
+            { label: "Availability", value: preferences.availability_status },
+            { label: "Match ready", value: asRecord(resource.data).match_ready },
+            { label: "Student notice", value: asRecord(resource.data).student_notice },
+          ]}
+        />
+      </section>
+      <section className="form-card">
+        <h2>Availability and preferences</h2>
+        <form className="form-grid" onSubmit={submit}>
+          <label>
+            Open to work
+            <select name="open_to_work" defaultValue={String(preferences.open_to_work ?? "false")}>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </label>
+          <label>
+            Availability
+            <select name="availability_status" defaultValue={String(preferences.availability_status ?? "not_available")}>
+              <option value="available_now">Available now</option>
+              <option value="available_from_date">Available from date</option>
+              <option value="not_available">Not available</option>
+            </select>
+          </label>
+          <Field label="Available from" name="available_from" type="date" defaultValue={String(preferences.available_from ?? "")} />
+          <Field label="Preferred counties" name="preferred_counties" defaultValue={asArray(preferences.preferred_counties).join(", ")} />
+          <Field label="Employment types" name="employment_types" defaultValue={asArray(preferences.employment_types).join(", ")} />
+          <Field label="Shift preferences" name="shift_preferences" defaultValue={asArray(preferences.shift_preferences).join(", ")} />
+          <Field label="Desired roles" name="desired_roles" defaultValue={asArray(preferences.desired_roles).join(", ")} />
+          <Field label="Minimum rate or salary" name="minimum_rate_or_salary" defaultValue={String(preferences.minimum_rate_or_salary ?? "")} />
+          <Field label="Relocation willingness" name="relocation_willingness" defaultValue={String(preferences.relocation_willingness ?? "")} />
+          <TextArea label="Notes" name="notes" defaultValue={String(preferences.notes ?? "")} />
+          <button className="button full" type="submit" disabled={!resource.token}>
+            Save preferences
+          </button>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+function ProfessionalOpportunities() {
+  const resource = useApiResource<Record<string, unknown>>("professional", "/api/professional/opportunities");
+  const opportunities = asArray<Record<string, unknown>>(asRecord(resource.data).opportunities);
+
+  return (
+    <section className="card">
+      <h2>Placement opportunities</h2>
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <div className="data-list">
+        {opportunities.length ? opportunities.map((item) => (
+          <DataRow key={String(item.id)} title={`Opportunity ${display(item.id)}`} status={item.status} meta={[
+            { label: "Facility", value: asRecord(item.facility).display_name },
+            { label: "Employment", value: item.employment_type },
+            { label: "Start", value: item.start_date },
+            { label: "Updated", value: item.updated_at },
+          ]}>
+            <Link className="button secondary" href={`/portal/professional/opportunities/${item.id}`}>
+              Open
+            </Link>
+          </DataRow>
+        )) : <EmptyState title="No opportunities yet" body="Afyalink shows opportunities only after admin-approved placement contact is created." />}
+      </div>
+    </section>
+  );
+}
+
+function ProfessionalOpportunityDetail({ id }: { id: string }) {
+  const resource = useApiResource<Record<string, unknown>>("professional", `/api/professional/opportunities/${id}`);
+  const placement = asRecord(asRecord(resource.data).placement);
+  const events = asArray<Record<string, unknown>>(asRecord(resource.data).events);
+
+  return (
+    <div className="data-list">
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <section className="card">
+        <h2>Opportunity {display(placement.id)}</h2>
+        <MetaGrid
+          items={[
+            { label: "Status", value: placement.status },
+            { label: "Facility", value: asRecord(placement.facility).display_name },
+            { label: "Employment", value: placement.employment_type },
+            { label: "Start", value: placement.start_date },
+            { label: "End", value: placement.end_date },
+            { label: "Your note", value: placement.professional_note },
+          ]}
+        />
+      </section>
+      <section className="card">
+        <h2>Timeline</h2>
+        <div className="data-list">
+          {events.map((event) => (
+            <DataRow key={String(event.id)} title={display(event.event_type)} status={event.to_status} meta={[{ label: "From", value: event.from_status }, { label: "Created", value: event.created_at }]} />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

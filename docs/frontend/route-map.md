@@ -4,6 +4,7 @@
 
 - `/`
 - `/how-it-works`
+- `/matching`
 - `/professionals`
 - `/students`
 - `/facilities`
@@ -36,6 +37,10 @@
 - `/portal/professional/interview`
 - `/portal/professional/publication`
 - `/portal/professional/waiting-license`
+- `/portal/professional/placement-preferences`
+- `/portal/professional/availability`
+- `/portal/professional/opportunities`
+- `/portal/professional/opportunities/[id]`
 
 ## Facility Portal
 
@@ -48,6 +53,13 @@
 - `/portal/facility/appointments`
 - `/portal/facility/recommendations`
 - `/portal/facility/packages`
+- `/portal/facility/requisitions`
+- `/portal/facility/requisitions/new`
+- `/portal/facility/requisitions/[id]`
+- `/portal/facility/shortlists`
+- `/portal/facility/placements`
+- `/portal/facility/placements/[id]`
+- `/portal/facility/team`
 
 ## Admin Portal
 
@@ -67,8 +79,17 @@
 - `/portal/admin/subscriptions`
 - `/portal/admin/appointments`
 - `/portal/admin/recommendations`
+- `/portal/admin/requisitions`
+- `/portal/admin/requisitions/[id]`
+- `/portal/admin/matching`
+- `/portal/admin/shortlists`
+- `/portal/admin/placements`
+- `/portal/admin/placements/[id]`
+- `/portal/admin/communications`
 - `/portal/admin/reports`
 - `/portal/admin/notifications`
 - `/portal/admin/privacy`
+- `/portal/admin/integrations`
+- `/portal/admin/security`
 - `/portal/admin/audit`
 - `/portal/admin/pre-licensure`

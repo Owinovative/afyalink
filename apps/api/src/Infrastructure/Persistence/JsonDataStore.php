@@ -41,6 +41,21 @@ final class JsonDataStore implements DataStore
         'recommendation_requests',
         'recommendation_packages',
         'recommendation_package_candidates',
+        'facility_requisitions',
+        'professional_placement_preferences',
+        'candidate_matches',
+        'ai_assistance_logs',
+        'placement_shortlists',
+        'placement_shortlist_candidates',
+        'placements',
+        'placement_events',
+        'communication_threads',
+        'communication_messages',
+        'facility_interview_requests',
+        'professional_availability_blocks',
+        'facility_preferred_interview_windows',
+        'facility_invitations',
+        'integration_connections',
     ];
 
     public function __construct(

@@ -15,6 +15,11 @@ const visualBySlug: Record<string, { src: string; alt: string; tone: VisualTone 
     alt: "Clinical administrator reviewing healthcare records for verification.",
     tone: "teal",
   },
+  matching: {
+    src: "/images/facilities/hospital-facility-team.jpg",
+    alt: "Healthcare facility team reviewing staffing needs and candidate recommendations.",
+    tone: "deep",
+  },
   professionals: {
     src: "/images/professionals/clinical-professional-consultation.jpg",
     alt: "Healthcare professional consulting with a patient in a clinic.",

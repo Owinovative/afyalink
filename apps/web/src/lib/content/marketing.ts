@@ -36,6 +36,32 @@ export const marketingPages: Record<string, MarketingPageContent> = {
       },
     ],
   },
+  matching: {
+    slug: "matching",
+    eyebrow: "Intelligent placement",
+    title: "Explainable matching from facility need to reviewed placement.",
+    description:
+      "Afyalink helps facilities define staffing requisitions, matches only eligible professionals, and keeps every shortlist human-reviewed.",
+    primaryCta: { label: "Facility requisitions", href: "/portal/facility/requisitions" },
+    secondaryCta: { label: "Professional availability", href: "/portal/professional/placement-preferences" },
+    highlights: [
+      { title: "Structured demand", body: "Facilities describe role, location, urgency, timing, and employment type." },
+      { title: "Eligible supply", body: "Only verified, qualified, consented, open-to-work professionals enter normal matching." },
+      { title: "Human review", body: "Admins inspect explanations before shortlists or placement contact are shared." },
+    ],
+    sections: [
+      {
+        title: "Matching starts with real requisitions.",
+        body: "Facilities submit staffing needs instead of browsing without context, giving Afyalink a controlled operating workflow.",
+        points: ["Profession and specialty", "Location and urgency", "Employment type", "Start date", "Required credentials"],
+      },
+      {
+        title: "Fairness and explainability are built in.",
+        body: "The deterministic engine records score breakdowns, ineligible reasons, and risk flags without protected-characteristic scoring.",
+        points: ["No auto-rejection", "Admin-reviewed shortlist", "Student restrictions", "Audit trail", "AI drafts only"],
+      },
+    ],
+  },
   professionals: {
     slug: "professionals",
     eyebrow: "Professional portal",
@@ -47,7 +73,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     highlights: [
       { title: "Private records", body: "Credential uploads stay inside controlled review flows." },
       { title: "Clear readiness", body: "The dashboard explains what is missing before submission." },
-      { title: "Publication status", body: "See whether your profile is visible without exposing facility identities." },
+      { title: "Placement preferences", body: "Set availability, counties, employment types, and opportunity readiness." },
     ],
     sections: [
       {
@@ -57,8 +83,8 @@ export const marketingPages: Record<string, MarketingPageContent> = {
       },
       {
         title: "Track assessment without noise.",
-        body: "Verification and interview status remain visible without exposing internal admin notes.",
-        points: ["Regulatory verification", "Interview scheduling", "Qualification outcome", "Catalogue state"],
+        body: "Verification, interview, publication, and placement opportunity status remain visible without exposing internal admin notes.",
+        points: ["Regulatory verification", "Interview scheduling", "Qualification outcome", "Catalogue state", "Opportunity visibility"],
       },
     ],
   },
@@ -73,7 +99,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     highlights: [
       { title: "Prepare now", body: "Add training details and preliminary documents." },
       { title: "Stay accurate", body: "You are not shown as licensed or facility-publishable." },
-      { title: "Convert later", body: "Upload license evidence when issued, then enter the licensed workflow." },
+      { title: "Future pipeline", body: "Set future preferences without entering licensed matching until conversion." },
     ],
     sections: [
       {
@@ -84,7 +110,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
       {
         title: "What waits for licensure.",
         body: "Application submission, verification, interview, and publication stay locked until conversion.",
-        points: ["License upload", "Admin review", "Application readiness", "Facility catalogue eligibility"],
+        points: ["License upload", "Admin review", "Application readiness", "Facility catalogue eligibility", "Normal matching eligibility"],
       },
     ],
   },
@@ -93,13 +119,13 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     eyebrow: "Facility portal",
     title: "Verified candidate access for approved facilities.",
     description:
-      "Onboard your organization, activate access, review published candidates, and request curated recommendations.",
+      "Onboard your organization, activate access, define staffing requisitions, review shared shortlists, and request curated recommendations.",
     primaryCta: { label: "Join as a facility", href: "/auth/register/facility" },
     secondaryCta: { label: "Access model", href: "/pricing-access" },
     highlights: [
       { title: "Approved only", body: "Organizations are reviewed before marketplace access." },
       { title: "Access gated", body: "Browsing requires active facility entitlement." },
-      { title: "Curated support", body: "Request candidate packages by role, location, and urgency." },
+      { title: "Placement-grade needs", body: "Submit structured requisitions and receive reviewed shortlists." },
     ],
     sections: [
       {
@@ -109,8 +135,8 @@ export const marketingPages: Record<string, MarketingPageContent> = {
       },
       {
         title: "Access remains controlled.",
-        body: "Subscription states support manual confirmation now and future payment automation later.",
-        points: ["Pending payment", "Active access", "Suspension", "Expiry"],
+        body: "Subscription states support manual confirmation now, future payment automation later, and permissioned team workflows.",
+        points: ["Pending payment", "Active access", "Suspension", "Expiry", "Facility team roles"],
       },
     ],
   },
@@ -119,13 +145,13 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     eyebrow: "Security posture",
     title: "Private credentials. Permissioned views. Full auditability.",
     description:
-      "Afyalink keeps sensitive records behind private storage, backend authorization, watermarked views, and audit logs.",
+      "Afyalink keeps sensitive records behind private storage, backend authorization, watermarked views, explainable matching, and audit logs.",
     primaryCta: { label: "Verification model", href: "/verification" },
     secondaryCta: { label: "Contact Afyalink", href: "/contact" },
     highlights: [
       { title: "No public documents", body: "Facilities see safe summaries and approved metadata." },
       { title: "Audited operations", body: "Candidate views, payments, notifications, and privacy actions are traceable." },
-      { title: "Watermark deterrence", body: "Screenshots cannot be impossible; access remains controlled and logged." },
+      { title: "Human-reviewed AI", body: "AI can draft rationale, but it cannot make final placement decisions." },
     ],
     sections: [
       {
@@ -135,8 +161,8 @@ export const marketingPages: Record<string, MarketingPageContent> = {
       },
       {
         title: "Every sensitive action has a trail.",
-        body: "Review, publication, access, recommendation, appointment, notification, payment, privacy, and profile-view events are logged.",
-        points: ["Admin actions", "Access changes", "Provider callbacks", "Notification attempts", "Marketplace views"],
+        body: "Review, publication, access, matching, shortlist, placement, communication, notification, payment, privacy, and profile-view events are logged.",
+        points: ["Admin actions", "Access changes", "Matching runs", "Shortlist sharing", "Communication visibility"],
       },
     ],
   },
@@ -145,19 +171,19 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     eyebrow: "Verification engine",
     title: "Credential review, verification, interview, and publication control.",
     description:
-      "Afyalink keeps each assessment step explicit before any candidate can be published.",
+      "Afyalink keeps each assessment step explicit before any candidate can be published or matched.",
     primaryCta: { label: "Apply now", href: "/auth/register/professional" },
     secondaryCta: { label: "How it works", href: "/how-it-works" },
     highlights: [
       { title: "Credential review", body: "Approve, reject, or request replacement with history." },
       { title: "Regulatory cases", body: "Track body, status, assignment, and evidence safely." },
-      { title: "Interview scoring", body: "Structured outcomes determine publishability." },
+      { title: "Interview scoring", body: "Structured outcomes determine publishability and placement readiness." },
     ],
     sections: [
       {
         title: "Eligibility belongs to the backend.",
         body: "The frontend renders status. It does not invent publication rules.",
-        points: ["Submitted application", "Passed verification", "Completed interview", "Recommended qualification", "Current consent"],
+        points: ["Submitted application", "Passed verification", "Completed interview", "Recommended qualification", "Current consent", "Open-to-work preference"],
       },
       {
         title: "Professionals see useful status.",

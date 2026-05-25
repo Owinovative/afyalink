@@ -29,6 +29,14 @@ type AdminSection =
   | "subscriptions"
   | "appointments"
   | "recommendations"
+  | "requisitions"
+  | "requisition-detail"
+  | "matching"
+  | "shortlists"
+  | "placements"
+  | "communications"
+  | "integrations"
+  | "security"
   | "reports"
   | "notifications"
   | "privacy"
@@ -51,6 +59,14 @@ const adminSectionTitles: Record<AdminSection, string> = {
   subscriptions: "Subscriptions",
   appointments: "Appointments",
   recommendations: "Recommendations",
+  requisitions: "Requisitions",
+  "requisition-detail": "Requisition detail",
+  matching: "Matching",
+  shortlists: "Shortlists",
+  placements: "Placements",
+  communications: "Communications",
+  integrations: "Integrations",
+  security: "Security",
   reports: "Reports",
   notifications: "Notifications",
   privacy: "Privacy requests",
@@ -74,6 +90,14 @@ const adminSectionBodies: Record<AdminSection, string> = {
   subscriptions: "Manage facility access entitlement.",
   appointments: "Review facility appointment requests.",
   recommendations: "Prepare and share recommendation packages.",
+  requisitions: "Review facility staffing needs and coordinate matching.",
+  "requisition-detail": "Run matching, inspect explanations, and prepare shortlists.",
+  matching: "Generate explainable candidate matches for active requisitions.",
+  shortlists: "Create and share human-reviewed placement shortlists.",
+  placements: "Track placements from proposal through offer and onboarding.",
+  communications: "Manage mediated opportunity communication threads.",
+  integrations: "Inspect FHIR and SMART-ready integration foundations.",
+  security: "Review ASVS-readiness and placement fairness controls.",
   reports: "Track funnel, verification, interview, facility, student, and notification reporting.",
   notifications: "Inspect delivery state and retry failed operational messages.",
   privacy: "Manage data access, correction, retention, and consent-withdrawal requests.",
@@ -103,6 +127,12 @@ export function AdminPage({ section, id }: { section: AdminSection; id?: string 
       {section === "publications" ? <PublicationManager /> : null}
       {section === "appointments" ? <FacilityRequestManager /> : null}
       {section === "recommendations" ? <RecommendationManager /> : null}
+      {section === "requisitions" || section === "matching" || section === "shortlists" ? <RequisitionManager /> : null}
+      {section === "requisition-detail" && id ? <RequisitionDetail id={id} /> : null}
+      {section === "placements" ? <PlacementManager /> : null}
+      {section === "communications" ? <CommunicationManager /> : null}
+      {section === "integrations" ? <IntegrationReadiness /> : null}
+      {section === "security" ? <SecurityReadiness /> : null}
       {section === "reports" ? <ReportsDashboard /> : null}
       {section === "notifications" ? <NotificationOperations /> : null}
       {section === "privacy" ? <PrivacyRequests /> : null}
@@ -1234,6 +1264,262 @@ function AdminRows({
           <EmptyState title="No records" body="No matching records were returned by the backend." />
         )}
       </div>
+    </section>
+  );
+}
+
+function RequisitionManager() {
+  const resource = useApiResource<Record<string, unknown>>("admin", "/api/admin/requisitions");
+  const requisitions = asArray<Record<string, unknown>>(asRecord(resource.data).requisitions);
+
+  return (
+    <section className="card">
+      <h2>Facility staffing requisitions</h2>
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <div className="data-list">
+        {requisitions.length ? (
+          requisitions.map((row) => (
+            <DataRow
+              key={String(row.id)}
+              title={display(row.title)}
+              status={row.status}
+              meta={[
+                { label: "Facility", value: asRecord(row.facility).display_name },
+                { label: "Profession", value: row.profession_required },
+                { label: "County", value: row.county },
+                { label: "Urgency", value: row.urgency },
+                { label: "Positions", value: row.number_of_positions },
+              ]}
+            >
+              <Link className="button secondary" href={`/portal/admin/requisitions/${row.id}`}>
+                Open matching workbench
+              </Link>
+            </DataRow>
+          ))
+        ) : (
+          <EmptyState title="No requisitions" body="Submitted facility staffing needs appear here." />
+        )}
+      </div>
+    </section>
+  );
+}
+
+function RequisitionDetail({ id }: { id: string }) {
+  const resource = useApiResource<Record<string, unknown>>("admin", `/api/admin/requisitions/${id}`);
+  const data = asRecord(resource.data);
+  const requisition = asRecord(data.requisition);
+  const matches = asArray<Record<string, unknown>>(data.matches);
+  const shortlists = asArray<Record<string, unknown>>(data.shortlists);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function update(status: string) {
+    setMessage("");
+    setError("");
+    try {
+      await apiRequest(`/api/admin/requisitions/${id}`, { method: "PATCH", token: resource.token, body: { status } });
+      setMessage(`Requisition moved to ${status}.`);
+      await resource.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not update requisition.");
+    }
+  }
+
+  async function runMatching() {
+    setMessage("");
+    setError("");
+    try {
+      const result = asRecord(await apiRequest(`/api/admin/requisitions/${id}/matching-runs`, { method: "POST", token: resource.token, body: {} }));
+      setMessage(`Matching generated ${display(asRecord(result.matching).generated_count)} rows.`);
+      await resource.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not run matching.");
+    }
+  }
+
+  async function createShortlist(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    setError("");
+    try {
+      const values = formValues(event);
+      const candidate_match_ids = String(values.candidate_match_ids ?? "")
+        .split(",")
+        .map((value) => Number(value.trim()))
+        .filter(Boolean);
+      await apiRequest("/api/admin/placement-shortlists", {
+        method: "POST",
+        token: resource.token,
+        body: { ...values, requisition_id: Number(id), candidate_match_ids },
+      });
+      setMessage("Shortlist saved.");
+      await resource.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not create shortlist.");
+    }
+  }
+
+  return (
+    <div className="data-list">
+      {message ? <Feedback message={message} /> : null}
+      {error || resource.error ? <Feedback message={error || resource.error} tone="error" /> : null}
+      <section className="card">
+        <h2>{display(requisition.title, "Requisition")}</h2>
+        <MetaGrid
+          items={[
+            { label: "Status", value: requisition.status },
+            { label: "Facility", value: asRecord(requisition.facility).display_name },
+            { label: "Profession", value: requisition.profession_required },
+            { label: "County", value: requisition.county },
+            { label: "Employment", value: requisition.employment_type },
+            { label: "Urgency", value: requisition.urgency },
+          ]}
+        />
+        <div className="action-row" style={{ marginTop: 18 }}>
+          <button className="button secondary" type="button" disabled={!resource.token} onClick={() => update("under_review")}>
+            Mark under review
+          </button>
+          <button className="button" type="button" disabled={!resource.token} onClick={runMatching}>
+            Run matching
+          </button>
+        </div>
+      </section>
+      <section className="card">
+        <h2>Explainable matches</h2>
+        <div className="data-list">
+          {matches.length ? (
+            matches.map((match) => (
+              <DataRow
+                key={String(match.id)}
+                title={`Match ${display(match.id)} - ${display(match.match_band)}`}
+                status={match.status}
+                meta={[
+                  { label: "Score", value: match.match_score },
+                  { label: "Candidate", value: asRecord(match.candidate).candidate_code },
+                  { label: "Reasons", value: asArray<string>(match.eligibility_reasons).join(", ") },
+                  { label: "Risk flags", value: asArray<string>(match.risk_flags).join(", ") },
+                ]}
+              />
+            ))
+          ) : (
+            <EmptyState title="No matches yet" body="Run matching to generate deterministic candidate fit explanations." />
+          )}
+        </div>
+      </section>
+      <section className="form-card">
+        <h2>Create shortlist</h2>
+        <form className="form-grid" onSubmit={createShortlist}>
+          <Field label="Shortlist title" name="title" required defaultValue={`Shortlist for ${display(requisition.title)}`} />
+          <Field label="Candidate match IDs" name="candidate_match_ids" placeholder="1,2,3" />
+          <TextArea label="Admin rationale" name="admin_rationale" />
+          <label>
+            Status
+            <select name="status" defaultValue="draft">
+              <option value="draft">Draft</option>
+              <option value="under_review">Under review</option>
+              <option value="shared">Shared with facility</option>
+            </select>
+          </label>
+          <button className="button full" type="submit" disabled={!resource.token}>
+            Save shortlist
+          </button>
+        </form>
+      </section>
+      <section className="card">
+        <h2>Shortlists</h2>
+        <div className="data-list">
+          {shortlists.map((shortlist) => (
+            <DataRow key={String(shortlist.id)} title={display(shortlist.title)} status={shortlist.status} meta={[{ label: "Shared", value: shortlist.shared_at }, { label: "Candidates", value: asArray(shortlist.candidates).length }]} />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function PlacementManager() {
+  const resource = useApiResource<Record<string, unknown>>("admin", "/api/admin/placements");
+  const placements = asArray<Record<string, unknown>>(asRecord(resource.data).placements);
+
+  return (
+    <section className="card">
+      <h2>Placement pipeline</h2>
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <div className="data-list">
+        {placements.length ? placements.map((placement) => (
+          <DataRow key={String(placement.id)} title={`Placement ${display(placement.id)}`} status={placement.status} meta={[
+            { label: "Facility", value: asRecord(placement.facility).display_name },
+            { label: "Employment", value: placement.employment_type },
+            { label: "Start", value: placement.start_date },
+            { label: "Updated", value: placement.updated_at },
+          ]} />
+        )) : <EmptyState title="No placements" body="Placements are created from reviewed shortlists or admin-approved opportunities." />}
+      </div>
+    </section>
+  );
+}
+
+function CommunicationManager() {
+  const resource = useApiResource<Record<string, unknown>>("admin", "/api/admin/communications");
+  const threads = asArray<Record<string, unknown>>(asRecord(resource.data).threads);
+
+  return (
+    <section className="card">
+      <h2>Mediated communications</h2>
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <div className="data-list">
+        {threads.length ? threads.map((thread) => (
+          <DataRow key={String(thread.id)} title={display(thread.subject)} status={thread.status} meta={[
+            { label: "Context", value: `${display(thread.context_type)} #${display(thread.context_id)}` },
+            { label: "Facility", value: thread.facility_id },
+            { label: "Professional", value: thread.professional_user_id },
+          ]} />
+        )) : <EmptyState title="No communication threads" body="Admin-mediated facility/professional conversations appear here." />}
+      </div>
+    </section>
+  );
+}
+
+function IntegrationReadiness() {
+  const resource = useApiResource<Record<string, unknown>>("admin", "/api/admin/integrations");
+  const readiness = asRecord(asRecord(resource.data).fhir_readiness);
+
+  return (
+    <section className="card">
+      <h2>FHIR and SMART readiness</h2>
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <MetaGrid
+        items={[
+          { label: "Practitioner", value: readiness.practitioner_mapping },
+          { label: "Organization", value: readiness.organization_mapping },
+          { label: "Appointment", value: readiness.appointment_mapping },
+          { label: "DocumentReference", value: readiness.document_reference_mapping },
+          { label: "SMART App Launch", value: readiness.smart_app_launch },
+          { label: "Clinical data storage", value: readiness.clinical_data_storage },
+        ]}
+      />
+    </section>
+  );
+}
+
+function SecurityReadiness() {
+  const resource = useApiResource<Record<string, unknown>>("admin", "/api/admin/security/asvs-readiness");
+  const readiness = asRecord(asRecord(resource.data).asvs_readiness);
+
+  return (
+    <section className="card">
+      <h2>ASVS-readiness foundation</h2>
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <MetaGrid
+        items={[
+          { label: "Authentication", value: readiness.auth },
+          { label: "Access control", value: readiness.access_control },
+          { label: "Documents", value: readiness.documents },
+          { label: "Matching", value: readiness.matching },
+          { label: "AI", value: readiness.ai },
+          { label: "Audit", value: readiness.audit },
+        ]}
+      />
     </section>
   );
 }

@@ -16,6 +16,7 @@ Afyalink is not just a recruitment site. It is a trust infrastructure layer for 
 - support admin review, interview scoring, and recommendation workflows;
 - operate facility subscriptions, controlled candidate viewing, recommendations, and placement requests.
 - run notification delivery, M-PESA-ready payment operations, student/pre-licensure pipeline management, and privacy/compliance queues.
+- define facility staffing requisitions, explainably match eligible professionals, build reviewed shortlists, and track placement outcomes.
 
 ## Milestone 1 Scope
 
@@ -112,6 +113,7 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - HMS-inspired, benchmark-synthesized frontend visual system with compact photo discipline, low-bandwidth local imagery, refined portal chrome, and public pages for professionals, facilities, students, verification, security, pricing, about, contact, and FAQ.
 - Student / graduate awaiting-license track for pre-licensure applicants, including student registration, preliminary credential requirements, waiting-license dashboard guidance, admin pre-licensure queue, and controlled conversion into the licensed professional track.
 - Milestone 4 operations engine with notification delivery attempts, log/null email provider adapter, notification worker script, M-PESA callback event persistence, redacted payment callback handling, facility subscription payment linkage, admin command center, reporting summaries, privacy request lifecycle, and new admin routes for notifications, reports, and privacy work.
+- Milestone 5 intelligent placement engine with facility requisitions, professional availability/preferences, deterministic matching, AI-assisted draft rationale governance, placement shortlists, placement lifecycle events, controlled communication threads, facility team invitation foundation, FHIR/SMART-readiness mappings, ASVS-readiness checklist, and placement-focused portal routes.
 
 ## Run Locally
 
@@ -190,6 +192,7 @@ The current tests verify:
 - notification processing records delivery attempts and sent/retry/failed state;
 - M-PESA callbacks are persisted idempotently with redacted payloads and can confirm matched payments;
 - privacy requests can be submitted, reviewed, updated, and audited.
+- Milestone 5 matching blocks student-awaiting-license applicants from normal matching, scores eligible published professionals transparently, records AI draft usage, creates shortlists/placements, hashes facility invitation tokens, and maps safe FHIR metadata without exposing private document storage keys.
 
 ## Render Staging
 
@@ -209,16 +212,25 @@ Read the deployment guide before using staging credential uploads:
 - [Milestone 1 Plan](docs/milestones/milestone-1.md)
 - [Milestone 3 Facility Marketplace](docs/milestones/milestone-3.md)
 - [Milestone 4 Production Operations Engine](docs/milestones/milestone-4.md)
+- [Milestone 5 Intelligent Placement Engine](docs/milestones/milestone-5.md)
 - [Technical Direction](docs/architecture/technical-direction.md)
 - [Facility Platform Architecture](docs/architecture/facility-platform-architecture.md)
 - [Candidate Publication and Access Control](docs/architecture/candidate-publication-access-control.md)
 - [Security Foundation](docs/security/security-foundation.md)
 - [Secure Candidate Viewing](docs/security/secure-candidate-viewing.md)
 - [Privacy Requests and Retention](docs/security/privacy-requests-and-retention.md)
+- [ASVS Readiness Checklist](docs/security/asvs-readiness-checklist.md)
+- [AI-Assisted Recommendations Governance](docs/ai/ai-assisted-recommendations-governance.md)
 - [Notification Delivery](docs/workflows/notification-delivery.md)
 - [M-PESA Payment Operations](docs/workflows/mpesa-payment-operations.md)
 - [Facility Subscription Billing](docs/workflows/facility-subscription-billing.md)
+- [Facility Requisitions](docs/workflows/facility-requisitions.md)
+- [Matching Engine](docs/workflows/matching-engine.md)
+- [Placement Lifecycle](docs/workflows/placement-lifecycle.md)
+- [Communication Threads](docs/workflows/communication-threads.md)
+- [Facility Team Collaboration](docs/workflows/facility-team-collaboration.md)
 - [Recommendation Workflow](docs/workflows/recommendation-workflow.md)
+- [FHIR and SMART Readiness](docs/integrations/fhir-smart-readiness.md)
 - [Admin Command Center](docs/operations/admin-command-center.md)
 - [Public Landing Page](docs/product/public-landing-page.md)
 - [Student Awaiting License Experience](docs/product/student-awaiting-license-experience.md)
@@ -229,4 +241,5 @@ Read the deployment guide before using staging credential uploads:
 - [Milestone 1 API Endpoints](docs/api/milestone-1-endpoints.md)
 - [Milestone 3 API Endpoints](docs/api/milestone-3-endpoints.md)
 - [Milestone 4 API Endpoints](docs/api/milestone-4-endpoints.md)
+- [Milestone 5 API Endpoints](docs/api/milestone-5-endpoints.md)
 - [Docs Index](docs/README.md)

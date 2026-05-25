@@ -22,6 +22,8 @@ use Afyalink\Core\Application\Operations\OperationsDashboardService;
 use Afyalink\Core\Application\Operations\ReportingService;
 use Afyalink\Core\Application\Payments\MpesaPaymentService;
 use Afyalink\Core\Application\Payments\PaymentService;
+use Afyalink\Core\Application\AI\LocalRecommendationAssistant;
+use Afyalink\Core\Application\Placements\PlacementService;
 use Afyalink\Core\Application\Privacy\PrivacyRequestService;
 use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
 use Afyalink\Core\Application\Professionals\StudentPrelicensureService;
@@ -38,6 +40,7 @@ use Afyalink\Core\Http\Controllers\CredentialController;
 use Afyalink\Core\Http\Controllers\FacilityController;
 use Afyalink\Core\Http\Controllers\OperationsController;
 use Afyalink\Core\Http\Controllers\PaymentController;
+use Afyalink\Core\Http\Controllers\PlacementController;
 use Afyalink\Core\Http\Controllers\ProfessionalController;
 use Afyalink\Core\Infrastructure\Notifications\EmailProvider;
 use Afyalink\Core\Infrastructure\Notifications\LogEmailProvider;
@@ -93,6 +96,7 @@ final class ApiKernel
         $facilityAccess = new FacilityAccessService($this->store, $facilities, $audit, $notifications);
         $candidatePublications = new CandidatePublicationService($this->store, $facilities, $facilityAccess, $consents, $audit, $notifications);
         $facilityEngagements = new FacilityEngagementService($this->store, $facilities, $facilityAccess, $candidatePublications, $audit, $notifications);
+        $placements = new PlacementService($this->store, $facilities, $facilityAccess, $candidatePublications, $audit, $notifications, new LocalRecommendationAssistant());
 
         $authController = new AuthController($this->auth, $accounts);
         $professionalController = new ProfessionalController($profiles, $workflow, $verifications, $interviews, $candidatePublications);
@@ -103,6 +107,7 @@ final class ApiKernel
         $adminController = new AdminController($workflow, $credentials, $payments, $this->store, $verifications, $interviews, $prelicensure);
         $facilityController = new FacilityController($this->auth, $facilities, $facilityAccess, $candidatePublications, $facilityEngagements);
         $adminFacilityController = new AdminFacilityController($facilities, $facilityAccess, $candidatePublications, $facilityEngagements);
+        $placementController = new PlacementController($placements);
         $operationsController = new OperationsController(
             new OperationsDashboardService($this->store),
             new ReportingService($this->store),
@@ -112,7 +117,7 @@ final class ApiKernel
         );
 
         $this->router = new Router();
-        $this->routes($authController, $professionalController, $credentialController, $consentController, $paymentController, $applicationController, $adminController, $facilityController, $adminFacilityController, $operationsController);
+        $this->routes($authController, $professionalController, $credentialController, $consentController, $paymentController, $applicationController, $adminController, $facilityController, $adminFacilityController, $placementController, $operationsController);
     }
 
     public function auth(): AuthService
@@ -174,6 +179,7 @@ final class ApiKernel
         AdminController $admin,
         FacilityController $facility,
         AdminFacilityController $adminFacility,
+        PlacementController $placements,
         OperationsController $operations,
     ): void {
         $this->router->add('GET', '/api/health', static fn (): array => ['status' => 'ok']);
@@ -192,6 +198,10 @@ final class ApiKernel
 
         $this->router->add('GET', '/api/professional/dashboard', $this->professional([$professional, 'dashboard']));
         $this->router->add('PUT', '/api/professional/profile', $this->professional([$professional, 'saveProfile'], Permission::ProfileOwnWrite));
+        $this->router->add('GET', '/api/professional/placement', $this->professional([$placements, 'professionalPlacementDashboard'], Permission::ProfessionalPlacementOwnManage));
+        $this->router->add('PUT', '/api/professional/placement/preferences', $this->professional([$placements, 'savePreferences'], Permission::ProfessionalPlacementOwnManage));
+        $this->router->add('GET', '/api/professional/opportunities', $this->professional([$placements, 'professionalOpportunities'], Permission::ProfessionalPlacementOwnManage));
+        $this->router->add('GET', '/api/professional/opportunities/{id}', $this->professional([$placements, 'professionalOpportunity'], Permission::ProfessionalPlacementOwnManage));
         $this->router->add('GET', '/api/professional/credentials', $this->professional([$credentials, 'index']));
         $this->router->add('POST', '/api/professional/credentials', $this->professional([$credentials, 'upload'], Permission::CredentialOwnUpload));
         $this->router->add('POST', '/api/professional/consents', $this->professional([$consents, 'accept']));
@@ -204,6 +214,13 @@ final class ApiKernel
         $this->router->add('POST', '/api/facility/access/payment-intents', $this->facilityUser([$facility, 'createAccessPayment'], Permission::FacilitySubscriptionOwnManage));
         $this->router->add('GET', '/api/facility/candidates', $this->facilityUser([$facility, 'candidates'], Permission::FacilityCandidateView));
         $this->router->add('GET', '/api/facility/candidates/{id}', $this->facilityUser([$facility, 'candidate'], Permission::FacilityCandidateView));
+        $this->router->add('GET', '/api/facility/requisitions', $this->facilityUser([$placements, 'facilityRequisitions'], Permission::FacilityRequisitionManage));
+        $this->router->add('POST', '/api/facility/requisitions', $this->facilityUser([$placements, 'createFacilityRequisition'], Permission::FacilityRequisitionManage));
+        $this->router->add('GET', '/api/facility/requisitions/{id}', $this->facilityUser([$placements, 'facilityRequisition'], Permission::FacilityRequisitionManage));
+        $this->router->add('GET', '/api/facility/shortlists', $this->facilityUser([$placements, 'facilityShortlists'], Permission::FacilityCandidateView));
+        $this->router->add('GET', '/api/facility/placements', $this->facilityUser([$placements, 'facilityPlacements'], Permission::FacilityRequestManage));
+        $this->router->add('POST', '/api/facility/interview-requests', $this->facilityUser([$placements, 'requestFacilityInterview'], Permission::FacilityRequestManage));
+        $this->router->add('POST', '/api/facility/team/invitations', $this->facilityUser([$placements, 'inviteFacilityMember'], Permission::FacilityTeamManage));
         $this->router->add('POST', '/api/facility/requests/appointments', $this->facilityUser([$facility, 'requestAppointment'], Permission::FacilityRequestManage));
         $this->router->add('POST', '/api/facility/recommendation-requests', $this->facilityUser([$facility, 'requestRecommendation'], Permission::FacilityRequestManage));
         $this->router->add('GET', '/api/facility/recommendation-packages', $this->facilityUser([$facility, 'recommendationPackages'], Permission::FacilityCandidateView));
@@ -238,6 +255,19 @@ final class ApiKernel
         $this->router->add('GET', '/api/admin/recommendation-packages', $this->protected([$adminFacility, 'recommendationPackages'], Permission::RecommendationPackageManage));
         $this->router->add('POST', '/api/admin/recommendation-packages', $this->protected([$adminFacility, 'createRecommendationPackage'], Permission::RecommendationPackageManage));
         $this->router->add('PATCH', '/api/admin/recommendation-packages/{id}', $this->protected([$adminFacility, 'updateRecommendationPackage'], Permission::RecommendationPackageManage));
+        $this->router->add('GET', '/api/admin/requisitions', $this->protected([$placements, 'adminRequisitions'], Permission::MatchingManage));
+        $this->router->add('GET', '/api/admin/requisitions/{id}', $this->protected([$placements, 'adminRequisition'], Permission::MatchingManage));
+        $this->router->add('PATCH', '/api/admin/requisitions/{id}', $this->protected([$placements, 'updateRequisition'], Permission::MatchingManage));
+        $this->router->add('POST', '/api/admin/requisitions/{id}/matching-runs', $this->protected([$placements, 'runMatching'], Permission::MatchingManage));
+        $this->router->add('POST', '/api/admin/matches/{id}/ai-draft', $this->protected([$placements, 'draftAiRationale'], Permission::MatchingManage));
+        $this->router->add('POST', '/api/admin/placement-shortlists', $this->protected([$placements, 'createShortlist'], Permission::MatchingManage));
+        $this->router->add('GET', '/api/admin/placements', $this->protected([$placements, 'adminPlacements'], Permission::PlacementManage));
+        $this->router->add('POST', '/api/admin/placements', $this->protected([$placements, 'createPlacement'], Permission::PlacementManage));
+        $this->router->add('PATCH', '/api/admin/placements/{id}', $this->protected([$placements, 'updatePlacement'], Permission::PlacementManage));
+        $this->router->add('GET', '/api/admin/communications', $this->protected([$placements, 'adminThreads'], Permission::CommunicationManage));
+        $this->router->add('POST', '/api/admin/communications', $this->protected([$placements, 'createThread'], Permission::CommunicationManage));
+        $this->router->add('GET', '/api/admin/integrations', $this->protected([$placements, 'integrations'], Permission::IntegrationManage));
+        $this->router->add('GET', '/api/admin/security/asvs-readiness', $this->protected([$placements, 'security'], Permission::OperationsRead));
         $this->router->add('GET', '/api/admin/audit-logs', $this->protected([$admin, 'auditLogs'], Permission::AuditRead));
         $this->router->add('GET', '/api/admin/pre-licensure', $this->protected([$admin, 'prelicensureApplicants'], Permission::PrelicensureManage));
         $this->router->add('PATCH', '/api/admin/pre-licensure/{id}/convert', $this->protected([$admin, 'convertPrelicensureApplicant'], Permission::PrelicensureManage));

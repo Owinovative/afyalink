@@ -20,7 +20,13 @@ type FacilitySection =
   | "candidate-detail"
   | "appointments"
   | "recommendations"
-  | "packages";
+  | "packages"
+  | "requisitions"
+  | "requisition-new"
+  | "requisition-detail"
+  | "shortlists"
+  | "placements"
+  | "team";
 
 const facilitySectionTitles: Record<FacilitySection, string> = {
   home: "Facility workspace",
@@ -32,6 +38,12 @@ const facilitySectionTitles: Record<FacilitySection, string> = {
   appointments: "Appointments",
   recommendations: "Recommendations",
   packages: "Packages",
+  requisitions: "Requisitions",
+  "requisition-new": "New requisition",
+  "requisition-detail": "Requisition detail",
+  shortlists: "Shortlists",
+  placements: "Placements",
+  team: "Facility team",
 };
 
 const facilitySectionBodies: Record<FacilitySection, string> = {
@@ -44,6 +56,12 @@ const facilitySectionBodies: Record<FacilitySection, string> = {
   appointments: "Request consultation or hiring support.",
   recommendations: "Ask Afyalink to recommend professionals for a role.",
   packages: "Review shared recommendation packages.",
+  requisitions: "Create and track structured staffing needs.",
+  "requisition-new": "Submit a structured staffing need to Afyalink.",
+  "requisition-detail": "Track one requisition, shared shortlists, and placement progress.",
+  shortlists: "Review Afyalink-approved candidate shortlists.",
+  placements: "Track placement opportunities connected to your facility.",
+  team: "Invite facility collaborators with role-scoped access.",
 };
 
 function csvIds(value: unknown) {
@@ -53,7 +71,7 @@ function csvIds(value: unknown) {
     .filter((id) => Number.isInteger(id) && id > 0);
 }
 
-export function FacilityPage({ section, publicationId }: { section: FacilitySection; publicationId?: string }) {
+export function FacilityPage({ section, publicationId, id }: { section: FacilitySection; publicationId?: string; id?: string }) {
   const resource = useApiResource<Record<string, unknown>>("facility", "/api/facility/dashboard");
   const data = asRecord(resource.data);
   const facility = asRecord(data.facility);
@@ -84,6 +102,12 @@ export function FacilityPage({ section, publicationId }: { section: FacilitySect
         <RecommendationRequests token={resource.token} requests={recommendationRequests} refresh={resource.refresh} />
       ) : null}
       {section === "packages" ? <SharedPackages packages={packages} /> : null}
+      {section === "requisitions" ? <FacilityRequisitions token={resource.token} /> : null}
+      {section === "requisition-new" ? <FacilityRequisitionForm token={resource.token} /> : null}
+      {section === "requisition-detail" && id ? <FacilityRequisitionDetail token={resource.token} id={id} /> : null}
+      {section === "shortlists" ? <FacilityShortlists token={resource.token} /> : null}
+      {section === "placements" ? <FacilityPlacements token={resource.token} /> : null}
+      {section === "team" ? <FacilityTeam token={resource.token} /> : null}
     </>
   );
 }
@@ -578,6 +602,209 @@ function SharedPackages({ packages }: { packages: Record<string, unknown>[] }) {
         ) : (
           <EmptyState title="No shared packages" body="Afyalink shared recommendation packages will appear here in read-only mode." />
         )}
+      </div>
+    </section>
+  );
+}
+
+function FacilityRequisitions({ token }: { token: string }) {
+  const resource = useApiResource<Record<string, unknown>>("facility", "/api/facility/requisitions");
+  const requisitions = asArray<Record<string, unknown>>(asRecord(resource.data).requisitions);
+
+  return (
+    <section className="card">
+      <div className="action-row" style={{ justifyContent: "space-between" }}>
+        <h2>Staffing needs</h2>
+        <Link className="button secondary" href="/portal/facility/requisitions/new">
+          New requisition
+        </Link>
+      </div>
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <div className="data-list">
+        {requisitions.length ? requisitions.map((row) => (
+          <DataRow key={String(row.id)} title={display(row.title)} status={row.status} meta={[
+            { label: "Profession", value: row.profession_required },
+            { label: "County", value: row.county },
+            { label: "Employment", value: row.employment_type },
+            { label: "Urgency", value: row.urgency },
+          ]}>
+            <Link className="button secondary" href={`/portal/facility/requisitions/${row.id}`}>
+              Open
+            </Link>
+          </DataRow>
+        )) : <EmptyState title="No staffing needs" body="Create a requisition when your facility needs Afyalink placement support." />}
+      </div>
+    </section>
+  );
+}
+
+function FacilityRequisitionForm({ token }: { token: string }) {
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    setError("");
+    try {
+      await apiRequest("/api/facility/requisitions", { method: "POST", token, body: { ...formValues(event), submit: true } });
+      setMessage("Requisition submitted to Afyalink operations.");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not submit requisition.");
+    }
+  }
+
+  return (
+    <section className="form-card">
+      <h2>Structured staffing need</h2>
+      <form className="form-grid" onSubmit={submit}>
+        <Field label="Title" name="title" required placeholder="Night shift registered nurse cover" />
+        <Field label="Profession required" name="profession_required" required placeholder="Registered Nurse" />
+        <Field label="Specialty" name="specialty_required" placeholder="ICU, theatre, maternity..." />
+        <Field label="Department" name="facility_department" placeholder="Ward, outpatient, emergency..." />
+        <label>
+          Employment type
+          <select name="employment_type" defaultValue="full_time">
+            <option value="full_time">Full time</option>
+            <option value="part_time">Part time</option>
+            <option value="locum">Locum</option>
+            <option value="contract">Contract</option>
+            <option value="internship">Internship</option>
+            <option value="attachment">Attachment</option>
+            <option value="temporary">Temporary</option>
+          </select>
+        </label>
+        <Field label="Positions" name="number_of_positions" type="number" defaultValue="1" />
+        <Field label="County" name="county" required />
+        <Field label="Facility site" name="facility_site" />
+        <Field label="Required start date" name="required_start_date" type="date" />
+        <Field label="Minimum years experience" name="minimum_experience_years" type="number" />
+        <label>
+          Urgency
+          <select name="urgency" defaultValue="normal">
+            <option value="low">Low</option>
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+        </label>
+        <Field label="Shift pattern" name="shift_pattern" />
+        <Field label="Preferred skills" name="preferred_skills" placeholder="ICU, triage, EMR" />
+        <TextArea label="Notes" name="notes" />
+        <button className="button full" type="submit" disabled={!token}>
+          Submit requisition
+        </button>
+      </form>
+      <div className="data-list" style={{ marginTop: 18 }}>
+        {message ? <Feedback message={message} /> : null}
+        {error ? <Feedback message={error} tone="error" /> : null}
+      </div>
+    </section>
+  );
+}
+
+function FacilityRequisitionDetail({ token, id }: { token: string; id: string }) {
+  const resource = useApiResource<Record<string, unknown>>("facility", `/api/facility/requisitions/${id}`);
+  const requisition = asRecord(asRecord(resource.data).requisition);
+  const shortlists = asArray<Record<string, unknown>>(asRecord(resource.data).shortlists);
+  const placements = asArray<Record<string, unknown>>(asRecord(resource.data).placements);
+
+  return (
+    <div className="data-list">
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <section className="card">
+        <h2>{display(requisition.title, "Requisition")}</h2>
+        <MetaGrid items={[
+          { label: "Status", value: requisition.status },
+          { label: "Profession", value: requisition.profession_required },
+          { label: "County", value: requisition.county },
+          { label: "Employment", value: requisition.employment_type },
+          { label: "Urgency", value: requisition.urgency },
+        ]} />
+      </section>
+      <section className="card">
+        <h2>Shared shortlists</h2>
+        <div className="data-list">
+          {shortlists.length ? shortlists.map((shortlist) => <DataRow key={String(shortlist.id)} title={display(shortlist.title)} status={shortlist.status} meta={[{ label: "Shared", value: shortlist.shared_at }, { label: "Candidates", value: asArray(shortlist.candidates).length }]} />) : <EmptyState title="No shortlist yet" body="Afyalink will share reviewed candidates here." />}
+        </div>
+      </section>
+      <section className="card">
+        <h2>Placements</h2>
+        <div className="data-list">
+          {placements.length ? placements.map((placement) => <DataRow key={String(placement.id)} title={`Placement ${display(placement.id)}`} status={placement.status} meta={[{ label: "Employment", value: placement.employment_type }, { label: "Start", value: placement.start_date }]} />) : <EmptyState title="No placements yet" body="Placement records appear after Afyalink starts an opportunity workflow." />}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function FacilityShortlists({ token }: { token: string }) {
+  const resource = useApiResource<Record<string, unknown>>("facility", "/api/facility/shortlists");
+  const shortlists = asArray<Record<string, unknown>>(asRecord(resource.data).shortlists);
+
+  return (
+    <section className="card">
+      <h2>Afyalink-reviewed shortlists</h2>
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <div className="data-list">
+        {shortlists.length ? shortlists.map((shortlist) => <DataRow key={String(shortlist.id)} title={display(shortlist.title)} status={shortlist.status} meta={[{ label: "Candidates", value: asArray(shortlist.candidates).length }, { label: "Shared", value: shortlist.shared_at }]} />) : <EmptyState title="No shared shortlists" body="Shortlists appear only after Afyalink admin review." />}
+      </div>
+    </section>
+  );
+}
+
+function FacilityPlacements({ token }: { token: string }) {
+  const resource = useApiResource<Record<string, unknown>>("facility", "/api/facility/placements");
+  const placements = asArray<Record<string, unknown>>(asRecord(resource.data).placements);
+
+  return (
+    <section className="card">
+      <h2>Placement pipeline</h2>
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <div className="data-list">
+        {placements.length ? placements.map((placement) => <DataRow key={String(placement.id)} title={`Placement ${display(placement.id)}`} status={placement.status} meta={[{ label: "Employment", value: placement.employment_type }, { label: "Start", value: placement.start_date }, { label: "Updated", value: placement.updated_at }]} />) : <EmptyState title="No placements" body="Active placement workflows appear here." />}
+      </div>
+    </section>
+  );
+}
+
+function FacilityTeam({ token }: { token: string }) {
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function invite(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    setError("");
+    try {
+      await apiRequest("/api/facility/team/invitations", { method: "POST", token, body: formValues(event) });
+      setMessage("Invitation recorded and notification queued.");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not invite member.");
+    }
+  }
+
+  return (
+    <section className="form-card">
+      <h2>Invite a team member</h2>
+      <form className="form-grid" onSubmit={invite}>
+        <Field label="Email" name="email" type="email" required />
+        <label>
+          Role
+          <select name="role" defaultValue="recruiter">
+            <option value="admin">Admin</option>
+            <option value="recruiter">Recruiter</option>
+            <option value="viewer">Viewer</option>
+            <option value="billing_manager">Billing manager</option>
+          </select>
+        </label>
+        <button className="button full" type="submit" disabled={!token}>
+          Send invitation
+        </button>
+      </form>
+      <div className="data-list" style={{ marginTop: 18 }}>
+        {message ? <Feedback message={message} /> : null}
+        {error ? <Feedback message={error} tone="error" /> : null}
       </div>
     </section>
   );

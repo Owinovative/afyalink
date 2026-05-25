@@ -14,6 +14,7 @@ import type { MarketingPageContent } from "@/lib/content/marketing";
 
 const companionVisuals: Record<string, ReturnType<typeof getVisualForSlug>> = {
   "how-it-works": getVisualForSlug("facilities"),
+  matching: getVisualForSlug("facilities"),
   professionals: getVisualForSlug("verification"),
   students: getVisualForSlug("professionals"),
   facilities: getVisualForSlug("trust-security"),

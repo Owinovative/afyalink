@@ -18,6 +18,7 @@ The platform has progressed beyond intake into facility marketplace operations:
 - a student / graduate awaiting-license track that captures pre-licensure applicants early without treating them as licensed or facility-publishable candidates;
 - audit and notification outbox coverage for sensitive workflows;
 - Milestone 4 operations infrastructure for notification delivery attempts, M-PESA-ready callback events, facility subscription billing lifecycle, admin command center reporting, and privacy request queues.
+- Milestone 5 placement operations infrastructure for facility requisitions, explainable deterministic matching, reviewed shortlists, placement lifecycle tracking, controlled communication threads, facility collaboration, FHIR/SMART readiness, and ASVS-readiness governance.
 
 ## Safety Rules
 
@@ -31,3 +32,5 @@ The platform has progressed beyond intake into facility marketplace operations:
 - The frontend must render and guide workflows only. Backend services remain authoritative for application, verification, interview, subscription, and publication state.
 - Notification, payment callback, subscription activation, privacy request, and reporting logic must remain backend-owned. Frontend pages are operational consoles, not business-rule engines.
 - Payment provider payloads must be redacted before persistence or display. M-PESA credentials must never be committed or exposed to frontend routes.
+- Matching, shortlist sharing, AI-assisted rationale, communication visibility, and placement status changes must remain backend-owned and audited.
+- AI assistance must never auto-reject candidates, override eligibility rules, or use protected characteristics for scoring.
