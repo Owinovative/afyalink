@@ -31,6 +31,16 @@ services:
         value: "3600"
       - key: AFYALINK_MAX_UPLOAD_BYTES
         value: "8388608"
+      - key: MAIL_DRIVER
+        value: log
+      - key: MAIL_FROM_ADDRESS
+        value: no-reply@afyalink.local
+      - key: MAIL_FROM_NAME
+        value: Afyalink
+      - key: MPESA_ENV
+        value: sandbox
+      - key: MPESA_CALLBACK_URL
+        sync: false
 
   - type: web
     name: afyalink-web-staging

@@ -23,6 +23,11 @@ final class PdoPostgresDataStore implements DataStore
         'email_verification_tokens' => 'email_verification_tokens',
         'password_reset_tokens' => 'password_reset_tokens',
         'notification_outbox' => 'notification_outbox',
+        'notification_delivery_attempts' => 'notification_delivery_attempts',
+        'notification_templates' => 'notification_templates',
+        'notification_preferences' => 'notification_preferences',
+        'payment_provider_events' => 'payment_provider_events',
+        'privacy_requests' => 'privacy_requests',
         'regulatory_bodies' => 'regulatory_bodies',
         'verification_cases' => 'verification_cases',
         'interviews' => 'interviews',
@@ -47,6 +52,11 @@ final class PdoPostgresDataStore implements DataStore
         'applications' => ['timeline'],
         'audit_logs' => ['metadata'],
         'notification_outbox' => ['metadata'],
+        'notification_delivery_attempts' => ['provider_response'],
+        'notification_templates' => ['variables'],
+        'notification_preferences' => ['preferences'],
+        'payments' => ['callback_payload_redacted'],
+        'payment_provider_events' => ['payload_redacted'],
         'regulatory_bodies' => ['profession_coverage'],
         'verification_cases' => ['timeline'],
         'interviews' => ['timeline'],
@@ -61,6 +71,7 @@ final class PdoPostgresDataStore implements DataStore
     private const BOOL_COLUMNS = [
         'users' => ['is_active'],
         'regulatory_bodies' => ['active'],
+        'notification_templates' => ['active'],
         'facility_access_subscriptions' => ['admin_override'],
     ];
 

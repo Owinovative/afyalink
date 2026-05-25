@@ -25,6 +25,10 @@ enum Permission: string
     case RecommendationPackageManage = 'recommendation.package.manage';
     case PrelicensureManage = 'prelicensure.manage';
     case PaymentManage = 'payment.manage';
+    case NotificationManage = 'notification.manage';
+    case OperationsRead = 'operations.read';
+    case ReportsRead = 'reports.read';
+    case PrivacyRequestManage = 'privacy_request.manage';
     case AuditRead = 'audit.read';
     case UserManage = 'user.manage';
     case SystemManage = 'system.manage';

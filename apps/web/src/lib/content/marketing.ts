@@ -124,7 +124,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     secondaryCta: { label: "Contact Afyalink", href: "/contact" },
     highlights: [
       { title: "No public documents", body: "Facilities see safe summaries and approved metadata." },
-      { title: "Audited views", body: "Candidate profile access records viewer, facility, and timestamp." },
+      { title: "Audited operations", body: "Candidate views, payments, notifications, and privacy actions are traceable." },
       { title: "Watermark deterrence", body: "Screenshots cannot be impossible; access remains controlled and logged." },
     ],
     sections: [
@@ -135,8 +135,8 @@ export const marketingPages: Record<string, MarketingPageContent> = {
       },
       {
         title: "Every sensitive action has a trail.",
-        body: "Review, publication, access, recommendation, appointment, and profile-view events are logged.",
-        points: ["Admin actions", "Access changes", "Publication changes", "Marketplace views"],
+        body: "Review, publication, access, recommendation, appointment, notification, payment, privacy, and profile-view events are logged.",
+        points: ["Admin actions", "Access changes", "Provider callbacks", "Notification attempts", "Marketplace views"],
       },
     ],
   },
@@ -171,19 +171,19 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     eyebrow: "Facility access",
     title: "Facility access without fake public pricing.",
     description:
-      "Afyalink supports approved facility access, payment references, active or suspended status, and admin confirmation.",
+      "Afyalink supports approved facility access, payment references, M-PESA-ready callbacks, active or suspended status, and admin confirmation.",
     primaryCta: { label: "Join as a facility", href: "/auth/register/facility" },
     secondaryCta: { label: "Talk to Afyalink", href: "/contact" },
     highlights: [
       { title: "Approval first", body: "Facility review comes before useful marketplace access." },
       { title: "Active entitlement", body: "Browsing is denied until access is active." },
-      { title: "Admin controls", body: "Activate, suspend, expire, or cancel with audit trails." },
+      { title: "Admin controls", body: "Activate, suspend, expire, cancel, or extend access with audit trails." },
     ],
     sections: [
       {
         title: "Built for staged rollout.",
-        body: "Manual reference confirmation works now; payment callbacks can be added later.",
-        points: ["Payment intent foundation", "Plan code", "Access window", "Subscription status"],
+        body: "Manual reference confirmation works now; M-PESA callback event handling is ready for provider rollout.",
+        points: ["Payment intent foundation", "Provider callback events", "Access window", "Subscription status"],
       },
       {
         title: "Commercial workflow stays practical.",
@@ -229,7 +229,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     highlights: [
       { title: "Facilities", body: "Onboard, activate access, and request support." },
       { title: "Professionals", body: "Create an account and follow verification readiness." },
-      { title: "Operations", body: "Manage reviews, publication, access, and audit workflows." },
+      { title: "Operations", body: "Manage reviews, publication, access, payment, notification, privacy, and audit workflows." },
     ],
     sections: [
       {
@@ -240,7 +240,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
       {
         title: "Keep credentials out of contact forms.",
         body: "Private records belong in the authenticated professional portal.",
-        points: ["Private uploads", "Consent records", "Audit logs", "Controlled admin review"],
+        points: ["Private uploads", "Consent records", "Privacy requests", "Audit logs", "Controlled admin review"],
       },
     ],
   },
@@ -259,6 +259,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
       { title: "Can facilities see everyone?", body: "No. Only published candidates are visible to approved, active facilities." },
       { title: "Can screenshots be blocked?", body: "No. Afyalink uses watermarking, access control, warnings, and audit logs." },
       { title: "Who decides workflow state?", body: "The backend remains authoritative." },
+      { title: "Are payments automatic?", body: "Manual review remains available; M-PESA callbacks are ready for provider integration." },
     ],
     sections: [
       {

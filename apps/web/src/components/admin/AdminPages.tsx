@@ -29,6 +29,9 @@ type AdminSection =
   | "subscriptions"
   | "appointments"
   | "recommendations"
+  | "reports"
+  | "notifications"
+  | "privacy"
   | "audit";
 
 const adminSectionTitles: Record<AdminSection, string> = {
@@ -48,6 +51,9 @@ const adminSectionTitles: Record<AdminSection, string> = {
   subscriptions: "Subscriptions",
   appointments: "Appointments",
   recommendations: "Recommendations",
+  reports: "Reports",
+  notifications: "Notifications",
+  privacy: "Privacy requests",
   audit: "Audit",
 };
 
@@ -68,6 +74,9 @@ const adminSectionBodies: Record<AdminSection, string> = {
   subscriptions: "Manage facility access entitlement.",
   appointments: "Review facility appointment requests.",
   recommendations: "Prepare and share recommendation packages.",
+  reports: "Track funnel, verification, interview, facility, student, and notification reporting.",
+  notifications: "Inspect delivery state and retry failed operational messages.",
+  privacy: "Manage data access, correction, retention, and consent-withdrawal requests.",
   audit: "Inspect sensitive platform activity.",
 };
 
@@ -94,6 +103,9 @@ export function AdminPage({ section, id }: { section: AdminSection; id?: string 
       {section === "publications" ? <PublicationManager /> : null}
       {section === "appointments" ? <FacilityRequestManager /> : null}
       {section === "recommendations" ? <RecommendationManager /> : null}
+      {section === "reports" ? <ReportsDashboard /> : null}
+      {section === "notifications" ? <NotificationOperations /> : null}
+      {section === "privacy" ? <PrivacyRequests /> : null}
       {section === "audit" ? <AuditLog /> : null}
     </>
   );
@@ -108,13 +120,15 @@ function AdminDashboard() {
     if (!token) return;
     setError("");
     try {
-      const [applications, facilities, verifications, interviews, prelicensure] = await Promise.all([
+      const [applications, facilities, verifications, interviews, prelicensure, operations] = await Promise.all([
         apiRequest("/api/admin/applications", { token }),
         apiRequest("/api/admin/facility-operations/overview", { token }),
         apiRequest("/api/admin/verifications", { token }),
         apiRequest("/api/admin/interviews", { token }),
         apiRequest("/api/admin/pre-licensure", { token }),
+        apiRequest("/api/admin/operations/dashboard", { token }),
       ]);
+      const workQueues = asRecord(asRecord(asRecord(operations).operations).work_queues);
       setData({
         applications: asRecord(applications).overview,
         facilities: asRecord(facilities).facilities,
@@ -124,6 +138,7 @@ function AdminDashboard() {
         verifications: asRecord(verifications).overview,
         interviews: asRecord(interviews).overview,
         prelicensure: asRecord(prelicensure).overview,
+        workQueues,
       });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not load admin dashboard.");
@@ -147,6 +162,8 @@ function AdminDashboard() {
           { label: "Interviews", value: asRecord(data.interviews).total },
           { label: "Active access", value: asRecord(data.access).active },
           { label: "Waiting-license", value: asRecord(data.prelicensure).total },
+          { label: "Payment reviews", value: asRecord(data.workQueues).payment_reviews },
+          { label: "Notification failures", value: asRecord(data.workQueues).notification_failures },
         ]}
       />
       <div className="grid-3">
@@ -154,6 +171,8 @@ function AdminDashboard() {
         <QuickLink title="Facility operations" href="/portal/admin/facilities" body="Approve facilities and manage access." />
         <QuickLink title="Recommendations" href="/portal/admin/recommendations" body="Prepare curated candidate packages." />
         <QuickLink title="Pre-licensure queue" href="/portal/admin/pre-licensure" body="Track students waiting for licenses." />
+        <QuickLink title="Reports" href="/portal/admin/reports" body="Open operational funnel and delivery reports." />
+        <QuickLink title="Notifications" href="/portal/admin/notifications" body="Inspect pending and failed delivery attempts." />
       </div>
     </div>
   );
@@ -1026,6 +1045,147 @@ function RecommendationManager() {
         <AdminRows title="Recommendation requests" rows={requestRows} statusKey="status" />
         <AdminRows title="Recommendation packages" rows={packageRows} statusKey="status" />
       </div>
+    </div>
+  );
+}
+
+function ReportsDashboard() {
+  const resource = useApiResource<Record<string, unknown>>("admin", "/api/admin/reports");
+  const reports = asRecord(asRecord(resource.data).reports);
+  const cards = Object.entries(reports).map(([key, value]) => ({ key, value: asRecord(value) }));
+
+  return (
+    <div className="data-list">
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      <div className="grid-2">
+        {cards.length ? (
+          cards.map((card) => (
+            <section className="card" key={card.key}>
+              <h2>{display(card.key)}</h2>
+              <div className="table-lite">
+                {Object.entries(card.value).map(([metric, value]) => (
+                  <div key={metric}>
+                    <span>{display(metric)}</span>
+                    <span className="badge">{String(value ?? 0)}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))
+        ) : (
+          <EmptyState title="No report data" body="Aggregated reporting data will appear after workflow activity starts." />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NotificationOperations() {
+  const resource = useApiResource<Record<string, unknown>>("admin", "/api/admin/notifications");
+  const data = asRecord(resource.data);
+  const overview = asRecord(data.overview);
+  const counts = asRecord(overview.counts);
+  const failed = asArray<Record<string, unknown>>(data.failed);
+  const recent = asArray<Record<string, unknown>>(data.recent);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function process() {
+    setMessage("");
+    setError("");
+    try {
+      const response = asRecord(await apiRequest("/api/admin/notifications/process", {
+        method: "POST",
+        token: resource.token,
+        body: { limit: 25 },
+      }));
+      const delivery = asRecord(response.delivery);
+      setMessage(`Processed ${display(delivery.processed_count, "0")} notification(s).`);
+      await resource.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not process notifications.");
+    }
+  }
+
+  return (
+    <div className="data-list">
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      {message ? <Feedback message={message} /> : null}
+      {error ? <Feedback message={error} tone="error" /> : null}
+      <MetricGrid
+        metrics={[
+          { label: "Pending", value: counts.pending },
+          { label: "Retry scheduled", value: counts.retry_scheduled },
+          { label: "Sent", value: counts.sent },
+          { label: "Failed", value: counts.failed },
+          { label: "Provider", value: overview.provider },
+        ]}
+      />
+      <div className="action-row">
+        <button className="button" type="button" disabled={!resource.token} onClick={process}>
+          Process pending now
+        </button>
+      </div>
+      <div className="grid-2">
+        <AdminRows title="Failed or retrying notifications" rows={failed} statusKey="status" />
+        <AdminRows title="Recent notifications" rows={recent} statusKey="status" />
+      </div>
+    </div>
+  );
+}
+
+function PrivacyRequests() {
+  const resource = useApiResource<Record<string, unknown>>("admin", "/api/admin/privacy-requests");
+  const rows = asArray<Record<string, unknown>>(asRecord(resource.data).privacy_requests);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function update(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    setError("");
+    try {
+      const values = formValues(event);
+      const requestId = Number(values.request_id);
+      delete values.request_id;
+      await apiRequest(`/api/admin/privacy-requests/${requestId}`, {
+        method: "PATCH",
+        token: resource.token,
+        body: values,
+      });
+      setMessage("Privacy request updated.");
+      await resource.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not update privacy request.");
+    }
+  }
+
+  return (
+    <div className="data-list">
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      {message ? <Feedback message={message} /> : null}
+      {error ? <Feedback message={error} tone="error" /> : null}
+      <section className="form-card">
+        <h2>Update privacy request</h2>
+        <form className="form-grid" onSubmit={update}>
+          <Field label="Request ID" name="request_id" type="number" required />
+          <label>
+            Status
+            <select name="status" required>
+              {["submitted", "under_review", "completed", "rejected", "cancelled"].map((status) => (
+                <option key={status} value={status}>
+                  {display(status)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <TextArea label="Admin note" name="admin_note" />
+          <button className="button full" type="submit" disabled={!resource.token}>
+            Update request
+          </button>
+        </form>
+      </section>
+      <AdminRows title="Privacy requests" rows={rows} statusKey="status" />
     </div>
   );
 }

@@ -55,6 +55,9 @@ const requiredRoutes = [
   "src/app/portal/admin/subscriptions/page.tsx",
   "src/app/portal/admin/appointments/page.tsx",
   "src/app/portal/admin/recommendations/page.tsx",
+  "src/app/portal/admin/reports/page.tsx",
+  "src/app/portal/admin/notifications/page.tsx",
+  "src/app/portal/admin/privacy/page.tsx",
   "src/app/portal/admin/audit/page.tsx",
 ];
 

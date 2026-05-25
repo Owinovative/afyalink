@@ -59,3 +59,14 @@ Admins use `/portal/admin/pre-licensure` to review:
 
 Conversion is audited with `student_awaiting_license.converted`.
 
+## Milestone 4 Operations Additions
+
+Milestone 4 keeps pre-licensure candidates out of the licensed marketplace while adding operations visibility:
+
+- admin command center counts students awaiting license
+- admin reports include student pipeline counts
+- notification templates include license-upload reminder-ready messaging
+- conversion remains admin-reviewed after license details and license evidence exist
+
+Students still cannot be published to facilities until they convert to `licensed_professional` and complete the normal verification, interview, and publication workflow.
+

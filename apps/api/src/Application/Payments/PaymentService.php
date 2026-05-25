@@ -34,6 +34,12 @@ final readonly class PaymentService
         $currency = strtoupper((string) ($input['currency'] ?? 'KES'));
         $method = strtolower((string) $input['method']);
         $idempotencyKey = trim((string) $input['idempotency_key']);
+        $provider = isset($input['provider']) && trim((string) $input['provider']) !== ''
+            ? strtolower(trim((string) $input['provider']))
+            : (str_contains($method, 'mpesa') ? 'mpesa' : 'manual');
+        $requestedInitialStatus = $method === 'mpesa_stk' || $method === 'mpesa_stk_push'
+            ? PaymentStatus::AwaitingProvider
+            : null;
 
         $existing = $this->store->first(
             'payments',
@@ -45,14 +51,28 @@ final readonly class PaymentService
         }
 
         $intent = $this->factory->create($user->id, $amountCents, $currency, $method, $idempotencyKey);
+        $initialStatus = $requestedInitialStatus instanceof PaymentStatus ? $requestedInitialStatus : $intent->status;
         $row = $this->store->insert('payments', [
             'user_id' => $user->id,
+            'payer_user_id' => $user->id,
+            'payer_type' => trim((string) ($input['payer_type'] ?? 'professional')),
+            'entity_type' => trim((string) ($input['entity_type'] ?? 'professional_application_fee')),
+            'entity_id' => isset($input['entity_id']) && $input['entity_id'] !== '' ? (int) $input['entity_id'] : null,
             'intent_reference' => $intent->intentReference,
             'amount_cents' => $intent->amountCents,
             'currency' => $intent->currency,
             'method' => $intent->method,
-            'status' => $intent->status->value,
+            'status' => $initialStatus->value,
             'idempotency_key' => $intent->idempotencyKey,
+            'provider' => $provider,
+            'provider_reference' => isset($input['provider_reference']) ? trim((string) $input['provider_reference']) : null,
+            'checkout_request_id' => isset($input['checkout_request_id']) ? trim((string) $input['checkout_request_id']) : null,
+            'merchant_request_id' => isset($input['merchant_request_id']) ? trim((string) $input['merchant_request_id']) : null,
+            'phone_number' => isset($input['phone_number']) ? trim((string) $input['phone_number']) : null,
+            'callback_payload_redacted' => [],
+            'failure_reason' => null,
+            'paid_at' => null,
+            'expires_at' => isset($input['expires_at']) ? trim((string) $input['expires_at']) : null,
             'external_reference' => trim((string) ($input['external_reference'] ?? '')),
             'review_note' => null,
             'created_at' => gmdate(DATE_ATOM),
@@ -65,6 +85,8 @@ final readonly class PaymentService
             'currency' => $row['currency'],
             'method' => $row['method'],
             'status' => $row['status'],
+            'provider' => $row['provider'] ?? null,
+            'entity_type' => $row['entity_type'] ?? null,
         ], $ipAddress, $userAgent);
 
         return $this->safePayment($row);
@@ -121,6 +143,8 @@ final readonly class PaymentService
         $updated = $this->store->update('payments', $paymentId, [
             'status' => $status->value,
             'review_note' => $note,
+            'paid_at' => $status === PaymentStatus::Confirmed ? gmdate(DATE_ATOM) : ($payment['paid_at'] ?? null),
+            'failure_reason' => $status === PaymentStatus::Failed ? $note : ($payment['failure_reason'] ?? null),
             'reviewed_by' => $admin->id,
             'reviewed_at' => gmdate(DATE_ATOM),
             'updated_at' => gmdate(DATE_ATOM),
@@ -150,10 +174,34 @@ final readonly class PaymentService
             'currency' => (string) $row['currency'],
             'method' => (string) $row['method'],
             'status' => (string) $row['status'],
+            'payer_type' => (string) ($row['payer_type'] ?? 'professional'),
+            'entity_type' => (string) ($row['entity_type'] ?? 'professional_application_fee'),
+            'entity_id' => $row['entity_id'] ?? null,
+            'provider' => $row['provider'] ?? null,
+            'provider_reference' => $row['provider_reference'] ?? null,
+            'checkout_request_id' => $row['checkout_request_id'] ?? null,
+            'merchant_request_id' => $row['merchant_request_id'] ?? null,
+            'phone_number' => $this->maskPhone($row['phone_number'] ?? null),
             'external_reference' => $row['external_reference'] ?? null,
             'review_note' => $row['review_note'] ?? null,
+            'failure_reason' => $row['failure_reason'] ?? null,
+            'paid_at' => $row['paid_at'] ?? null,
+            'expires_at' => $row['expires_at'] ?? null,
             'created_at' => (string) $row['created_at'],
             'updated_at' => (string) $row['updated_at'],
         ];
+    }
+
+    private function maskPhone(mixed $phone): ?string
+    {
+        if ($phone === null || trim((string) $phone) === '') {
+            return null;
+        }
+        $digits = preg_replace('/\D+/', '', (string) $phone) ?? '';
+        if (strlen($digits) <= 4) {
+            return '****';
+        }
+
+        return substr($digits, 0, 3) . '****' . substr($digits, -3);
     }
 }
