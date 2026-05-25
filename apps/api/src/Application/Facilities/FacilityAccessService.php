@@ -51,6 +51,7 @@ final readonly class FacilityAccessService
         $amountCents = (int) ($input['amount_cents'] ?? 500000);
         $currency = strtoupper((string) ($input['currency'] ?? 'KES'));
         $method = strtolower((string) ($input['method'] ?? 'mpesa_manual_reference'));
+        $provider = str_contains($method, 'mpesa') ? 'mpesa' : 'manual';
         $intent = $this->factory->create($user->id, $amountCents, $currency, 'facility_' . $method, $idempotencyKey);
         $now = gmdate(DATE_ATOM);
         $subscription = $this->store->insert('facility_access_subscriptions', [
@@ -62,6 +63,12 @@ final readonly class FacilityAccessService
             'amount_cents' => $amountCents,
             'currency' => $currency,
             'method' => $method,
+            'provider' => $provider,
+            'provider_reference' => null,
+            'checkout_request_id' => isset($input['checkout_request_id']) ? trim((string) $input['checkout_request_id']) : null,
+            'merchant_request_id' => isset($input['merchant_request_id']) ? trim((string) $input['merchant_request_id']) : null,
+            'phone_number' => isset($input['phone_number']) ? trim((string) $input['phone_number']) : null,
+            'paid_at' => null,
             'external_reference' => isset($input['external_reference']) ? trim((string) $input['external_reference']) : null,
             'starts_at' => null,
             'ends_at' => null,
@@ -237,6 +244,12 @@ final readonly class FacilityAccessService
             'amount_cents' => 0,
             'currency' => 'KES',
             'method' => 'admin_override',
+            'provider' => 'manual',
+            'provider_reference' => null,
+            'checkout_request_id' => null,
+            'merchant_request_id' => null,
+            'phone_number' => null,
+            'paid_at' => null,
             'external_reference' => null,
             'starts_at' => null,
             'ends_at' => null,
@@ -285,13 +298,32 @@ final readonly class FacilityAccessService
             'amount_cents' => (int) $row['amount_cents'],
             'currency' => (string) $row['currency'],
             'method' => (string) $row['method'],
+            'provider' => $row['provider'] ?? null,
+            'provider_reference' => $row['provider_reference'] ?? null,
+            'checkout_request_id' => $row['checkout_request_id'] ?? null,
+            'merchant_request_id' => $row['merchant_request_id'] ?? null,
+            'phone_number' => $this->maskPhone($row['phone_number'] ?? null),
             'external_reference' => $row['external_reference'] ?? null,
             'starts_at' => $row['starts_at'] ?? null,
             'ends_at' => $row['ends_at'] ?? null,
+            'paid_at' => $row['paid_at'] ?? null,
             'admin_override' => (bool) ($row['admin_override'] ?? false),
             'note' => $row['note'] ?? null,
             'created_at' => (string) $row['created_at'],
             'updated_at' => (string) $row['updated_at'],
         ];
+    }
+
+    private function maskPhone(mixed $phone): ?string
+    {
+        if ($phone === null || trim((string) $phone) === '') {
+            return null;
+        }
+        $digits = preg_replace('/\D+/', '', (string) $phone) ?? '';
+        if (strlen($digits) <= 4) {
+            return '****';
+        }
+
+        return substr($digits, 0, 3) . '****' . substr($digits, -3);
     }
 }

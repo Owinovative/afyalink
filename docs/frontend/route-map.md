@@ -67,5 +67,8 @@
 - `/portal/admin/subscriptions`
 - `/portal/admin/appointments`
 - `/portal/admin/recommendations`
+- `/portal/admin/reports`
+- `/portal/admin/notifications`
+- `/portal/admin/privacy`
 - `/portal/admin/audit`
 - `/portal/admin/pre-licensure`

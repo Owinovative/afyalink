@@ -16,7 +16,8 @@ The platform has progressed beyond intake into facility marketplace operations:
 - facility onboarding, admin approval, active access subscriptions, candidate publication, controlled candidate browsing, appointment requests, recommendation requests, and shared recommendation packages;
 - a multi-page Next.js public website with routed professional, facility, and admin portals;
 - a student / graduate awaiting-license track that captures pre-licensure applicants early without treating them as licensed or facility-publishable candidates;
-- audit and notification outbox coverage for sensitive workflows.
+- audit and notification outbox coverage for sensitive workflows;
+- Milestone 4 operations infrastructure for notification delivery attempts, M-PESA-ready callback events, facility subscription billing lifecycle, admin command center reporting, and privacy request queues.
 
 ## Safety Rules
 
@@ -28,3 +29,5 @@ The platform has progressed beyond intake into facility marketplace operations:
 - Candidate publication must stay separate from raw professional/application records.
 - Student-awaiting-license applicants must stay out of full licensed submission, verification/interview, and facility publication until converted after license evidence is available.
 - The frontend must render and guide workflows only. Backend services remain authoritative for application, verification, interview, subscription, and publication state.
+- Notification, payment callback, subscription activation, privacy request, and reporting logic must remain backend-owned. Frontend pages are operational consoles, not business-rule engines.
+- Payment provider payloads must be redacted before persistence or display. M-PESA credentials must never be committed or exposed to frontend routes.

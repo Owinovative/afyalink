@@ -50,7 +50,7 @@ AFYALINK_JSON_DATASTORE=apps/api/storage/runtime/afyalink-dev.json
 
 Do not use JSON persistence for production-like local development.
 
-Milestone 3 facility marketplace tables are included in the normal migration path. No new environment variables are required for facility onboarding, candidate publication, access gating, requests, or recommendation packages.
+Milestone 3 and Milestone 4 tables are included in the normal migration path. Facility onboarding, candidate publication, access gating, requests, recommendations, notification delivery attempts, provider payment events, privacy requests, and reporting counters all use the same migration command.
 
 Local private credential storage uses:
 
@@ -58,11 +58,39 @@ Local private credential storage uses:
 
 These paths are ignored and must not be committed.
 
-## Notification Outbox
+## Notification Delivery
 
-Milestone 1 queues notification intents in the `notification_outbox` table. The current development adapter records email verification, password reset, application submission, and credential replacement messages for later delivery. It does not require SMTP credentials for local testing.
+Afyalink queues notification intents in `notification_outbox` and records delivery attempts in `notification_delivery_attempts`. The default local/staging driver is safe log delivery.
+
+```text
+MAIL_DRIVER=log
+MAIL_FROM_ADDRESS=no-reply@afyalink.local
+MAIL_FROM_NAME=Afyalink
+```
+
+Process pending notifications manually:
+
+```bash
+cd apps/api
+php scripts/process-notifications.php 25
+```
 
 For local manual testing, inspect the latest `notification_outbox.action_url` in the database or JSON dev store to retrieve the verification/reset token that a real mail worker would send. Do not log or expose those tokens in production.
+
+## M-PESA Callback Foundation
+
+Set provider credentials only in deployment secrets:
+
+```text
+MPESA_ENV=sandbox
+MPESA_CONSUMER_KEY=
+MPESA_CONSUMER_SECRET=
+MPESA_SHORTCODE=
+MPESA_PASSKEY=
+MPESA_CALLBACK_URL=https://your-api.example.com/api/payments/mpesa/callback
+```
+
+The callback endpoint stores redacted provider events and updates matched payment/subscription state. It does not fake STK success or hardcode credentials.
 
 ## Optional MinIO Credential Storage
 

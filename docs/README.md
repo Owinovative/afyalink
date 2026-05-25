@@ -2,7 +2,7 @@
 
 This folder contains the initial project documentation extracted from the Afyalink blueprint and engineering specification.
 
-The current implementation documents executable account lifecycle, notification outbox, replacement workflow, PostgreSQL persistence, private credential storage behavior, facility marketplace operations, secure candidate access, the image-led public website, the routed Next.js portal platform, and the pre-licensure student track.
+The current implementation documents executable account lifecycle, operational notification delivery, replacement workflow, PostgreSQL persistence, private credential storage behavior, M-PESA-ready payments, facility marketplace operations, secure candidate access, the image-led public website, the routed Next.js portal platform, the pre-licensure student track, admin command center reporting, and privacy request handling.
 
 ## Current Docs
 
@@ -11,9 +11,15 @@ The current implementation documents executable account lifecycle, notification 
 - [Candidate Publication and Access Control](architecture/candidate-publication-access-control.md)
 - [Milestone 1 Implementation Plan](milestones/milestone-1.md)
 - [Milestone 3 Facility Marketplace Platform](milestones/milestone-3.md)
+- [Milestone 4 Production Operations Engine](milestones/milestone-4.md)
 - [Security Foundation](security/security-foundation.md)
 - [Secure Candidate Viewing and Watermarking](security/secure-candidate-viewing.md)
+- [Privacy Requests and Retention](security/privacy-requests-and-retention.md)
+- [Notification Delivery Workflow](workflows/notification-delivery.md)
+- [M-PESA Payment Operations](workflows/mpesa-payment-operations.md)
+- [Facility Subscription Billing](workflows/facility-subscription-billing.md)
 - [Recommendation Workflow](workflows/recommendation-workflow.md)
+- [Admin Command Center](operations/admin-command-center.md)
 - [Benchmark Synthesis](frontend/benchmark-synthesis.md)
 - [Visual Route Audit](frontend/visual-route-audit.md)
 - [Photo Asset Plan](frontend/photo-asset-plan.md)
@@ -26,6 +32,7 @@ The current implementation documents executable account lifecycle, notification 
 - [Local Setup](setup.md)
 - [Milestone 1 API Endpoints](api/milestone-1-endpoints.md)
 - [Milestone 3 API Endpoints](api/milestone-3-endpoints.md)
+- [Milestone 4 API Endpoints](api/milestone-4-endpoints.md)
 - [Render Staging Deployment](deployment/render-staging.md)
 
 ## Source Documents

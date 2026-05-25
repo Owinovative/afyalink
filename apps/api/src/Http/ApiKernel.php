@@ -16,8 +16,13 @@ use Afyalink\Core\Application\Facilities\FacilityAccessService;
 use Afyalink\Core\Application\Facilities\FacilityEngagementService;
 use Afyalink\Core\Application\Facilities\FacilityService;
 use Afyalink\Core\Application\Interviews\InterviewService;
+use Afyalink\Core\Application\Notifications\NotificationDeliveryService;
 use Afyalink\Core\Application\Notifications\NotificationService;
+use Afyalink\Core\Application\Operations\OperationsDashboardService;
+use Afyalink\Core\Application\Operations\ReportingService;
+use Afyalink\Core\Application\Payments\MpesaPaymentService;
 use Afyalink\Core\Application\Payments\PaymentService;
+use Afyalink\Core\Application\Privacy\PrivacyRequestService;
 use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
 use Afyalink\Core\Application\Professionals\StudentPrelicensureService;
 use Afyalink\Core\Application\Verification\VerificationService;
@@ -31,8 +36,11 @@ use Afyalink\Core\Http\Controllers\AuthController;
 use Afyalink\Core\Http\Controllers\ConsentController;
 use Afyalink\Core\Http\Controllers\CredentialController;
 use Afyalink\Core\Http\Controllers\FacilityController;
+use Afyalink\Core\Http\Controllers\OperationsController;
 use Afyalink\Core\Http\Controllers\PaymentController;
 use Afyalink\Core\Http\Controllers\ProfessionalController;
+use Afyalink\Core\Infrastructure\Notifications\EmailProvider;
+use Afyalink\Core\Infrastructure\Notifications\LogEmailProvider;
 use Afyalink\Core\Infrastructure\Persistence\DataStore;
 use Afyalink\Core\Infrastructure\Storage\CredentialStorage;
 use Afyalink\Core\Support\Exceptions\AuthorizationException;
@@ -56,9 +64,11 @@ final class ApiKernel
         private readonly int $maxUploadBytes = 8388608,
         private readonly int $emailVerificationTtlSeconds = 86400,
         private readonly int $passwordResetTtlSeconds = 3600,
+        private readonly ?EmailProvider $emailProvider = null,
     ) {
         $audit = new AuditLogger($this->store);
         $notifications = new NotificationService($this->store);
+        $delivery = new NotificationDeliveryService($this->store, $audit, $this->emailProvider ?? new LogEmailProvider());
         $this->auth = new AuthService($this->store, $audit, sessionTtlSeconds: $this->sessionTtlSeconds);
         $accounts = new AccountLifecycleService(
             $this->store,
@@ -74,6 +84,7 @@ final class ApiKernel
         $credentials = new CredentialService($this->store, $storage, $audit, new FileUploadPolicy($this->maxUploadBytes), $notifications);
         $consents = new ConsentService($this->store, $audit);
         $payments = new PaymentService($this->store, $audit);
+        $mpesa = new MpesaPaymentService($this->store, $audit);
         $prelicensure = new StudentPrelicensureService($this->store, $audit);
         $workflow = new ApplicationWorkflowService($this->store, $profiles, $credentials, $consents, $payments, $audit, notifications: $notifications, prelicensure: $prelicensure);
         $verifications = new VerificationService($this->store, $workflow, $audit, $notifications);
@@ -92,9 +103,16 @@ final class ApiKernel
         $adminController = new AdminController($workflow, $credentials, $payments, $this->store, $verifications, $interviews, $prelicensure);
         $facilityController = new FacilityController($this->auth, $facilities, $facilityAccess, $candidatePublications, $facilityEngagements);
         $adminFacilityController = new AdminFacilityController($facilities, $facilityAccess, $candidatePublications, $facilityEngagements);
+        $operationsController = new OperationsController(
+            new OperationsDashboardService($this->store),
+            new ReportingService($this->store),
+            $delivery,
+            new PrivacyRequestService($this->store, $audit),
+            $mpesa,
+        );
 
         $this->router = new Router();
-        $this->routes($authController, $professionalController, $credentialController, $consentController, $paymentController, $applicationController, $adminController, $facilityController, $adminFacilityController);
+        $this->routes($authController, $professionalController, $credentialController, $consentController, $paymentController, $applicationController, $adminController, $facilityController, $adminFacilityController, $operationsController);
     }
 
     public function auth(): AuthService
@@ -156,6 +174,7 @@ final class ApiKernel
         AdminController $admin,
         FacilityController $facility,
         AdminFacilityController $adminFacility,
+        OperationsController $operations,
     ): void {
         $this->router->add('GET', '/api/health', static fn (): array => ['status' => 'ok']);
         $this->router->add('POST', '/api/auth/register', [$auth, 'register']);
@@ -165,6 +184,8 @@ final class ApiKernel
         $this->router->add('POST', '/api/auth/password/forgot', [$auth, 'forgotPassword']);
         $this->router->add('POST', '/api/auth/password/reset', [$auth, 'resetPassword']);
         $this->router->add('POST', '/api/facility/auth/register', [$facility, 'register']);
+        $this->router->add('POST', '/api/payments/mpesa/callback', [$operations, 'paymentCallback']);
+        $this->router->add('POST', '/api/privacy-requests', [$operations, 'submitPrivacyRequest']);
         $this->router->add('POST', '/api/auth/logout', $this->protected([$auth, 'logout']));
         $this->router->add('POST', '/api/auth/email/resend', $this->professional([$auth, 'resendEmailVerification']));
         $this->router->add('GET', '/api/me', $this->protected([$auth, 'me']));
@@ -220,6 +241,12 @@ final class ApiKernel
         $this->router->add('GET', '/api/admin/audit-logs', $this->protected([$admin, 'auditLogs'], Permission::AuditRead));
         $this->router->add('GET', '/api/admin/pre-licensure', $this->protected([$admin, 'prelicensureApplicants'], Permission::PrelicensureManage));
         $this->router->add('PATCH', '/api/admin/pre-licensure/{id}/convert', $this->protected([$admin, 'convertPrelicensureApplicant'], Permission::PrelicensureManage));
+        $this->router->add('GET', '/api/admin/operations/dashboard', $this->protected([$operations, 'dashboard'], Permission::OperationsRead));
+        $this->router->add('GET', '/api/admin/reports', $this->protected([$operations, 'reports'], Permission::ReportsRead));
+        $this->router->add('GET', '/api/admin/notifications', $this->protected([$operations, 'notifications'], Permission::NotificationManage));
+        $this->router->add('POST', '/api/admin/notifications/process', $this->protected([$operations, 'processNotifications'], Permission::NotificationManage));
+        $this->router->add('GET', '/api/admin/privacy-requests', $this->protected([$operations, 'privacyRequests'], Permission::PrivacyRequestManage));
+        $this->router->add('PATCH', '/api/admin/privacy-requests/{id}', $this->protected([$operations, 'updatePrivacyRequest'], Permission::PrivacyRequestManage));
     }
 
     /**

@@ -24,6 +24,9 @@ final readonly class AppConfig
         public int $maxUploadBytes,
         public int $emailVerificationTtlSeconds,
         public int $passwordResetTtlSeconds,
+        public string $mailDriver,
+        public string $mailFromAddress,
+        public string $mailFromName,
     ) {}
 
     /**
@@ -49,6 +52,9 @@ final readonly class AppConfig
             maxUploadBytes: (int) ($env['AFYALINK_MAX_UPLOAD_BYTES'] ?? 8388608),
             emailVerificationTtlSeconds: (int) ($env['AFYALINK_EMAIL_VERIFICATION_TTL_SECONDS'] ?? 86400),
             passwordResetTtlSeconds: (int) ($env['AFYALINK_PASSWORD_RESET_TTL_SECONDS'] ?? 3600),
+            mailDriver: strtolower($env['MAIL_DRIVER'] ?? 'log'),
+            mailFromAddress: $env['MAIL_FROM_ADDRESS'] ?? 'no-reply@afyalink.local',
+            mailFromName: $env['MAIL_FROM_NAME'] ?? 'Afyalink',
         );
     }
 }

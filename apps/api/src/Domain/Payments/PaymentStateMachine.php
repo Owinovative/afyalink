@@ -14,6 +14,7 @@ final class PaymentStateMachine
         'initiated' => [
             PaymentStatus::AwaitingProvider,
             PaymentStatus::PendingVerification,
+            PaymentStatus::Confirmed,
             PaymentStatus::Failed,
             PaymentStatus::Expired,
         ],
@@ -54,4 +55,3 @@ final class PaymentStateMachine
         }
     }
 }
-

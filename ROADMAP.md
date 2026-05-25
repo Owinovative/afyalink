@@ -53,11 +53,20 @@
 - Admin pre-licensure queue with conversion control
 - Students blocked from licensed application submission, interview/publication pipeline, and facility marketplace visibility until converted
 
+## Milestone 4
+
+- Notification delivery engine with delivery attempts, safe log/null email provider, retry/backoff, and worker command
+- M-PESA-ready callback foundation with redacted provider event persistence and idempotent status handling
+- Facility subscription billing lifecycle tied to approved facility access
+- Admin operations command center with payment, notification, verification, interview, facility, marketplace, student, and privacy queues
+- Reporting summaries for application funnel, verification, interview, facility onboarding, subscriptions, publication, recommendations, appointments, students, notifications, and privacy
+- Privacy request foundation for access, correction, retention/deletion, and consent-withdrawal requests
+
 ## Later
 
 - Regulatory integration automation where APIs exist
-- Advanced reporting
+- CSV/PDF report export and scheduled operations reports
 - AI-assisted matching, only after core trust workflows are stable
-- Production M-PESA callbacks and automatic subscription reconciliation
+- Live STK push initiation and production M-PESA credential rollout
 - Viewer-bound signed document preview endpoints where business rules allow document previews
 - Server-managed browser sessions or cookie-based frontend auth if backend auth architecture changes

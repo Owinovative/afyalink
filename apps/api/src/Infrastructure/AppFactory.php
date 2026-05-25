@@ -12,6 +12,7 @@ use Afyalink\Core\Infrastructure\Persistence\PdoPostgresDataStore;
 use Afyalink\Core\Infrastructure\Storage\CredentialStorage;
 use Afyalink\Core\Infrastructure\Storage\LocalPrivateCredentialStorage;
 use Afyalink\Core\Infrastructure\Storage\S3CompatibleCredentialStorage;
+use Afyalink\Core\Infrastructure\Notifications\EmailProviderFactory;
 use PDO;
 use RuntimeException;
 
@@ -27,6 +28,7 @@ final class AppFactory
             maxUploadBytes: $config->maxUploadBytes,
             emailVerificationTtlSeconds: $config->emailVerificationTtlSeconds,
             passwordResetTtlSeconds: $config->passwordResetTtlSeconds,
+            emailProvider: EmailProviderFactory::fromConfig($config),
         );
     }
 

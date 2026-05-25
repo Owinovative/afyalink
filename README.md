@@ -4,7 +4,7 @@
 
 Afyalink is a secure healthcare professional verification, assessment, and placement platform.
 
-The platform is designed to help healthcare professionals submit credential records, give consent for verification, pay required review/interview fees, and track application status. It also gives Afyalink administrators verification/interview workbenches and gives approved healthcare facilities subscription-gated access to published, read-only, watermarked candidate profiles.
+The platform is designed to help healthcare professionals submit credential records, give consent for verification, pay required review/interview fees, and track application status. It also gives Afyalink administrators verification/interview workbenches, payment and notification operations tooling, privacy request handling, and approved healthcare facilities subscription-gated access to published, read-only, watermarked candidate profiles.
 
 ## Product Direction
 
@@ -15,6 +15,7 @@ Afyalink is not just a recruitment site. It is a trust infrastructure layer for 
 - record consent, payment, review, and workflow decisions;
 - support admin review, interview scoring, and recommendation workflows;
 - operate facility subscriptions, controlled candidate viewing, recommendations, and placement requests.
+- run notification delivery, M-PESA-ready payment operations, student/pre-licensure pipeline management, and privacy/compliance queues.
 
 ## Milestone 1 Scope
 
@@ -110,6 +111,7 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - Next.js App Router web platform with multi-page public site, routed auth, and separate professional, facility, and admin portals.
 - HMS-inspired, benchmark-synthesized frontend visual system with compact photo discipline, low-bandwidth local imagery, refined portal chrome, and public pages for professionals, facilities, students, verification, security, pricing, about, contact, and FAQ.
 - Student / graduate awaiting-license track for pre-licensure applicants, including student registration, preliminary credential requirements, waiting-license dashboard guidance, admin pre-licensure queue, and controlled conversion into the licensed professional track.
+- Milestone 4 operations engine with notification delivery attempts, log/null email provider adapter, notification worker script, M-PESA callback event persistence, redacted payment callback handling, facility subscription payment linkage, admin command center, reporting summaries, privacy request lifecycle, and new admin routes for notifications, reports, and privacy work.
 
 ## Run Locally
 
@@ -120,6 +122,7 @@ cd apps/api
 composer install
 composer dump-autoload
 php scripts/migrate.php
+php scripts/process-notifications.php 25
 composer check
 php -S localhost:8000 -t public
 ```
@@ -184,6 +187,9 @@ The current tests verify:
 - candidate profile views are watermarked and audited;
 - facility requests and recommendation packages persist through admin-managed workflows.
 - students awaiting license can register without a professional license, cannot submit licensed applications or enter facility publication, and can be converted by admin only after license details and evidence are available.
+- notification processing records delivery attempts and sent/retry/failed state;
+- M-PESA callbacks are persisted idempotently with redacted payloads and can confirm matched payments;
+- privacy requests can be submitted, reviewed, updated, and audited.
 
 ## Render Staging
 
@@ -202,12 +208,18 @@ Read the deployment guide before using staging credential uploads:
 
 - [Milestone 1 Plan](docs/milestones/milestone-1.md)
 - [Milestone 3 Facility Marketplace](docs/milestones/milestone-3.md)
+- [Milestone 4 Production Operations Engine](docs/milestones/milestone-4.md)
 - [Technical Direction](docs/architecture/technical-direction.md)
 - [Facility Platform Architecture](docs/architecture/facility-platform-architecture.md)
 - [Candidate Publication and Access Control](docs/architecture/candidate-publication-access-control.md)
 - [Security Foundation](docs/security/security-foundation.md)
 - [Secure Candidate Viewing](docs/security/secure-candidate-viewing.md)
+- [Privacy Requests and Retention](docs/security/privacy-requests-and-retention.md)
+- [Notification Delivery](docs/workflows/notification-delivery.md)
+- [M-PESA Payment Operations](docs/workflows/mpesa-payment-operations.md)
+- [Facility Subscription Billing](docs/workflows/facility-subscription-billing.md)
 - [Recommendation Workflow](docs/workflows/recommendation-workflow.md)
+- [Admin Command Center](docs/operations/admin-command-center.md)
 - [Public Landing Page](docs/product/public-landing-page.md)
 - [Student Awaiting License Experience](docs/product/student-awaiting-license-experience.md)
 - [Pre-Licensure Student Workflow](docs/workflows/pre-licensure-student-track.md)
@@ -216,4 +228,5 @@ Read the deployment guide before using staging credential uploads:
 - [Local Setup](docs/setup.md)
 - [Milestone 1 API Endpoints](docs/api/milestone-1-endpoints.md)
 - [Milestone 3 API Endpoints](docs/api/milestone-3-endpoints.md)
+- [Milestone 4 API Endpoints](docs/api/milestone-4-endpoints.md)
 - [Docs Index](docs/README.md)

@@ -49,6 +49,11 @@ AFYALINK_SESSION_TTL_SECONDS=43200
 AFYALINK_EMAIL_VERIFICATION_TTL_SECONDS=86400
 AFYALINK_PASSWORD_RESET_TTL_SECONDS=3600
 AFYALINK_MAX_UPLOAD_BYTES=8388608
+MAIL_DRIVER=log
+MAIL_FROM_ADDRESS=no-reply@afyalink.local
+MAIL_FROM_NAME=Afyalink
+MPESA_ENV=sandbox
+MPESA_CALLBACK_URL=https://YOUR-API-STAGING.onrender.com/api/payments/mpesa/callback
 ```
 
 Do not set S3 credentials while using temporary local staging storage.
@@ -115,6 +120,23 @@ After deployment:
 6. Complete verification and interview qualification for one candidate.
 7. Publish the candidate from the admin facility operations console.
 8. Register a facility, submit it for review, approve it as admin, and activate facility access.
+9. Open `/portal/admin/notifications` to inspect queued notifications and process local log delivery if needed.
+10. Open `/portal/admin/reports` and `/portal/admin/privacy` to verify Milestone 4 operational routes.
+
+## Notification Worker
+
+For staging without a long-running worker, run the notification processor manually from a Render shell:
+
+```bash
+cd /var/www/afyalink/apps/api
+php scripts/process-notifications.php 25
+```
+
+For production, run the command on a scheduler or background worker. Keep `MAIL_DRIVER=log` until a live provider adapter is configured.
+
+## M-PESA Notes
+
+The callback endpoint is deployed at `/api/payments/mpesa/callback`. Staging should use sandbox credentials only. Do not configure live credentials until provider validation, callback IP policy, and operational reconciliation have been reviewed.
 9. Confirm the facility can browse/open the published candidate at `/portal/facility/candidates/:publicationId` and that `candidate_profile_views` and `audit_logs` receive view records.
 
 ## Production Changes Required Later

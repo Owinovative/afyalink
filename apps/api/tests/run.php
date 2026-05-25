@@ -34,6 +34,13 @@ use Afyalink\Core\Domain\Permissions\RolePermissionMatrix;
 use Afyalink\Core\Domain\Profiles\ProfessionalProfile;
 use Afyalink\Core\Domain\Regulatory\RegulatoryBodyRegistry;
 use Afyalink\Core\Domain\Security\FileUploadPolicy;
+use Afyalink\Core\Application\Audit\AuditLogger;
+use Afyalink\Core\Application\Notifications\NotificationDeliveryService;
+use Afyalink\Core\Application\Payments\MpesaPaymentService;
+use Afyalink\Core\Application\Privacy\PrivacyRequestService;
+use Afyalink\Core\Application\Auth\AuthenticatedUser;
+use Afyalink\Core\Infrastructure\Notifications\EmailProvider;
+use Afyalink\Core\Infrastructure\Notifications\LogEmailProvider;
 use Afyalink\Core\Http\ApiKernel;
 use Afyalink\Core\Http\Request;
 use Afyalink\Core\Http\JsonResponse;
@@ -940,6 +947,162 @@ $tests = [
 
         $json = AppConfig::fromEnv(['AFYALINK_DATASTORE' => 'json'], __DIR__);
         expectTrue($json->datastoreDriver === 'json', 'JSON datastore should be explicit');
+    },
+    'milestone 4 notification delivery records attempts and sent state' => function (): void {
+        $path = sys_get_temp_dir() . '/afyalink-m4-notifications-' . bin2hex(random_bytes(4)) . '.json';
+        $store = new JsonDataStore($path);
+        $audit = new AuditLogger($store);
+        $store->insert('notification_outbox', [
+            'recipient_user_id' => 1,
+            'recipient_email' => 'nurse@example.com',
+            'channel' => 'email',
+            'type' => 'application_submitted',
+            'subject' => 'Application submitted',
+            'body' => 'Your application was submitted.',
+            'action_url' => 'https://example.test/portal/professional/dashboard',
+            'status' => 'queued',
+            'metadata' => ['template' => 'application_submitted'],
+            'created_at' => gmdate(DATE_ATOM),
+            'sent_at' => null,
+        ]);
+
+        $delivery = new NotificationDeliveryService($store, $audit, new LogEmailProvider());
+        $result = $delivery->processPending(10);
+        $outbox = $store->all('notification_outbox')[0];
+
+        expectTrue($result['processed_count'] === 1, 'one notification should be processed');
+        expectTrue($outbox['status'] === 'sent', 'notification should be marked sent');
+        expectTrue(count($store->all('notification_delivery_attempts')) === 1, 'delivery attempt should be recorded');
+        expectTrue(in_array('notification.sent', array_map(static fn (array $row): string => (string) $row['action'], $store->all('audit_logs')), true), 'sent notification should be audited');
+        @unlink($path);
+    },
+    'milestone 4 notification delivery records retry failures' => function (): void {
+        $path = sys_get_temp_dir() . '/afyalink-m4-notification-failure-' . bin2hex(random_bytes(4)) . '.json';
+        $store = new JsonDataStore($path);
+        $audit = new AuditLogger($store);
+        $store->insert('notification_outbox', [
+            'recipient_user_id' => 1,
+            'recipient_email' => 'retry@example.com',
+            'channel' => 'email',
+            'type' => 'password_reset',
+            'subject' => 'Reset',
+            'body' => 'Reset password.',
+            'action_url' => 'https://example.test/reset',
+            'status' => 'queued',
+            'metadata' => [],
+            'created_at' => gmdate(DATE_ATOM),
+            'sent_at' => null,
+        ]);
+        $failingProvider = new class implements EmailProvider {
+            public function name(): string
+            {
+                return 'failing-test';
+            }
+
+            public function send(string $to, string $subject, string $body, ?string $actionUrl = null, array $metadata = []): array
+            {
+                throw new RuntimeException('provider unavailable');
+            }
+        };
+        $delivery = new NotificationDeliveryService($store, $audit, $failingProvider, maxAttempts: 2);
+        $delivery->processPending(1);
+        $outbox = $store->all('notification_outbox')[0];
+
+        expectTrue($outbox['status'] === 'retry_scheduled', 'first failed notification attempt should be retry scheduled');
+        expectTrue(count($store->all('notification_delivery_attempts')) === 1, 'failed attempt should be recorded');
+        expectTrue(in_array('notification.delivery_failed', array_map(static fn (array $row): string => (string) $row['action'], $store->all('audit_logs')), true), 'failed notification attempt should be audited');
+        @unlink($path);
+    },
+    'milestone 4 mpesa callback processing is idempotent and activates matched payment' => function (): void {
+        $path = sys_get_temp_dir() . '/afyalink-m4-mpesa-' . bin2hex(random_bytes(4)) . '.json';
+        $store = new JsonDataStore($path);
+        $audit = new AuditLogger($store);
+        $user = $store->insert('users', [
+            'name' => 'Payment User',
+            'email' => 'pay@example.com',
+            'phone' => '0700000000',
+            'password_hash' => 'hash',
+            'roles' => [UserRole::Professional->value],
+            'is_active' => true,
+            'created_at' => gmdate(DATE_ATOM),
+            'updated_at' => gmdate(DATE_ATOM),
+        ]);
+        $payment = $store->insert('payments', [
+            'user_id' => (int) $user['id'],
+            'payer_user_id' => (int) $user['id'],
+            'payer_type' => 'professional',
+            'entity_type' => 'professional_application_fee',
+            'entity_id' => null,
+            'intent_reference' => 'AFYA-PAY-MPESA-1',
+            'amount_cents' => 250000,
+            'currency' => 'KES',
+            'method' => 'mpesa_stk',
+            'status' => PaymentStatus::AwaitingProvider->value,
+            'idempotency_key' => 'mpesa-test',
+            'provider' => 'mpesa',
+            'provider_reference' => null,
+            'checkout_request_id' => 'ws_CO_123',
+            'merchant_request_id' => 'merchant_123',
+            'phone_number' => '254700000000',
+            'callback_payload_redacted' => [],
+            'failure_reason' => null,
+            'paid_at' => null,
+            'expires_at' => null,
+            'external_reference' => '',
+            'review_note' => null,
+            'created_at' => gmdate(DATE_ATOM),
+            'updated_at' => gmdate(DATE_ATOM),
+        ]);
+
+        $callback = [
+            'Body' => [
+                'stkCallback' => [
+                    'MerchantRequestID' => 'merchant_123',
+                    'CheckoutRequestID' => 'ws_CO_123',
+                    'ResultCode' => 0,
+                    'ResultDesc' => 'The service request is processed successfully.',
+                    'CallbackMetadata' => [
+                        'Item' => [
+                            ['Name' => 'Amount', 'Value' => 2500],
+                            ['Name' => 'MpesaReceiptNumber', 'Value' => 'RCP123456'],
+                            ['Name' => 'PhoneNumber', 'Value' => 254700000000],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $mpesa = new MpesaPaymentService($store, $audit);
+        $first = $mpesa->handleCallback($callback);
+        $second = $mpesa->handleCallback($callback);
+        $updatedPayment = $store->find('payments', (int) $payment['id']);
+
+        expectTrue($first['status'] === 'processed', 'first callback should process');
+        expectTrue($second['status'] === 'duplicate', 'duplicate callback should be idempotent');
+        expectTrue(($updatedPayment['status'] ?? '') === PaymentStatus::Confirmed->value, 'matched payment should be confirmed');
+        expectTrue(count($store->all('payment_provider_events')) === 1, 'only one provider event should be persisted for duplicate callback');
+        $storedEvent = $store->all('payment_provider_events')[0];
+        $storedPayload = json_encode($storedEvent['payload_redacted'] ?? [], JSON_UNESCAPED_SLASHES);
+        expectFalse(str_contains((string) $storedPayload, '254700000000'), 'callback event payload should mask phone numbers');
+        @unlink($path);
+    },
+    'milestone 4 privacy request lifecycle is audited and masks subject email' => function (): void {
+        $path = sys_get_temp_dir() . '/afyalink-m4-privacy-' . bin2hex(random_bytes(4)) . '.json';
+        $store = new JsonDataStore($path);
+        $audit = new AuditLogger($store);
+        $admin = new AuthenticatedUser(99, 'Admin', 'admin@example.com', '0799999999', [UserRole::Admin]);
+        $service = new PrivacyRequestService($store, $audit);
+        $request = $service->submit(null, [
+            'request_type' => 'data_access',
+            'subject_name' => 'Jane Applicant',
+            'subject_email' => 'jane@example.com',
+            'description' => 'Please provide a copy of my Afyalink records.',
+        ]);
+        $updated = $service->update($admin, (int) $request['id'], ['status' => 'under_review', 'admin_note' => 'Assigned to operations.']);
+
+        expectTrue($request['subject_email'] === 'j***@example.com', 'privacy response should mask subject email');
+        expectTrue($updated['status'] === 'under_review', 'privacy request should update through service');
+        expectTrue(in_array('privacy_request.status_changed', array_map(static fn (array $row): string => (string) $row['action'], $store->all('audit_logs')), true), 'privacy request update should be audited');
+        @unlink($path);
     },
     's3-compatible storage rejects unsafe keys before network access' => function (): void {
         $storage = new S3CompatibleCredentialStorage(

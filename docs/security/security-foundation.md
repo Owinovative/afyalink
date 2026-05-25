@@ -62,7 +62,16 @@ Use minimum necessary access. Facilities should only see approved candidate info
 - Credential replacement requests queue a professional notification and replacement uploads supersede prior rejected/replacement documents.
 - Candidate catalogue publication requires current consent, qualified/approved application state, passed verification, and completed recommended interview.
 - Facility marketplace browsing requires approved facility status and active access.
+- Notification delivery attempts are recorded separately from notification intent records, with retry/backoff and masked admin views.
+- M-PESA callback events are persisted with redacted payloads and idempotency keys before payment or subscription state is changed.
+- Privacy requests are recorded as auditable workflow records. Destructive deletion is intentionally not automatic.
 
 ## Notification Security
 
-The Milestone 1 notification layer is an outbox, not a direct SMTP integration. It stores the minimum delivery metadata needed for later workers and keeps all credential files private. Production mail workers must treat `action_url` values as sensitive because verification and reset links contain bearer-style one-time tokens.
+The notification layer is an outbox plus delivery-attempt pipeline. It stores the minimum delivery metadata needed for workers and keeps all credential files private. Production mail workers must treat `action_url` values as sensitive because verification and reset links contain bearer-style one-time tokens.
+
+The staging `log` driver is safe because it does not require provider credentials. A live provider adapter must keep credentials in environment variables and must not log provider secrets, reset links, or raw credential data.
+
+## Payment Callback Security
+
+M-PESA/Daraja credentials must stay in deployment secrets. Callback payloads are redacted before persistence. The callback endpoint uses provider references and a deterministic dedupe key to avoid duplicate payment confirmation.
