@@ -68,6 +68,17 @@ MAIL_FROM_ADDRESS=no-reply@afyalink.local
 MAIL_FROM_NAME=Afyalink
 ```
 
+Milestone 5 recommendation assistance defaults to the local deterministic adapter:
+
+```text
+AI_RECOMMENDATION_DRIVER=local
+AI_PROVIDER=
+AI_MODEL=
+AI_API_KEY=
+```
+
+Do not configure a live AI provider until prompt redaction, approval, monitoring, and billing controls are reviewed. The local adapter is enough for development and tests.
+
 Process pending notifications manually:
 
 ```bash

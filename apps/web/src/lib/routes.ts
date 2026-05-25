@@ -1,5 +1,6 @@
 export const marketingLinks = [
   { href: "/how-it-works", label: "How it works" },
+  { href: "/matching", label: "Matching" },
   { href: "/professionals", label: "Professionals" },
   { href: "/students", label: "Students" },
   { href: "/facilities", label: "Facilities" },
@@ -21,21 +22,32 @@ export const professionalLinks = [
   { href: "/portal/professional/verification", label: "Verification" },
   { href: "/portal/professional/interview", label: "Interview" },
   { href: "/portal/professional/publication", label: "Publication" },
+  { href: "/portal/professional/placement-preferences", label: "Availability" },
+  { href: "/portal/professional/opportunities", label: "Opportunities" },
 ];
 
 export const facilityLinks = [
   { href: "/portal/facility/dashboard", label: "Dashboard" },
   { href: "/portal/facility/onboarding", label: "Onboarding" },
   { href: "/portal/facility/access", label: "Access" },
+  { href: "/portal/facility/requisitions", label: "Requisitions" },
   { href: "/portal/facility/candidates", label: "Candidates" },
+  { href: "/portal/facility/shortlists", label: "Shortlists" },
+  { href: "/portal/facility/placements", label: "Placements" },
   { href: "/portal/facility/appointments", label: "Appointments" },
   { href: "/portal/facility/recommendations", label: "Recommendations" },
   { href: "/portal/facility/packages", label: "Packages" },
+  { href: "/portal/facility/team", label: "Team" },
 ];
 
 export const adminLinks = [
   { href: "/portal/admin/dashboard", label: "Dashboard" },
   { href: "/portal/admin/applications", label: "Applications" },
+  { href: "/portal/admin/requisitions", label: "Requisitions" },
+  { href: "/portal/admin/matching", label: "Matching" },
+  { href: "/portal/admin/shortlists", label: "Shortlists" },
+  { href: "/portal/admin/placements", label: "Placements" },
+  { href: "/portal/admin/communications", label: "Communications" },
   { href: "/portal/admin/pre-licensure", label: "Pre-Licensure" },
   { href: "/portal/admin/credentials", label: "Credentials" },
   { href: "/portal/admin/payments", label: "Payments" },
@@ -49,5 +61,7 @@ export const adminLinks = [
   { href: "/portal/admin/reports", label: "Reports" },
   { href: "/portal/admin/notifications", label: "Notifications" },
   { href: "/portal/admin/privacy", label: "Privacy" },
+  { href: "/portal/admin/integrations", label: "Integrations" },
+  { href: "/portal/admin/security", label: "Security" },
   { href: "/portal/admin/audit", label: "Audit" },
 ];

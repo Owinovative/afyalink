@@ -43,6 +43,21 @@ final class PdoPostgresDataStore implements DataStore
         'recommendation_requests' => 'recommendation_requests',
         'recommendation_packages' => 'recommendation_packages',
         'recommendation_package_candidates' => 'recommendation_package_candidates',
+        'facility_requisitions' => 'facility_requisitions',
+        'professional_placement_preferences' => 'professional_placement_preferences',
+        'candidate_matches' => 'candidate_matches',
+        'ai_assistance_logs' => 'ai_assistance_logs',
+        'placement_shortlists' => 'placement_shortlists',
+        'placement_shortlist_candidates' => 'placement_shortlist_candidates',
+        'placements' => 'placements',
+        'placement_events' => 'placement_events',
+        'communication_threads' => 'communication_threads',
+        'communication_messages' => 'communication_messages',
+        'facility_interview_requests' => 'facility_interview_requests',
+        'professional_availability_blocks' => 'professional_availability_blocks',
+        'facility_preferred_interview_windows' => 'facility_preferred_interview_windows',
+        'facility_invitations' => 'facility_invitations',
+        'integration_connections' => 'integration_connections',
     ];
 
     /** @var array<string, list<string>> */
@@ -65,6 +80,13 @@ final class PdoPostgresDataStore implements DataStore
         'candidate_profile_views' => ['watermark', 'metadata'],
         'facility_requests' => ['candidate_publication_ids', 'metadata'],
         'recommendation_requests' => ['criteria', 'candidate_publication_ids'],
+        'facility_requisitions' => ['required_credentials', 'preferred_skills', 'language_preferences'],
+        'professional_placement_preferences' => ['preferred_counties', 'preferred_facility_types', 'employment_types', 'shift_preferences', 'desired_roles', 'student_future_preferences'],
+        'candidate_matches' => ['score_breakdown', 'eligibility_reasons', 'risk_flags'],
+        'ai_assistance_logs' => ['prompt_redacted', 'output_redacted'],
+        'placement_events' => ['metadata'],
+        'facility_interview_requests' => ['preferred_times'],
+        'integration_connections' => ['scopes', 'metadata'],
     ];
 
     /** @var array<string, list<string>> */
@@ -73,6 +95,7 @@ final class PdoPostgresDataStore implements DataStore
         'regulatory_bodies' => ['active'],
         'notification_templates' => ['active'],
         'facility_access_subscriptions' => ['admin_override'],
+        'professional_placement_preferences' => ['open_to_work', 'remote_or_telehealth_interest'],
     ];
 
     public function __construct(

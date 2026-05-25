@@ -16,6 +16,8 @@ Afyalink handles identity records, credentials, professional licenses, payment e
 - Server-side file validation by type, size, and checksum.
 - No public direct links to credential documents.
 - No secrets in logs, frontend payloads, or committed files.
+- No protected-characteristic scoring in matching or AI-assisted recommendation workflows.
+- No AI-generated final decisions, auto-rejections, or hidden ranking decisions.
 
 ## Document Protection
 
@@ -65,6 +67,11 @@ Use minimum necessary access. Facilities should only see approved candidate info
 - Notification delivery attempts are recorded separately from notification intent records, with retry/backoff and masked admin views.
 - M-PESA callback events are persisted with redacted payloads and idempotency keys before payment or subscription state is changed.
 - Privacy requests are recorded as auditable workflow records. Destructive deletion is intentionally not automatic.
+- Match eligibility blocks student-awaiting-license applicants from normal licensed requisitions and keeps backend business rules authoritative.
+- Matching produces score explanations for admin review; shortlist sharing and placement status changes are audited.
+- AI assistance is draft-only, redacted, and logged through `ai_assistance_logs`.
+- Communication threads use explicit visibility levels so internal admin notes do not leak to facilities or professionals.
+- FHIR/SMART readiness maps safe metadata only and does not expose clinical patient data or credential storage keys.
 
 ## Notification Security
 

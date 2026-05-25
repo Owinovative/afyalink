@@ -122,6 +122,7 @@ After deployment:
 8. Register a facility, submit it for review, approve it as admin, and activate facility access.
 9. Open `/portal/admin/notifications` to inspect queued notifications and process local log delivery if needed.
 10. Open `/portal/admin/reports` and `/portal/admin/privacy` to verify Milestone 4 operational routes.
+11. Open `/matching`, `/portal/facility/requisitions`, `/portal/admin/requisitions`, and `/portal/admin/matching` to verify Milestone 5 route availability.
 
 ## Notification Worker
 
@@ -133,6 +134,10 @@ php scripts/process-notifications.php 25
 ```
 
 For production, run the command on a scheduler or background worker. Keep `MAIL_DRIVER=log` until a live provider adapter is configured.
+
+## AI Recommendation Notes
+
+Milestone 5 uses `AI_RECOMMENDATION_DRIVER=local` by default. Do not add `AI_API_KEY` in staging unless a provider adapter, prompt redaction review, and usage monitoring process are in place.
 
 ## M-PESA Notes
 

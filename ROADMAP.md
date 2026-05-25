@@ -62,11 +62,26 @@
 - Reporting summaries for application funnel, verification, interview, facility onboarding, subscriptions, publication, recommendations, appointments, students, notifications, and privacy
 - Privacy request foundation for access, correction, retention/deletion, and consent-withdrawal requests
 
+## Milestone 5
+
+- Facility staffing requisitions with draft/submitted/review/matching/shortlist lifecycle
+- Professional availability and placement preferences
+- Match eligibility service that blocks unqualified, unconsented, unpublished, or student-awaiting-license candidates from normal matching
+- Deterministic, explainable candidate match scoring
+- AI-assisted recommendation abstraction with local default adapter and draft-only human review
+- Placement shortlists and facility-visible approved rationale
+- Placement lifecycle, placement events, and controlled professional opportunities
+- Communication thread foundation with explicit visibility rules
+- Facility interview request and calendar-readiness foundation
+- Facility team invitation token-hash foundation
+- FHIR/SMART-readiness metadata mappings and integration connection foundation
+- ASVS-readiness checklist and access-control regression coverage
+
 ## Later
 
 - Regulatory integration automation where APIs exist
 - CSV/PDF report export and scheduled operations reports
-- AI-assisted matching, only after core trust workflows are stable
+- Live AI provider integrations after governance and redaction controls are reviewed
 - Live STK push initiation and production M-PESA credential rollout
 - Viewer-bound signed document preview endpoints where business rules allow document previews
 - Server-managed browser sessions or cookie-based frontend auth if backend auth architecture changes

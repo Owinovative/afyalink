@@ -32,6 +32,16 @@ final readonly class ReportingService
             'student_pipeline' => $this->studentPipeline(),
             'notifications' => $this->countBy('notification_outbox', 'status', ['queued' => 'pending']),
             'privacy_requests' => $this->countBy('privacy_requests', 'status'),
+            'facility_requisitions' => $this->countBy('facility_requisitions', 'status'),
+            'matching' => [
+                'bands' => $this->countBy('candidate_matches', 'match_band'),
+                'statuses' => $this->countBy('candidate_matches', 'status'),
+            ],
+            'placement_shortlists' => $this->countBy('placement_shortlists', 'status'),
+            'placement_funnel' => $this->countBy('placements', 'status'),
+            'facility_interview_requests' => $this->countBy('facility_interview_requests', 'status'),
+            'communications' => $this->countBy('communication_threads', 'status'),
+            'ai_assistance' => $this->countBy('ai_assistance_logs', 'status'),
         ];
     }
 

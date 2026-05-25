@@ -28,6 +28,11 @@ final readonly class OperationsDashboardService
             'publications' => $this->countBy('candidate_publications', 'status'),
             'recommendation_requests' => $this->countBy('recommendation_requests', 'status'),
             'appointment_requests' => $this->countBy('facility_requests', 'status'),
+            'requisitions' => $this->countBy('facility_requisitions', 'status'),
+            'candidate_matches' => $this->countBy('candidate_matches', 'match_band'),
+            'placement_shortlists' => $this->countBy('placement_shortlists', 'status'),
+            'placements' => $this->countBy('placements', 'status'),
+            'communication_threads' => $this->countBy('communication_threads', 'status'),
             'students' => $this->studentCounts(),
             'notifications' => $this->countBy('notification_outbox', 'status', ['queued' => 'pending']),
             'privacy_requests' => $this->countBy('privacy_requests', 'status'),
@@ -50,6 +55,10 @@ final readonly class OperationsDashboardService
             'students_awaiting_license' => $this->countWhere('profiles', static fn (array $row): bool => ($row['applicant_track'] ?? '') === 'student_awaiting_license' && ($row['conversion_review_status'] ?? '') !== 'converted'),
             'publication_ready_professionals' => $this->countWhere('applications', static fn (array $row): bool => in_array((string) ($row['status'] ?? ''), ['qualified', 'approved'], true)),
             'privacy_requests' => $this->countWhere('privacy_requests', static fn (array $row): bool => in_array((string) ($row['status'] ?? ''), ['submitted', 'under_review'], true)),
+            'requisitions_submitted' => $this->countWhere('facility_requisitions', static fn (array $row): bool => in_array((string) ($row['status'] ?? ''), ['submitted', 'under_review', 'matching'], true)),
+            'shortlists_ready' => $this->countWhere('placement_shortlists', static fn (array $row): bool => ($row['status'] ?? '') === 'shared'),
+            'active_placements' => $this->countWhere('placements', static fn (array $row): bool => in_array((string) ($row['status'] ?? ''), ['proposed', 'facility_interested', 'professional_contacted', 'interview_requested', 'interview_scheduled', 'offer_pending', 'offer_made', 'onboarding', 'placed'], true)),
+            'open_communications' => $this->countWhere('communication_threads', static fn (array $row): bool => ($row['status'] ?? '') === 'open'),
         ];
     }
 

@@ -23,6 +23,13 @@ enum Permission: string
     case CandidatePublicationManage = 'candidate.publication.manage';
     case FacilityRequestManage = 'facility.request.manage';
     case RecommendationPackageManage = 'recommendation.package.manage';
+    case FacilityRequisitionManage = 'facility.requisition.manage';
+    case ProfessionalPlacementOwnManage = 'professional.placement.own.manage';
+    case MatchingManage = 'matching.manage';
+    case PlacementManage = 'placement.manage';
+    case CommunicationManage = 'communication.manage';
+    case FacilityTeamManage = 'facility.team.manage';
+    case IntegrationManage = 'integration.manage';
     case PrelicensureManage = 'prelicensure.manage';
     case PaymentManage = 'payment.manage';
     case NotificationManage = 'notification.manage';

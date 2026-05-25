@@ -320,4 +320,128 @@ final readonly class NotificationService
             ],
         );
     }
+
+    /**
+     * @param array<string, mixed> $facility
+     * @param array<string, mixed> $requisition
+     */
+    public function facilityRequisitionSubmitted(array $facility, array $requisition): void
+    {
+        $this->queueEmail(
+            recipientUserId: isset($facility['created_by']) && $facility['created_by'] !== null ? (int) $facility['created_by'] : null,
+            recipientEmail: (string) $facility['email'],
+            type: 'facility_requisition_submitted',
+            subject: 'Afyalink staffing requisition received',
+            body: 'Your staffing requisition has been submitted to Afyalink operations.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'requisition_id' => $requisition['id'] ?? null,
+                'requisition_title' => $requisition['title'] ?? null,
+                'profession_required' => $requisition['profession_required'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $facility
+     * @param array<string, mixed> $requisition
+     */
+    public function facilityRequisitionUnderReview(array $facility, array $requisition): void
+    {
+        $this->queueEmail(
+            recipientUserId: isset($facility['created_by']) && $facility['created_by'] !== null ? (int) $facility['created_by'] : null,
+            recipientEmail: (string) $facility['email'],
+            type: 'facility_requisition_under_review',
+            subject: 'Afyalink requisition under review',
+            body: 'Afyalink has started reviewing your staffing requisition.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'requisition_id' => $requisition['id'] ?? null,
+                'status' => $requisition['status'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $facility
+     * @param array<string, mixed> $shortlist
+     * @param array<string, mixed> $requisition
+     */
+    public function shortlistShared(array $facility, array $shortlist, array $requisition): void
+    {
+        $this->queueEmail(
+            recipientUserId: isset($facility['created_by']) && $facility['created_by'] !== null ? (int) $facility['created_by'] : null,
+            recipientEmail: (string) $facility['email'],
+            type: 'shortlist_shared',
+            subject: 'Afyalink shortlist shared',
+            body: 'A reviewed Afyalink shortlist is available in your facility portal.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'shortlist_id' => $shortlist['id'] ?? null,
+                'shortlist_title' => $shortlist['title'] ?? null,
+                'requisition_id' => $requisition['id'] ?? null,
+                'requisition_title' => $requisition['title'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $facility
+     * @param array<string, mixed> $request
+     */
+    public function facilityInterviewRequested(array $facility, array $request): void
+    {
+        $this->queueEmail(
+            recipientUserId: isset($facility['created_by']) && $facility['created_by'] !== null ? (int) $facility['created_by'] : null,
+            recipientEmail: (string) $facility['email'],
+            type: 'facility_interview_requested',
+            subject: 'Afyalink interview request received',
+            body: 'Your facility interview request has been received for admin coordination.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'facility_interview_request_id' => $request['id'] ?? null,
+                'requisition_id' => $request['requisition_id'] ?? null,
+                'mode' => $request['mode'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $facility
+     * @param array<string, mixed> $invitation
+     */
+    public function facilityTeamInvitation(string $email, array $facility, array $invitation): void
+    {
+        $this->queueEmail(
+            recipientUserId: null,
+            recipientEmail: $email,
+            type: 'facility_team_invitation',
+            subject: 'You were invited to an Afyalink facility team',
+            body: 'A facility administrator invited you to collaborate in Afyalink. Sign in or create an account with this email to continue.',
+            metadata: [
+                'facility_id' => $facility['id'] ?? null,
+                'role' => $invitation['role'] ?? null,
+                'expires_at' => $invitation['expires_at'] ?? null,
+            ],
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $requisition
+     */
+    public function matchingRunCompleted(string $adminEmail, int $adminUserId, array $requisition, int $generatedCount): void
+    {
+        $this->queueEmail(
+            recipientUserId: $adminUserId,
+            recipientEmail: $adminEmail,
+            type: 'matching_run_completed',
+            subject: 'Afyalink matching run completed',
+            body: 'A requisition matching run has completed and is ready for admin review.',
+            metadata: [
+                'requisition_id' => $requisition['id'] ?? null,
+                'requisition_title' => $requisition['title'] ?? null,
+                'generated_count' => $generatedCount,
+            ],
+        );
+    }
 }
