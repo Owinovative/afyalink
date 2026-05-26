@@ -11,6 +11,7 @@ import {
   VisualCard,
   getVisualForSlug,
 } from "@/components/marketing/VisualSystem";
+import { contactAddresses } from "@/lib/contact";
 import type { MarketingPageContent } from "@/lib/content/marketing";
 
 const companionBySlug: Record<string, string> = {
@@ -94,6 +95,10 @@ function contactSection() {
         <section className="form-card">
           <span className="eyebrow">Message</span>
           <h2>Send a focused note</h2>
+          <div className="contact-addresses" aria-label="Afyalink inboxes">
+            <a href={`mailto:${contactAddresses.public}`}>{contactAddresses.public}</a>
+            <a href={`mailto:${contactAddresses.support}`}>{contactAddresses.support}</a>
+          </div>
           <form className="form-grid">
             <label>
               Name

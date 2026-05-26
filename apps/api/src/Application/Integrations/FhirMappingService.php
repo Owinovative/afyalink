@@ -6,6 +6,10 @@ namespace Afyalink\Core\Application\Integrations;
 
 final readonly class FhirMappingService
 {
+    public function __construct(
+        private string $publicBaseUrl = 'https://www.afyalink.com',
+    ) {}
+
     /**
      * @param array<string, mixed> $profile
      * @return array<string, mixed>
@@ -16,7 +20,7 @@ final readonly class FhirMappingService
             'resourceType' => 'Practitioner',
             'identifier' => [
                 [
-                    'system' => 'https://afyalink.local/professionals',
+                    'system' => $this->systemUrl('professionals'),
                     'value' => 'professional-' . (string) ($profile['user_id'] ?? $profile['id'] ?? 'unknown'),
                 ],
             ],
@@ -53,7 +57,7 @@ final readonly class FhirMappingService
             'resourceType' => 'Organization',
             'identifier' => [
                 [
-                    'system' => 'https://afyalink.local/facilities',
+                    'system' => $this->systemUrl('facilities'),
                     'value' => 'facility-' . (string) ($facility['id'] ?? 'unknown'),
                 ],
             ],
@@ -89,5 +93,10 @@ final readonly class FhirMappingService
                 ],
             ],
         ];
+    }
+
+    private function systemUrl(string $path): string
+    {
+        return rtrim($this->publicBaseUrl, '/') . '/' . ltrim($path, '/');
     }
 }

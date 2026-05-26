@@ -27,6 +27,9 @@ final readonly class AppConfig
         public string $mailDriver,
         public string $mailFromAddress,
         public string $mailFromName,
+        public string $supportEmail,
+        public string $publicContactEmail,
+        public string $adminEmail,
     ) {}
 
     /**
@@ -53,8 +56,11 @@ final readonly class AppConfig
             emailVerificationTtlSeconds: (int) ($env['AFYALINK_EMAIL_VERIFICATION_TTL_SECONDS'] ?? 86400),
             passwordResetTtlSeconds: (int) ($env['AFYALINK_PASSWORD_RESET_TTL_SECONDS'] ?? 3600),
             mailDriver: strtolower($env['MAIL_DRIVER'] ?? 'log'),
-            mailFromAddress: $env['MAIL_FROM_ADDRESS'] ?? 'no-reply@afyalink.local',
+            mailFromAddress: $env['MAIL_FROM_ADDRESS'] ?? 'no-reply@afyalink.com',
             mailFromName: $env['MAIL_FROM_NAME'] ?? 'Afyalink',
+            supportEmail: $env['SUPPORT_EMAIL'] ?? 'support@afyalink.com',
+            publicContactEmail: $env['PUBLIC_CONTACT_EMAIL'] ?? 'info@afyalink.com',
+            adminEmail: $env['ADMIN_EMAIL'] ?? 'admin@afyalink.com',
         );
     }
 }

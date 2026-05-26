@@ -7,7 +7,7 @@ namespace Afyalink\Core\Infrastructure\Notifications;
 final readonly class LogEmailProvider implements EmailProvider
 {
     public function __construct(
-        private string $fromAddress = 'no-reply@afyalink.local',
+        private string $fromAddress = 'no-reply@afyalink.com',
         private string $fromName = 'Afyalink',
         private bool $writeToErrorLog = false,
     ) {}
