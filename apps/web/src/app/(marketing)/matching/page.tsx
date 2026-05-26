@@ -1,6 +1,5 @@
-import { MarketingContentPage } from "@/components/marketing/MarketingContentPage";
-import { marketingPages } from "@/lib/content/marketing";
+import { MatchingExperience } from "@/components/marketing/MatchingExperience";
 
 export default function Page() {
-  return <MarketingContentPage page={marketingPages.matching} />;
+  return <MatchingExperience />;
 }
