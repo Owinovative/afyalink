@@ -11,16 +11,12 @@ The Afyalink public page positions the platform as healthcare verification infra
 
 ## Page Structure
 
-- Hero: Afyalink as verified healthcare talent infrastructure, using HMS-inspired dark healthcare composition and one controlled clinical photo.
-- Trust strip: verify, interview, recommend, connect.
-- How it works: professional intake, Afyalink verification/interview, facility access.
-- Professional section: readiness, verification, publication awareness.
-- Student section: pre-licensure profile building for students and graduates waiting for licenses.
-- Facility section: onboarding, subscription-gated access, recommendations.
-- Product feature grid: credential intake, verification, interviews, access, marketplace, packages.
+- Hero: photo-led healthcare trust platform positioning with short headline, two CTAs, and compact proof signals.
+- Three-audience story: licensed professionals, students awaiting license, and approved facilities.
+- Trust workflow: submit credentials, verify, interview, publish, match, and place.
+- Facility demand: requisitions, matching, reviewed shortlists, and placement lifecycle.
 - Security section: private storage, RBAC, consent, watermarking, audit.
-- Portal gateway: professional, facility, admin paths.
-- Student gateway: register as a waiting-license applicant before moving to the licensed workflow.
+- Human placement story: Afyalink as the link between verified professionals and accountable facility hiring.
 - CTA and footer.
 
 ## Design Principles
@@ -34,6 +30,6 @@ The Afyalink public page positions the platform as healthcare verification infra
 - Keep source photos under 250 KB where possible and avoid loading the oversized full logo PNG in runtime navigation.
 - Public pages should feel individually art-directed rather than copies of one card grid.
 
-## HMS-Inspired Photo Direction
+## Milestone 6 Photo Direction
 
-The current public site follows the benchmark synthesis in `docs/frontend/benchmark-synthesis.md` with Invinceible Core HMS V2 as the primary internal reference: compact healthcare hero, grouped metrics, controlled photo panels, strong header/logo alignment, and concise operational copy. Apple, Airbnb, Maven, Oscar, Mayo, and Stripe remain supporting references for image discipline, healthcare warmth, authority, and hierarchy.
+The current public site follows the benchmark synthesis in `docs/frontend/benchmark-synthesis.md`: premium healthcare trust platform with real human photography, strong editorial layout, calm authority, and operational clarity. Apple, Airbnb, Maven, Oscar, Mayo, and Stripe remain supporting references for image discipline, healthcare warmth, authority, and hierarchy.

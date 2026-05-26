@@ -147,18 +147,22 @@ The local route map includes public marketing pages, routed auth pages, and prof
 
 ## Render Staging
 
-Use `render.yaml` from the repository root to create the staging API and web services on Render. The web service is a Node-backed Next.js service and requires `NEXT_PUBLIC_AFYA_API_BASE`. The staging API uses Neon PostgreSQL via `DATABASE_URL` and temporary local credential storage:
+Use `render.yaml` from the repository root to create the staging API, web, and notification cron services on Render. The web service is a Node-backed Next.js service and requires `NEXT_PUBLIC_AFYA_API_BASE`. The staging API uses Neon PostgreSQL via `DATABASE_URL` and should use private R2/S3-compatible credential storage:
 
 ```text
 AFYALINK_DATASTORE=pgsql
 DATABASE_URL=postgresql://USER:PASSWORD@HOST.neon.tech/DBNAME?sslmode=require
-AFYALINK_CREDENTIAL_STORAGE=local
-AFYALINK_LOCAL_CREDENTIAL_ROOT=/tmp/afyalink/credentials
+AFYALINK_CREDENTIAL_STORAGE=r2
+S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+S3_REGION=auto
+S3_BUCKET=afyalink-credentials
+S3_ACCESS_KEY_ID=<Render secret>
+S3_SECRET_ACCESS_KEY=<Render secret>
 CORS_ALLOWED_ORIGINS=https://your-web-staging.onrender.com
 NEXT_PUBLIC_AFYA_API_BASE=https://your-api-staging.onrender.com
 ```
 
-Temporary local credential storage on Render is not durable and is only acceptable for staging. See [Render Staging Deployment](deployment/render-staging.md).
+Temporary local credential storage on Render is not durable and is only acceptable for throwaway staging smoke tests. See [Render Platform Architecture](deployment/render-platform.md) and [Render Staging Deployment](deployment/render-staging.md).
 
 Cloudflare R2/S3-compatible private storage is already supported through `AFYALINK_CREDENTIAL_STORAGE=r2` plus `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, and `S3_SECRET_ACCESS_KEY`. Keep buckets private; facility candidate views must not expose raw object keys.
 

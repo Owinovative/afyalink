@@ -50,6 +50,11 @@ const visualBySlug: Record<string, { src: string; alt: string; tone: VisualTone 
     alt: "Healthcare team reviewing candidate and staffing information together.",
     tone: "gold",
   },
+  marketplace: {
+    src: "/images/marketplace/facility-candidate-review.jpg",
+    alt: "Healthcare team reviewing candidate and staffing information together.",
+    tone: "green",
+  },
   recommendations: {
     src: "/images/trust/hospital-corridor-care-team.jpg",
     alt: "Healthcare team in a hospital corridor discussing care operations.",
@@ -114,17 +119,19 @@ export function ImagePanel({
   tone = "teal",
   priority = false,
   variant = "compact",
+  className = "",
 }: {
   src: string;
   alt: string;
   tone?: VisualTone;
   priority?: boolean;
   variant?: "compact" | "hero" | "wide";
+  className?: string;
 }) {
   const isVector = src.endsWith(".svg");
 
   return (
-    <figure className={`image-panel image-${variant} tone-${tone} ${isVector ? "is-vector" : "is-photo"}`}>
+    <figure className={`image-panel image-${variant} tone-${tone} ${isVector ? "is-vector" : "is-photo"} ${className}`}>
       <Image
         src={src}
         alt={alt}
@@ -137,6 +144,28 @@ export function ImagePanel({
         className="media-image"
       />
     </figure>
+  );
+}
+
+export function PhotoMosaic({
+  primary,
+  secondary,
+  tertiary,
+  priority = false,
+}: {
+  primary: { src: string; alt: string; tone?: VisualTone };
+  secondary: { src: string; alt: string; tone?: VisualTone };
+  tertiary: { src: string; alt: string; tone?: VisualTone };
+  priority?: boolean;
+}) {
+  return (
+    <div className="photo-mosaic" aria-label="Afyalink healthcare trust imagery">
+      <ImagePanel src={primary.src} alt={primary.alt} tone={primary.tone} priority={priority} variant="hero" />
+      <div className="photo-mosaic-stack">
+        <ImagePanel src={secondary.src} alt={secondary.alt} tone={secondary.tone} variant="compact" />
+        <ImagePanel src={tertiary.src} alt={tertiary.alt} tone={tertiary.tone} variant="compact" />
+      </div>
+    </div>
   );
 }
 
@@ -253,6 +282,53 @@ export function VisualCard({
       <p>{body}</p>
       {children}
     </article>
+  );
+}
+
+export function AudienceCard({
+  eyebrow,
+  title,
+  body,
+  visual,
+  href,
+  cta,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  visual: { src: string; alt: string; tone?: VisualTone };
+  href: string;
+  cta: string;
+}) {
+  return (
+    <article className="audience-card">
+      <ImagePanel src={visual.src} alt={visual.alt} tone={visual.tone} />
+      <div className="audience-card-body">
+        <div className="eyebrow">{eyebrow}</div>
+        <h3>{title}</h3>
+        <p>{body}</p>
+        <Link className="text-link" href={href}>
+          {cta}
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+export function TrustBand({
+  items,
+}: {
+  items: Array<{ title: string; body: string }>;
+}) {
+  return (
+    <div className="trust-band">
+      {items.map((item) => (
+        <div key={item.title}>
+          <strong>{item.title}</strong>
+          <span>{item.body}</span>
+        </div>
+      ))}
+    </div>
   );
 }
 

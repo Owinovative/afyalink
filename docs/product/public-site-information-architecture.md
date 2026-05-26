@@ -19,6 +19,8 @@ Afyalink's public site is organized around user intent rather than one long gene
 ## Content Rules
 
 - Real healthcare photography should anchor major pages.
+- Public pages should use distinct editorial structures rather than one repeated card grid.
+- Homepage should establish the multi-sided platform quickly: professional, student, facility, trust workflow, matching, placement, and security.
 - Backend-governed workflow rules must be explained without moving those rules into frontend-only claims.
 - Students must never be described as licensed, verified, or facility-publishable before conversion.
 - Facility marketplace access must remain described as approved and subscription-gated.

@@ -1,45 +1,137 @@
 import Link from "next/link";
 import {
+  AudienceCard,
   FeatureSplit,
   ImagePanel,
   LargeCTA,
+  PhotoMosaic,
   ProcessTimeline,
-  CompactMetricStrip,
   SectionFrame,
   SectionIntro,
+  TrustBand,
   VisualCard,
   getVisualForSlug,
 } from "@/components/marketing/VisualSystem";
 import type { MarketingPageContent } from "@/lib/content/marketing";
 
-const companionVisuals: Record<string, ReturnType<typeof getVisualForSlug>> = {
-  "how-it-works": getVisualForSlug("facilities"),
-  matching: getVisualForSlug("facilities"),
-  professionals: getVisualForSlug("verification"),
-  students: getVisualForSlug("professionals"),
-  facilities: getVisualForSlug("trust-security"),
-  "trust-security": getVisualForSlug("verification"),
-  verification: getVisualForSlug("professionals"),
-  "pricing-access": getVisualForSlug("recommendations"),
-  about: getVisualForSlug("facilities"),
-  contact: getVisualForSlug("contact"),
-  faq: getVisualForSlug("how-it-works"),
+const pageCompanions: Record<string, string[]> = {
+  "how-it-works": ["home", "verification", "facilities"],
+  matching: ["facilities", "marketplace", "trust-security"],
+  professionals: ["professionals", "verification", "trust-security"],
+  students: ["students", "professionals", "verification"],
+  facilities: ["facilities", "marketplace", "matching"],
+  "trust-security": ["trust-security", "verification", "facilities"],
+  verification: ["verification", "professionals", "trust-security"],
+  "pricing-access": ["pricing-access", "facilities", "recommendations"],
+  about: ["about", "professionals", "facilities"],
+  contact: ["contact", "facilities", "professionals"],
+  faq: ["faq", "students", "trust-security"],
 };
 
-function pageTone(slug: string) {
-  if (slug === "trust-security" || slug === "facilities") return "deep";
-  if (slug === "pricing-access" || slug === "contact") return "warm";
-  return "soft";
+function visualsFor(slug: string) {
+  const keys = pageCompanions[slug] ?? ["home", "professionals", "facilities"];
+  return keys.map((key) => getVisualForSlug(key));
+}
+
+function PageSpecificSection({ page }: { page: MarketingPageContent }) {
+  if (page.slug === "contact") return <ContactPanel page={page} />;
+  if (page.slug === "faq") return <FaqPanel page={page} />;
+
+  if (page.slug === "matching") {
+    return (
+      <SectionFrame tone="warm">
+        <div className="wide-container operational-story">
+          <div>
+            <div className="eyebrow">Placement logic</div>
+            <h2>Matching is explainable, reviewed, and never an automatic rejection engine.</h2>
+            <p>
+              Requisitions, eligibility filters, deterministic scoring, AI-assisted draft rationale, and admin review
+              stay separate so placement decisions remain accountable.
+            </p>
+          </div>
+          <ProcessTimeline
+            steps={[
+              { title: "Define demand", body: "Facilities submit role, county, urgency, start date, and employment type." },
+              { title: "Score eligible supply", body: "Students and unpublished candidates are blocked from normal matching." },
+              { title: "Review shortlist", body: "Admins inspect explanations before anything is shared." },
+              { title: "Track placement", body: "Placement outcomes and communication remain auditable." },
+            ]}
+          />
+        </div>
+      </SectionFrame>
+    );
+  }
+
+  if (page.slug === "trust-security") {
+    return (
+      <SectionFrame tone="deep">
+        <div className="wide-container">
+          <TrustBand
+            items={[
+              { title: "Private storage", body: "R2/S3-compatible credential files stay outside the public web app." },
+              { title: "Watermarking", body: "Candidate viewing is deterred, traceable, and policy-backed." },
+              { title: "Audit trail", body: "Sensitive operations record actor, entity, state, and redacted metadata." },
+              { title: "Privacy requests", body: "Operations teams can manage access and privacy lifecycle work." },
+            ]}
+          />
+        </div>
+      </SectionFrame>
+    );
+  }
+
+  if (page.slug === "pricing-access") {
+    return (
+      <SectionFrame tone="warm">
+        <div className="wide-container pricing-panel">
+          <VisualCard title="Professional application" body="Applicants prepare records and payment references before submission. Fees and policy can remain configurable." />
+          <VisualCard title="Facility access" body="Approved facilities activate access before marketplace browsing, matching, recommendation packages, and placement work." />
+          <VisualCard title="Recommendation support" body="Commercial terms should be discussed with Afyalink until public pricing is finalized." />
+        </div>
+      </SectionFrame>
+    );
+  }
+
+  return (
+    <SectionFrame tone="warm">
+      <div className="wide-container audience-grid">
+        <AudienceCard
+          eyebrow="Professional"
+          title="Readiness before exposure."
+          body="Profile, credential, consent, payment, verification, and interview state remain visible to the applicant."
+          visual={getVisualForSlug("professionals")}
+          href="/professionals"
+          cta="Professional path"
+        />
+        <AudienceCard
+          eyebrow="Facility"
+          title="Access before browsing."
+          body="Facility users must be approved and active before catalogue, matching, or shortlist workflows."
+          visual={getVisualForSlug("facilities")}
+          href="/facilities"
+          cta="Facility path"
+        />
+        <AudienceCard
+          eyebrow="Operations"
+          title="Audit before scale."
+          body="Afyalink operators manage review, publication, recommendations, matching, privacy, and placement state."
+          visual={getVisualForSlug("verification")}
+          href="/verification"
+          cta="Verification model"
+        />
+      </div>
+    </SectionFrame>
+  );
 }
 
 export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
-  const visual = getVisualForSlug(page.slug);
-  const companion = companionVisuals[page.slug] ?? getVisualForSlug("home");
+  const [primary, secondary, tertiary] = visualsFor(page.slug);
+  const firstSection = page.sections[0];
+  const secondSection = page.sections[1];
 
   return (
     <>
-      <section className="hero">
-        <div className="hero-container hero-grid">
+      <section className={`hero editorial-page-hero page-${page.slug}`}>
+        <div className="hero-container hero-shell">
           <div className="hero-copy">
             <div className="eyebrow">{page.eyebrow}</div>
             <h1>{page.title}</h1>
@@ -57,108 +149,61 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
               ) : null}
             </div>
           </div>
-          <ImagePanel src={visual.src} alt={visual.alt} tone={visual.tone} />
+          <PhotoMosaic primary={primary} secondary={secondary} tertiary={tertiary} />
         </div>
       </section>
 
-      <SectionFrame tone={pageTone(page.slug)}>
-        <div className="wide-container">
-          <CompactMetricStrip
-            items={page.highlights.map((item) => ({
-              value: item.title,
-              label: "Platform layer",
+      <SectionFrame>
+        <div className="wide-container page-opening">
+          <SectionIntro
+            eyebrow="What matters"
+            title={firstSection?.title ?? "Afyalink keeps the workflow explicit."}
+            body={firstSection?.body ?? page.description}
+          />
+          <TrustBand
+            items={page.highlights.slice(0, 4).map((item) => ({
+              title: item.title,
               body: item.body,
             }))}
           />
         </div>
       </SectionFrame>
 
-      <SectionFrame>
+      <SectionFrame tone="soft">
         <div className="wide-container">
           <FeatureSplit
-            eyebrow="Product workflow"
-            title={page.sections[0]?.title ?? page.title}
-            body={page.sections[0]?.body ?? page.description}
-            points={page.sections[0]?.points ?? page.highlights.map((item) => item.title)}
-            visual={companion}
+            eyebrow="Workflow"
+            title={firstSection?.title ?? page.title}
+            body={firstSection?.body ?? page.description}
+            points={firstSection?.points ?? page.highlights.map((item) => item.title)}
+            visual={secondary}
             cta={page.primaryCta}
           />
         </div>
       </SectionFrame>
 
-      <SectionFrame tone="soft">
-        <div className="wide-container">
-          <div className="process-band">
-            <div className="feature-copy">
-              <div className="eyebrow">Operating detail</div>
-              <h2>{page.sections[1]?.title ?? "Workflow controls stay explicit."}</h2>
-              <p>{page.sections[1]?.body ?? "Afyalink keeps business rules in backend services and renders safe, role-aware next steps in the frontend."}</p>
-              <ProcessTimeline
-                steps={(page.sections[1]?.points ?? page.highlights.map((item) => item.title)).map((point) => ({
-                  title: point,
-                  body: "Handled through routed pages, backend authorization, and clear product state.",
-                }))}
-              />
-            </div>
-          </div>
-        </div>
-      </SectionFrame>
-
-      {page.slug === "contact" ? <ContactPanel page={page} /> : null}
-      {page.slug === "faq" ? <FaqPanel page={page} /> : null}
-
       <SectionFrame>
-        <div className="wide-container">
-          <SectionIntro
-            eyebrow="Role-aware paths"
-            title="Start from the workspace that fits your role."
-            body="Public pages explain Afyalink. Portals handle records, permissions, and live workflow state."
-            align="center"
-          />
-          <div className="grid-3">
-            <VisualCard
-              eyebrow="Professional"
-              title="Prepare for verification."
-              body="Build your profile, upload credentials, accept consent, and submit when ready."
-            >
-              <div className="action-row" style={{ marginTop: 18 }}>
-                <Link className="button secondary" href="/auth/register/professional">
-                  Start application
-                </Link>
-              </div>
-            </VisualCard>
-            <VisualCard
-              eyebrow="Facility"
-              title="Request access."
-              body="Submit facility details, activate access, browse candidates, and request recommendations."
-            >
-              <div className="action-row" style={{ marginTop: 18 }}>
-                <Link className="button secondary" href="/auth/register/facility">
-                  Join as facility
-                </Link>
-              </div>
-            </VisualCard>
-            <VisualCard
-              eyebrow="Operations"
-              title="Run review workflows."
-              body="Manage applications, credentials, interviews, facilities, publication, and audit."
-            >
-              <div className="action-row" style={{ marginTop: 18 }}>
-                <Link className="button secondary" href="/portal/admin">
-                  Open admin
-                </Link>
-              </div>
-            </VisualCard>
+        <div className="wide-container feature-split reverse">
+          <div className="feature-copy">
+            <div className="eyebrow">Operational clarity</div>
+            <h2>{secondSection?.title ?? "Backend rules stay authoritative."}</h2>
+            <p>
+              {secondSection?.body ??
+                "Afyalink pages explain the model, but workflow permissions, eligibility, and access decisions remain server-owned."}
+            </p>
           </div>
+          <ImagePanel src={tertiary.src} alt={tertiary.alt} tone={tertiary.tone} />
         </div>
       </SectionFrame>
+
+      <PageSpecificSection page={page} />
 
       <SectionFrame tone="deep">
         <div className="wide-container">
           <LargeCTA
             eyebrow={page.eyebrow}
-            title="Move from public guidance to secure workflow."
-            body="Choose your role, then continue in the routed portal where permissions and state are enforced."
+            title="Continue inside the right Afyalink route."
+            body="Public pages orient the work. Secure portals handle records, state, permissions, review, and placement operations."
             primary={page.primaryCta ?? { label: "Start", href: "/" }}
             secondary={page.secondaryCta}
           />
@@ -175,14 +220,14 @@ function ContactPanel({ page }: { page: MarketingPageContent }) {
         <div>
           <SectionIntro
             eyebrow="Contact routes"
-            title="Use the secure portal for records. Use contact for partnership and access conversations."
-            body="Private credentials should never move through a public contact channel. Afyalink keeps sensitive workflows inside authenticated routes."
+            title="Use contact for access, commercial, and partnership conversations."
+            body="Credentials, applications, and private documents belong inside authenticated portals, not public forms."
           />
           <ProcessTimeline
             steps={[
-              { title: "Professional application", body: "Use the professional registration path for credentials, consent, and application readiness." },
-              { title: "Facility onboarding", body: "Use the facility path for organization review, access activation, and marketplace entry." },
-              { title: "Commercial conversation", body: "Use contact for facility access, recommendation workflows, or partnership discussions." },
+              { title: "Facility access", body: "Discuss onboarding, access, recommendations, requisitions, and placement support." },
+              { title: "Professional support", body: "Use the professional portal for records; contact Afyalink for process questions." },
+              { title: "Security questions", body: "Raise privacy, audit, storage, or access-control topics without sending credential files." },
             ]}
           />
         </div>
@@ -203,8 +248,8 @@ function ContactPanel({ page }: { page: MarketingPageContent }) {
               <select name="purpose" defaultValue="facility_access">
                 <option value="facility_access">Facility access</option>
                 <option value="professional_application">Professional application</option>
-                <option value="partnership">Partnership</option>
-                <option value="security">Security question</option>
+                <option value="student_track">Student awaiting-license path</option>
+                <option value="security">Security or privacy</option>
               </select>
             </label>
             <label className="full">
@@ -222,17 +267,33 @@ function ContactPanel({ page }: { page: MarketingPageContent }) {
 }
 
 function FaqPanel({ page }: { page: MarketingPageContent }) {
+  const groups = [
+    { title: "Professionals", items: page.highlights.slice(0, 2) },
+    { title: "Students", items: page.highlights.slice(2, 4) },
+    { title: "Facilities and security", items: page.highlights.slice(4) },
+  ];
+
   return (
     <SectionFrame tone="warm">
       <div className="wide-container">
         <SectionIntro
-          eyebrow="Common questions"
-          title="Clear answers for professionals, facilities, and security reviewers."
-          body="Afyalink separates public explanation from authenticated workflow state so each answer points to the right route."
+          eyebrow="FAQ"
+          title="Short answers, grouped by role."
+          body="Afyalink avoids burying key decisions in long public copy. The portal provides live state after sign-in."
         />
         <div className="faq-grid">
-          {[...page.highlights, ...page.sections].map((item) => (
-            <VisualCard key={item.title} title={item.title} body={item.body} />
+          {groups.map((group) => (
+            <article className="visual-card faq-group" key={group.title}>
+              <h3>{group.title}</h3>
+              <div className="data-list">
+                {group.items.map((item) => (
+                  <div key={item.title}>
+                    <strong>{item.title}</strong>
+                    <p>{item.body}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
           ))}
         </div>
       </div>
