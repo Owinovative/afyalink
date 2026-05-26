@@ -5,7 +5,6 @@ import {
   PageIntro,
   PhotoBand,
   PhotoHero,
-  ProcessSteps,
   SectionFrame,
   TrustPanel,
   VisualCard,
@@ -26,48 +25,6 @@ const companionBySlug: Record<string, string> = {
   contact: "about",
   faq: "trust-security",
 };
-
-const pageSteps: Record<string, Array<{ title: string; body: string }>> = {
-  professionals: [
-    { title: "Profile", body: "Complete details." },
-    { title: "Credentials", body: "Upload privately." },
-    { title: "Assessment", body: "Verify and interview." },
-    { title: "Placement", body: "Set availability." },
-  ],
-  students: [
-    { title: "Register", body: "No license needed." },
-    { title: "Prepare", body: "Upload early records." },
-    { title: "Wait", body: "Not publishable." },
-    { title: "Convert", body: "Add license later." },
-  ],
-  facilities: [
-    { title: "Onboard", body: "Submit organization." },
-    { title: "Activate", body: "Confirm access." },
-    { title: "Request", body: "Create staffing needs." },
-    { title: "Place", body: "Track outcomes." },
-  ],
-  matching: [
-    { title: "Need", body: "Structure demand." },
-    { title: "Eligibility", body: "Filter safely." },
-    { title: "Reason", body: "Show fit." },
-    { title: "Review", body: "Approve sharing." },
-  ],
-  "trust-security": [
-    { title: "Private", body: "Protect records." },
-    { title: "Gated", body: "Check roles." },
-    { title: "Watermark", body: "Bind views." },
-    { title: "Audit", body: "Record actions." },
-  ],
-};
-
-function stepsFor(page: MarketingPageContent) {
-  return pageSteps[page.slug] ?? [
-    { title: "Enter", body: page.highlights[0]?.body ?? "Start safely." },
-    { title: "Review", body: page.highlights[1]?.body ?? "Check status." },
-    { title: "Control", body: page.highlights[2]?.body ?? "Gate access." },
-    { title: "Track", body: "Keep history." },
-  ];
-}
 
 function pricingSection() {
   return (
@@ -178,13 +135,8 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
         ]}
       />
 
-      <SectionFrame tone="white">
+      <SectionFrame tone="white" className="compact-public-section">
         <div className="wide-container page-opening">
-          <PageIntro
-            eyebrow="Key signals"
-            title={firstSection?.title ?? page.title}
-            body={firstSection?.body ?? page.description}
-          />
           <TrustPanel
             items={page.highlights.slice(0, 4).map((highlight) => ({
               title: highlight.title,
@@ -194,19 +146,13 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
         </div>
       </SectionFrame>
 
-      <SectionFrame tone="mist">
-        <div className="wide-container">
-          <ProcessSteps steps={stepsFor(page)} />
-        </div>
-      </SectionFrame>
-
       <SectionFrame tone="white">
         <div className="wide-container">
           <EditorialSplit
-            eyebrow="Model"
-            title={secondSection?.title ?? "Controlled healthcare workflows."}
-            body={secondSection?.body ?? "Status and access stay explicit."}
-            points={secondSection?.points ?? page.highlights.map((highlight) => highlight.title)}
+            eyebrow={firstSection?.title ? "Flow" : "Model"}
+            title={firstSection?.title ?? secondSection?.title ?? "Controlled healthcare workflows."}
+            body={firstSection?.body ?? secondSection?.body ?? "Status and access stay explicit."}
+            points={(firstSection?.points ?? secondSection?.points ?? page.highlights.map((highlight) => highlight.title)).slice(0, 4)}
             visual={companion}
             cta={page.primaryCta}
           />
@@ -222,7 +168,7 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
           <CTASection
             eyebrow="Portals"
             title="Open the right workspace."
-            body="Your role controls what happens next."
+            body="Role-based access starts here."
             primary={page.primaryCta ?? { label: "Create account", href: "/auth/register/professional" }}
             secondary={page.secondaryCta ?? { label: "Sign in", href: "/auth/login" }}
           />

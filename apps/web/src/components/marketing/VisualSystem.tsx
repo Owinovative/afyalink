@@ -168,7 +168,17 @@ export function PhotoHero({
   actions: Array<{ label: string; href: string; kind?: "primary" | "secondary" }>;
 }) {
   return (
-    <section className="hero photo-hero">
+    <section className="hero photo-hero image-led-hero">
+      <Image
+        src={primary.src}
+        alt={primary.alt}
+        fill
+        priority
+        sizes="100vw"
+        unoptimized={primary.src.endsWith(".svg")}
+        className="photo-hero-bg"
+      />
+      <div className="photo-hero-overlay" />
       <div className="hero-container hero-shell">
         <div className="hero-copy">
           <span className="eyebrow">{eyebrow}</span>
@@ -182,9 +192,13 @@ export function PhotoHero({
             ))}
           </div>
         </div>
-        <div className="hero-photo-stack">
-          <ImagePanel visual={primary} variant="hero" priority />
-          {secondary ? <ImagePanel visual={secondary} variant="portrait" className="hero-small-photo" /> : null}
+        <div className="hero-photo-stack" aria-hidden="true">
+          <ImagePanel visual={secondary ?? primary} variant="wide" />
+          <div className="hero-proof-pills">
+            <span>Verified</span>
+            <span>Reviewed</span>
+            <span>Private</span>
+          </div>
         </div>
       </div>
     </section>

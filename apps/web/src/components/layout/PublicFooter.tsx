@@ -9,27 +9,26 @@ export function PublicFooter() {
           <Link className="brand" href="/">
             <BrandLockup />
           </Link>
-          <p style={{ marginTop: 16 }}>Verified healthcare talent. Controlled facility access.</p>
+          <p style={{ marginTop: 16 }}>Verified talent. Controlled access.</p>
         </div>
         <div className="footer-links">
           <strong>Platform</strong>
-          <Link href="/how-it-works">How it works</Link>
           <Link href="/matching">Matching</Link>
           <Link href="/verification">Verification</Link>
-          <Link href="/trust-security">Trust & security</Link>
+          <Link href="/trust-security">Trust</Link>
         </div>
         <div className="footer-links">
           <strong>Portals</strong>
-          <Link href="/auth/register/professional">Professional application</Link>
-          <Link href="/auth/register/student">Student track</Link>
-          <Link href="/auth/register/facility">Facility onboarding</Link>
+          <Link href="/auth/register/professional">Professional</Link>
+          <Link href="/auth/register/student">Student</Link>
+          <Link href="/auth/register/facility">Facility</Link>
           <Link href="/auth/login">Sign in</Link>
         </div>
         <div className="footer-links">
           <strong>Trust</strong>
-          <Link href="/trust-security">Security model</Link>
-          <Link href="/verification">Verification workflow</Link>
-          <Link href="/pricing-access">Facility access</Link>
+          <Link href="/trust-security">Security</Link>
+          <Link href="/verification">Review</Link>
+          <Link href="/pricing-access">Access</Link>
         </div>
       </div>
       <div className="footer-note">

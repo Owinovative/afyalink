@@ -7,7 +7,6 @@ const primaryLinks = [
   { href: "/facilities", label: "Facilities" },
   { href: "/matching", label: "Matching" },
   { href: "/trust-security", label: "Trust" },
-  { href: "/pricing-access", label: "Access" },
 ];
 
 export function MarketingNav() {
