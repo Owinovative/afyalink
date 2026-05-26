@@ -77,14 +77,27 @@ Mail variables:
 
 ```text
 MAIL_DRIVER=log or smtp
-MAIL_FROM_ADDRESS=no-reply@your-domain
+MAIL_FROM_ADDRESS=no-reply@afyalink.com
 MAIL_FROM_NAME=Afyalink
 SMTP_HOST=<Render secret>
 SMTP_PORT=587
 SMTP_USERNAME=<Render secret>
 SMTP_PASSWORD=<Render secret>
 SMTP_ENCRYPTION=tls
+SUPPORT_EMAIL=support@afyalink.com
+PUBLIC_CONTACT_EMAIL=info@afyalink.com
+ADMIN_EMAIL=admin@afyalink.com
 ```
+
+For the Afyalink custom domain launch, use:
+
+```text
+APP_URL=https://www.afyalink.com
+API_URL=https://api.afyalink.com
+CORS_ALLOWED_ORIGINS=https://www.afyalink.com
+```
+
+See [Custom Domain and Branded Email](custom-domain-and-email.md) for DNS and email-provider records.
 
 ## Frontend Web Service
 
@@ -101,6 +114,12 @@ Required frontend variable:
 
 ```text
 NEXT_PUBLIC_AFYA_API_BASE=https://your-api-domain
+```
+
+For the Afyalink custom domain launch, use:
+
+```text
+NEXT_PUBLIC_AFYA_API_BASE=https://api.afyalink.com
 ```
 
 The frontend contains no secrets. Only public runtime configuration should use `NEXT_PUBLIC_`.
@@ -158,3 +177,22 @@ The following should be added as separate Render cron jobs only when the matchin
 - payment reconciliation against provider statements.
 
 Each job must be idempotent, bounded, and audited.
+
+## Custom Domain Launch Checklist
+
+1. Buy domain.
+2. Add domain to Cloudflare.
+3. Add frontend custom domain in Render.
+4. Add backend custom domain in Render.
+5. Add DNS CNAME records.
+6. Add Zoho/Google email DNS records.
+7. Verify SPF/DKIM/DMARC.
+8. Update Render frontend env.
+9. Update Render backend env.
+10. Redeploy frontend.
+11. Redeploy backend.
+12. Test website.
+13. Test API health.
+14. Test email verification.
+15. Test password reset.
+16. Test notification worker.

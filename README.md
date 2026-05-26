@@ -208,6 +208,26 @@ Read the deployment guides before changing staging or production settings:
 
 - [Render Platform Architecture](docs/deployment/render-platform.md)
 - [Render Staging Deployment](docs/deployment/render-staging.md)
+- [Custom Domain and Branded Email](docs/deployment/custom-domain-and-email.md)
+
+### Custom Domain Launch Checklist
+
+1. Buy domain.
+2. Add domain to Cloudflare.
+3. Add frontend custom domain in Render.
+4. Add backend custom domain in Render.
+5. Add DNS CNAME records.
+6. Add Zoho/Google email DNS records.
+7. Verify SPF/DKIM/DMARC.
+8. Update Render frontend env.
+9. Update Render backend env.
+10. Redeploy frontend.
+11. Redeploy backend.
+12. Test website.
+13. Test API health.
+14. Test email verification.
+15. Test password reset.
+16. Test notification worker.
 
 ## Documents
 
@@ -221,6 +241,7 @@ Read the deployment guides before changing staging or production settings:
 - [Security Foundation](docs/security/security-foundation.md)
 - [Secure Candidate Viewing](docs/security/secure-candidate-viewing.md)
 - [Render Platform Architecture](docs/deployment/render-platform.md)
+- [Custom Domain and Branded Email](docs/deployment/custom-domain-and-email.md)
 - [Frontend Benchmark Synthesis](docs/frontend/benchmark-synthesis.md)
 - [Visual Rejection Audit](docs/frontend/visual-rejection-audit.md)
 - [Privacy Requests and Retention](docs/security/privacy-requests-and-retention.md)

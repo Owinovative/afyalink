@@ -8,7 +8,7 @@ This guide deploys Afyalink staging to Render using:
 - Neon PostgreSQL through `DATABASE_URL`.
 - Cloudflare R2/S3-compatible private object storage for credential files.
 
-For the complete Render-first architecture, see [Render Platform Architecture](render-platform.md).
+For the complete Render-first architecture, see [Render Platform Architecture](render-platform.md). For custom domain and branded email launch steps, see [Custom Domain and Branded Email](custom-domain-and-email.md).
 
 ## Render Blueprint
 
@@ -75,8 +75,16 @@ AFYALINK_EMAIL_VERIFICATION_TTL_SECONDS=86400
 AFYALINK_PASSWORD_RESET_TTL_SECONDS=3600
 AFYALINK_MAX_UPLOAD_BYTES=8388608
 MAIL_DRIVER=log
-MAIL_FROM_ADDRESS=no-reply@afyalink.local
+MAIL_FROM_ADDRESS=no-reply@afyalink.com
 MAIL_FROM_NAME=Afyalink
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_ENCRYPTION=tls
+SUPPORT_EMAIL=support@afyalink.com
+PUBLIC_CONTACT_EMAIL=info@afyalink.com
+ADMIN_EMAIL=admin@afyalink.com
 MPESA_ENV=sandbox
 MPESA_CALLBACK_URL=https://YOUR-API-STAGING.onrender.com/api/payments/mpesa/callback
 AI_RECOMMENDATION_DRIVER=local
@@ -119,6 +127,25 @@ Recommended schedule:
 ```
 
 Use the same `DATABASE_URL`, storage, and mail variables as the API. Keep `MAIL_DRIVER=log` until a live provider adapter is configured. Do not run overlapping duplicate notification jobs unless delivery idempotency has been reviewed.
+
+## Custom Domain Launch Checklist
+
+1. Buy domain.
+2. Add domain to Cloudflare.
+3. Add frontend custom domain in Render.
+4. Add backend custom domain in Render.
+5. Add DNS CNAME records.
+6. Add Zoho/Google email DNS records.
+7. Verify SPF/DKIM/DMARC.
+8. Update Render frontend env.
+9. Update Render backend env.
+10. Redeploy frontend.
+11. Redeploy backend.
+12. Test website.
+13. Test API health.
+14. Test email verification.
+15. Test password reset.
+16. Test notification worker.
 
 ## Health Check
 

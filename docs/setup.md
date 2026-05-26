@@ -27,6 +27,10 @@ docker compose up -d postgres minio
 Create a local `.env` from `.env.example`, then set:
 
 ```text
+APP_URL=http://localhost:3000
+API_URL=http://localhost:8000
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
+NEXT_PUBLIC_AFYA_API_BASE=http://localhost:8000
 AFYALINK_DATASTORE=pgsql
 DATABASE_URL=postgresql://afyalink:afyalink_dev_password@localhost:5432/afyalink
 AFYALINK_CREDENTIAL_STORAGE=local
@@ -64,8 +68,11 @@ Afyalink queues notification intents in `notification_outbox` and records delive
 
 ```text
 MAIL_DRIVER=log
-MAIL_FROM_ADDRESS=no-reply@afyalink.local
+MAIL_FROM_ADDRESS=no-reply@afyalink.com
 MAIL_FROM_NAME=Afyalink
+SUPPORT_EMAIL=support@afyalink.com
+PUBLIC_CONTACT_EMAIL=info@afyalink.com
+ADMIN_EMAIL=admin@afyalink.com
 ```
 
 Milestone 5 recommendation assistance defaults to the local deterministic adapter:

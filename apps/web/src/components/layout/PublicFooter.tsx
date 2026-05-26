@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandLockup } from "@/components/layout/BrandLockup";
+import { contactAddresses } from "@/lib/contact";
 
 export function PublicFooter() {
   return (

@@ -45,9 +45,25 @@ services:
       - key: MAIL_DRIVER
         value: log
       - key: MAIL_FROM_ADDRESS
-        value: no-reply@afyalink.local
+        value: no-reply@afyalink.com
       - key: MAIL_FROM_NAME
         value: Afyalink
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_ENCRYPTION
+        value: tls
+      - key: SUPPORT_EMAIL
+        value: support@afyalink.com
+      - key: PUBLIC_CONTACT_EMAIL
+        value: info@afyalink.com
+      - key: ADMIN_EMAIL
+        value: admin@afyalink.com
       - key: MPESA_ENV
         value: sandbox
       - key: MPESA_CONSUMER_KEY
@@ -114,7 +130,23 @@ services:
       - key: MAIL_DRIVER
         value: log
       - key: MAIL_FROM_ADDRESS
-        value: no-reply@afyalink.local
+        value: no-reply@afyalink.com
       - key: MAIL_FROM_NAME
         value: Afyalink
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_ENCRYPTION
+        value: tls
+      - key: SUPPORT_EMAIL
+        value: support@afyalink.com
+      - key: PUBLIC_CONTACT_EMAIL
+        value: info@afyalink.com
+      - key: ADMIN_EMAIL
+        value: admin@afyalink.com
 
