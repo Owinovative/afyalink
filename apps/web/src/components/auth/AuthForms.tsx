@@ -39,19 +39,19 @@ function titleFor(mode: AuthMode) {
 function bodyFor(mode: AuthMode) {
   switch (mode) {
     case "professional-register":
-      return "Create your licensed professional account and continue to profile, credentials, consent, payment, and application readiness.";
+      return "Create an account and continue your profile.";
     case "student-register":
-      return "Start early as a waiting-license applicant. You will not be treated as licensed or facility-publishable until license conversion is complete.";
+      return "Start early. Publication waits for license conversion.";
     case "facility-register":
-      return "Create a facility owner account, complete onboarding, and wait for Afyalink approval before marketplace access.";
+      return "Create owner access. Approval unlocks browsing.";
     case "verify-email":
-      return "Paste the verification token from your email to unlock the next account step.";
+      return "Paste the token from your email.";
     case "forgot":
-      return "Enter your email. If an account exists, reset instructions will be queued.";
+      return "Enter your email for reset instructions.";
     case "reset":
-      return "Use your reset token and choose a new password.";
+      return "Use your token and new password.";
     default:
-      return "Sign in to the professional, facility, or admin workspace.";
+      return "Sign in to your workspace.";
   }
 }
 
@@ -146,11 +146,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       <div className="auth-shell">
         <aside className="auth-aside">
           <div className="eyebrow">Secure access</div>
-          <h1>Continue in the right Afyalink workspace.</h1>
-          <p>
-            Professionals, students, facilities, and admins use separate routes so workflow state and permissions stay
-            clear.
-          </p>
+          <h1>Choose the right workspace.</h1>
+          <p>Separate paths keep permissions clear.</p>
           <div className="table-lite">
             <div>
               <span>Licensed professionals</span>

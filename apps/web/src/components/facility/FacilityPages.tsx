@@ -48,20 +48,20 @@ const facilitySectionTitles: Record<FacilitySection, string> = {
 
 const facilitySectionBodies: Record<FacilitySection, string> = {
   home: "Your approved facility workspace.",
-  dashboard: "Track onboarding, access, requests, and shared packages.",
-  onboarding: "Keep organization details ready for Afyalink review.",
-  access: "Create access references and view entitlement state.",
-  candidates: "Browse published candidates after approval and active access.",
-  "candidate-detail": "Open a watermarked read-only candidate profile.",
-  appointments: "Request consultation or hiring support.",
-  recommendations: "Ask Afyalink to recommend professionals for a role.",
-  packages: "Review shared recommendation packages.",
-  requisitions: "Create and track structured staffing needs.",
-  "requisition-new": "Submit a structured staffing need to Afyalink.",
-  "requisition-detail": "Track one requisition, shared shortlists, and placement progress.",
-  shortlists: "Review Afyalink-approved candidate shortlists.",
-  placements: "Track placement opportunities connected to your facility.",
-  team: "Invite facility collaborators with role-scoped access.",
+  dashboard: "Access, requests, packages.",
+  onboarding: "Organization review details.",
+  access: "Entitlement state.",
+  candidates: "Published candidates only.",
+  "candidate-detail": "Watermarked candidate profile.",
+  appointments: "Request support.",
+  recommendations: "Request curated candidates.",
+  packages: "Shared packages.",
+  requisitions: "Structured staffing needs.",
+  "requisition-new": "Submit a staffing need.",
+  "requisition-detail": "One staffing need.",
+  shortlists: "Reviewed candidate lists.",
+  placements: "Placement opportunities.",
+  team: "Role-scoped collaborators.",
 };
 
 function csvIds(value: unknown) {
@@ -273,7 +273,7 @@ function FacilityAccess({ token, access, refresh }: { token: string; access: Rec
           idempotency_key: values.idempotency_key || `facility-web-${Date.now()}`,
         },
       });
-      setMessage("Facility access payment reference created.");
+      setMessage("Payment reference created.");
       await refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not create facility access payment.");
@@ -316,7 +316,7 @@ function FacilityAccess({ token, access, refresh }: { token: string; access: Rec
               />
             ))
           ) : (
-            <EmptyState title="No access record" body="Create a payment reference, then wait for Afyalink activation." />
+            <EmptyState title="No access record" body="Create a reference, then await activation." />
           )}
         </div>
       </section>
@@ -349,7 +349,7 @@ function CandidateMarketplace({ token }: { token: string }) {
   return (
     <section className="card">
       <h2>Candidate marketplace</h2>
-      <p>Only approved facilities with active access can browse published candidates.</p>
+        <p>Active access required.</p>
       <form className="form-grid" onSubmit={search} style={{ marginTop: 18 }}>
         <Field label="Search profession, county, or summary" name="search" defaultValue={query} />
         <label>
@@ -386,7 +386,7 @@ function CandidateMarketplace({ token }: { token: string }) {
             </DataRow>
           ))
         ) : (
-          <EmptyState title="No candidates loaded" body="Use Browse to request the current catalogue." />
+          <EmptyState title="No candidates loaded" body="Use Browse to load catalogue." />
         )}
       </div>
     </section>
@@ -436,7 +436,7 @@ function CandidateDetail({ publicationId }: { publicationId: string }) {
                 <DataRow key={String(item.id ?? item.document_type)} title={display(item.document_type)} status={item.review_status} />
               ))
             ) : (
-              <p>Approved metadata is not available. Raw private documents are not exposed.</p>
+        <p>No approved metadata. Private documents stay hidden.</p>
             )}
           </div>
         </div>
@@ -573,7 +573,7 @@ function RequestForm({
               />
             ))
           ) : (
-            <EmptyState title="No requests yet" body="Submit a request when your facility needs Afyalink support." />
+            <EmptyState title="No requests yet" body="Submit a support request." />
           )}
         </div>
       </section>
@@ -600,7 +600,7 @@ function SharedPackages({ packages }: { packages: Record<string, unknown>[] }) {
             />
           ))
         ) : (
-          <EmptyState title="No shared packages" body="Afyalink shared recommendation packages will appear here in read-only mode." />
+          <EmptyState title="No shared packages" body="Shared packages appear here." />
         )}
       </div>
     </section>
@@ -632,7 +632,7 @@ function FacilityRequisitions({ token }: { token: string }) {
               Open
             </Link>
           </DataRow>
-        )) : <EmptyState title="No staffing needs" body="Create a requisition when your facility needs Afyalink placement support." />}
+        )) : <EmptyState title="No staffing needs" body="Create a requisition." />}
       </div>
     </section>
   );
@@ -648,7 +648,7 @@ function FacilityRequisitionForm({ token }: { token: string }) {
     setError("");
     try {
       await apiRequest("/api/facility/requisitions", { method: "POST", token, body: { ...formValues(event), submit: true } });
-      setMessage("Requisition submitted to Afyalink operations.");
+      setMessage("Requisition submitted.");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not submit requisition.");
     }
@@ -725,13 +725,13 @@ function FacilityRequisitionDetail({ token, id }: { token: string; id: string })
       <section className="card">
         <h2>Shared shortlists</h2>
         <div className="data-list">
-          {shortlists.length ? shortlists.map((shortlist) => <DataRow key={String(shortlist.id)} title={display(shortlist.title)} status={shortlist.status} meta={[{ label: "Shared", value: shortlist.shared_at }, { label: "Candidates", value: asArray(shortlist.candidates).length }]} />) : <EmptyState title="No shortlist yet" body="Afyalink will share reviewed candidates here." />}
+          {shortlists.length ? shortlists.map((shortlist) => <DataRow key={String(shortlist.id)} title={display(shortlist.title)} status={shortlist.status} meta={[{ label: "Shared", value: shortlist.shared_at }, { label: "Candidates", value: asArray(shortlist.candidates).length }]} />) : <EmptyState title="No shortlist yet" body="Reviewed candidates appear here." />}
         </div>
       </section>
       <section className="card">
         <h2>Placements</h2>
         <div className="data-list">
-          {placements.length ? placements.map((placement) => <DataRow key={String(placement.id)} title={`Placement ${display(placement.id)}`} status={placement.status} meta={[{ label: "Employment", value: placement.employment_type }, { label: "Start", value: placement.start_date }]} />) : <EmptyState title="No placements yet" body="Placement records appear after Afyalink starts an opportunity workflow." />}
+          {placements.length ? placements.map((placement) => <DataRow key={String(placement.id)} title={`Placement ${display(placement.id)}`} status={placement.status} meta={[{ label: "Employment", value: placement.employment_type }, { label: "Start", value: placement.start_date }]} />) : <EmptyState title="No placements yet" body="Placement records appear here." />}
         </div>
       </section>
     </div>
@@ -747,7 +747,7 @@ function FacilityShortlists({ token }: { token: string }) {
       <h2>Afyalink-reviewed shortlists</h2>
       {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
       <div className="data-list">
-        {shortlists.length ? shortlists.map((shortlist) => <DataRow key={String(shortlist.id)} title={display(shortlist.title)} status={shortlist.status} meta={[{ label: "Candidates", value: asArray(shortlist.candidates).length }, { label: "Shared", value: shortlist.shared_at }]} />) : <EmptyState title="No shared shortlists" body="Shortlists appear only after Afyalink admin review." />}
+        {shortlists.length ? shortlists.map((shortlist) => <DataRow key={String(shortlist.id)} title={display(shortlist.title)} status={shortlist.status} meta={[{ label: "Candidates", value: asArray(shortlist.candidates).length }, { label: "Shared", value: shortlist.shared_at }]} />) : <EmptyState title="No shared shortlists" body="Shortlists appear after review." />}
       </div>
     </section>
   );

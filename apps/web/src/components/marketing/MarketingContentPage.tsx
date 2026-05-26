@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  AudienceTile,
   CTASection,
   EditorialSplit,
   PageIntro,
@@ -30,43 +29,43 @@ const companionBySlug: Record<string, string> = {
 
 const pageSteps: Record<string, Array<{ title: string; body: string }>> = {
   professionals: [
-    { title: "Profile", body: "Complete professional details and work history." },
-    { title: "Credentials", body: "Upload private documents for review." },
-    { title: "Assessment", body: "Move through verification and interview." },
-    { title: "Placement", body: "Set preferences for future opportunities." },
+    { title: "Profile", body: "Complete details." },
+    { title: "Credentials", body: "Upload privately." },
+    { title: "Assessment", body: "Verify and interview." },
+    { title: "Placement", body: "Set availability." },
   ],
   students: [
-    { title: "Register early", body: "Join without a license number." },
-    { title: "Prepare records", body: "Upload training and identity evidence." },
-    { title: "Wait accurately", body: "Remain outside licensed publication." },
-    { title: "Convert", body: "Upload license evidence when issued." },
+    { title: "Register", body: "No license needed." },
+    { title: "Prepare", body: "Upload early records." },
+    { title: "Wait", body: "Not publishable." },
+    { title: "Convert", body: "Add license later." },
   ],
   facilities: [
-    { title: "Onboard", body: "Submit organization details for Afyalink review." },
-    { title: "Activate access", body: "Confirm entitlement before browsing." },
-    { title: "Request talent", body: "Create requisitions and request recommendations." },
-    { title: "Place safely", body: "Track shortlists, communication, and outcomes." },
+    { title: "Onboard", body: "Submit organization." },
+    { title: "Activate", body: "Confirm access." },
+    { title: "Request", body: "Create staffing needs." },
+    { title: "Place", body: "Track outcomes." },
   ],
   matching: [
-    { title: "Requisition", body: "Facility need is structured first." },
-    { title: "Eligibility", body: "Only qualified and consented candidates are considered." },
-    { title: "Explanation", body: "Score reasons and ineligible reasons are visible to admins." },
-    { title: "Review", body: "Human operators approve shortlists." },
+    { title: "Need", body: "Structure demand." },
+    { title: "Eligibility", body: "Filter safely." },
+    { title: "Reason", body: "Show fit." },
+    { title: "Review", body: "Approve sharing." },
   ],
   "trust-security": [
-    { title: "Private storage", body: "Raw credentials stay outside public access." },
-    { title: "Authorization", body: "Roles and access state gate every sensitive view." },
-    { title: "Watermark", body: "Candidate views identify the viewer and context." },
-    { title: "Audit", body: "Sensitive actions are recorded with redaction." },
+    { title: "Private", body: "Protect records." },
+    { title: "Gated", body: "Check roles." },
+    { title: "Watermark", body: "Bind views." },
+    { title: "Audit", body: "Record actions." },
   ],
 };
 
 function stepsFor(page: MarketingPageContent) {
   return pageSteps[page.slug] ?? [
-    { title: "Enter", body: page.highlights[0]?.body ?? "Start from the correct route." },
-    { title: "Review", body: page.highlights[1]?.body ?? "Move through controlled workflow state." },
-    { title: "Control", body: page.highlights[2]?.body ?? "Keep access governed by backend rules." },
-    { title: "Track", body: "Use audit-ready portals for the live workflow." },
+    { title: "Enter", body: page.highlights[0]?.body ?? "Start safely." },
+    { title: "Review", body: page.highlights[1]?.body ?? "Check status." },
+    { title: "Control", body: page.highlights[2]?.body ?? "Gate access." },
+    { title: "Track", body: "Keep history." },
   ];
 }
 
@@ -74,9 +73,9 @@ function pricingSection() {
   return (
     <SectionFrame tone="cream">
       <div className="wide-container pricing-panel">
-        <VisualCard title="Professionals" body="Application and payment reference workflows remain connected to readiness and admin review." />
-        <VisualCard title="Facilities" body="Access is reviewed, entitlement-gated, and suitable for manual confirmation before provider automation." />
-        <VisualCard title="Recommendations" body="Curated packages and appointments can support commercial facility engagement without fake public prices." />
+        <VisualCard title="Professionals" body="Apply, verify, prepare." />
+        <VisualCard title="Facilities" body="Approved access only." />
+        <VisualCard title="Recommendations" body="Curated support on request." />
       </div>
     </SectionFrame>
   );
@@ -88,13 +87,13 @@ function contactSection() {
       <div className="wide-container contact-grid">
         <PhotoBand
           visual={getVisualForSlug("contact")}
-          eyebrow="Contact Afyalink"
-          title="Use the right channel for sensitive work."
-          body="Private records belong inside authenticated portals. Use this page for facility access, partnerships, support, and operational questions."
+          eyebrow="Contact"
+          title="Use the right channel."
+          body="Keep private records inside portals."
         />
         <section className="form-card">
-          <span className="eyebrow">Message details</span>
-          <h2>Send a focused inquiry</h2>
+          <span className="eyebrow">Message</span>
+          <h2>Send a focused note</h2>
           <form className="form-grid">
             <label>
               Name
@@ -118,7 +117,7 @@ function contactSection() {
               <textarea placeholder="How can Afyalink help?" />
             </label>
             <button className="button full" type="button">
-              Prepare inquiry
+              Prepare note
             </button>
           </form>
         </section>
@@ -138,7 +137,7 @@ function faqSection(page: MarketingPageContent) {
   return (
     <SectionFrame tone="mist">
       <div className="wide-container">
-        <PageIntro eyebrow="FAQ" title="Short answers by role." body="Afyalink keeps public explanations concise. Live workflow status belongs in authenticated portals." align="center" />
+        <PageIntro eyebrow="FAQ" title="Short answers by role." body="Public answers stay short. Portals hold live status." align="center" />
         <div className="faq-grid">
           {groups.map((group) => (
             <article className="visual-card faq-group" key={group.title}>
@@ -182,7 +181,7 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
       <SectionFrame tone="white">
         <div className="wide-container page-opening">
           <PageIntro
-            eyebrow="Why this page matters"
+            eyebrow="Key signals"
             title={firstSection?.title ?? page.title}
             body={firstSection?.body ?? page.description}
           />
@@ -204,9 +203,9 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
       <SectionFrame tone="white">
         <div className="wide-container">
           <EditorialSplit
-            eyebrow="Operational model"
-            title={secondSection?.title ?? "Designed for controlled healthcare workflows."}
-            body={secondSection?.body ?? "Afyalink keeps identity, access, verification, matching, and publication state explicit."}
+            eyebrow="Model"
+            title={secondSection?.title ?? "Controlled healthcare workflows."}
+            body={secondSection?.body ?? "Status and access stay explicit."}
             points={secondSection?.points ?? page.highlights.map((highlight) => highlight.title)}
             visual={companion}
             cta={page.primaryCta}
@@ -218,45 +217,12 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
       {page.slug === "faq" ? faqSection(page) : null}
       {page.slug === "pricing-access" ? pricingSection() : null}
 
-      {page.slug !== "contact" && page.slug !== "faq" && page.slug !== "pricing-access" ? (
-        <SectionFrame tone="cream">
-          <div className="wide-container">
-            <div className="audience-grid compact">
-              <AudienceTile
-                eyebrow="Professional path"
-                title="For licensed professionals"
-                body="Credential readiness, assessment, publication awareness, and placement preferences."
-                visual={getVisualForSlug("professionals")}
-                href="/professionals"
-                cta="Open path"
-              />
-              <AudienceTile
-                eyebrow="Student path"
-                title="For students awaiting license"
-                body="Early profile building without being represented as licensed or publishable."
-                visual={getVisualForSlug("students")}
-                href="/students"
-                cta="Open path"
-              />
-              <AudienceTile
-                eyebrow="Facility path"
-                title="For approved facilities"
-                body="Gated access, requisitions, recommendations, shortlists, and placements."
-                visual={getVisualForSlug("facilities")}
-                href="/facilities"
-                cta="Open path"
-              />
-            </div>
-          </div>
-        </SectionFrame>
-      ) : null}
-
       <SectionFrame tone="ink">
         <div className="wide-container">
           <CTASection
-            eyebrow="Afyalink portals"
-            title="Move from public overview to the right secure workspace."
-            body="Create the account that matches your role. Backend authorization remains the source of truth after sign-in."
+            eyebrow="Portals"
+            title="Open the right workspace."
+            body="Your role controls what happens next."
             primary={page.primaryCta ?? { label: "Create account", href: "/auth/register/professional" }}
             secondary={page.secondaryCta ?? { label: "Sign in", href: "/auth/login" }}
           />

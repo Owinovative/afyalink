@@ -74,34 +74,34 @@ const adminSectionTitles: Record<AdminSection, string> = {
 };
 
 const adminSectionBodies: Record<AdminSection, string> = {
-  dashboard: "Operational queues, access state, and review counters.",
-  applications: "Review submitted professional applications.",
-  "pre-licensure": "Track students and graduates awaiting license conversion.",
-  "application-detail": "Inspect one application and apply valid backend actions.",
-  credentials: "Review credential records and replacement needs.",
-  payments: "Confirm or reject payment references.",
-  verifications: "Manage regulatory verification cases.",
-  "verification-detail": "Update one verification case.",
-  interviews: "Schedule and review interviews.",
-  "interview-detail": "Record interview outcomes.",
-  facilities: "Approve facilities and inspect onboarding state.",
-  "facility-detail": "Manage one facility record.",
-  publications: "Publish, pause, or withdraw candidate catalogue entries.",
-  subscriptions: "Manage facility access entitlement.",
-  appointments: "Review facility appointment requests.",
-  recommendations: "Prepare and share recommendation packages.",
-  requisitions: "Review facility staffing needs and coordinate matching.",
-  "requisition-detail": "Run matching, inspect explanations, and prepare shortlists.",
-  matching: "Generate explainable candidate matches for active requisitions.",
-  shortlists: "Create and share human-reviewed placement shortlists.",
-  placements: "Track placements from proposal through offer and onboarding.",
-  communications: "Manage mediated opportunity communication threads.",
-  integrations: "Inspect FHIR and SMART-ready integration foundations.",
-  security: "Review ASVS-readiness and placement fairness controls.",
-  reports: "Track funnel, verification, interview, facility, student, and notification reporting.",
-  notifications: "Inspect delivery state and retry failed operational messages.",
-  privacy: "Manage data access, correction, retention, and consent-withdrawal requests.",
-  audit: "Inspect sensitive platform activity.",
+  dashboard: "Queues and counters.",
+  applications: "Submitted applications.",
+  "pre-licensure": "Waiting-license applicants.",
+  "application-detail": "One application.",
+  credentials: "Credential review.",
+  payments: "Payment references.",
+  verifications: "Regulatory cases.",
+  "verification-detail": "One verification case.",
+  interviews: "Schedules and outcomes.",
+  "interview-detail": "One interview.",
+  facilities: "Facility onboarding.",
+  "facility-detail": "One facility.",
+  publications: "Catalogue entries.",
+  subscriptions: "Facility access.",
+  appointments: "Facility requests.",
+  recommendations: "Recommendation packages.",
+  requisitions: "Staffing needs.",
+  "requisition-detail": "Match and shortlist.",
+  matching: "Explainable matches.",
+  shortlists: "Reviewed shortlists.",
+  placements: "Placement pipeline.",
+  communications: "Mediated threads.",
+  integrations: "Integration readiness.",
+  security: "Security readiness.",
+  reports: "Operational reports.",
+  notifications: "Delivery state.",
+  privacy: "Privacy requests.",
+  audit: "Sensitive activity.",
 };
 
 export function AdminPage({ section, id }: { section: AdminSection; id?: string }) {
@@ -197,12 +197,12 @@ function AdminDashboard() {
         ]}
       />
       <div className="grid-3">
-        <QuickLink title="Application review" href="/portal/admin/applications" body="Open professional submissions and credentials." />
-        <QuickLink title="Facility operations" href="/portal/admin/facilities" body="Approve facilities and manage access." />
-        <QuickLink title="Recommendations" href="/portal/admin/recommendations" body="Prepare curated candidate packages." />
-        <QuickLink title="Pre-licensure queue" href="/portal/admin/pre-licensure" body="Track students waiting for licenses." />
-        <QuickLink title="Reports" href="/portal/admin/reports" body="Open operational funnel and delivery reports." />
-        <QuickLink title="Notifications" href="/portal/admin/notifications" body="Inspect pending and failed delivery attempts." />
+        <QuickLink title="Application review" href="/portal/admin/applications" body="Submissions and credentials." />
+        <QuickLink title="Facility operations" href="/portal/admin/facilities" body="Approvals and access." />
+        <QuickLink title="Recommendations" href="/portal/admin/recommendations" body="Curated packages." />
+        <QuickLink title="Pre-licensure queue" href="/portal/admin/pre-licensure" body="Waiting-license applicants." />
+        <QuickLink title="Reports" href="/portal/admin/reports" body="Funnel and delivery." />
+        <QuickLink title="Notifications" href="/portal/admin/notifications" body="Pending and failed." />
       </div>
     </div>
   );
@@ -292,7 +292,7 @@ function PrelicensureQueue() {
               </DataRow>
             ))
           ) : (
-            <EmptyState title="No waiting-license applicants" body="Student and recent graduate applicants appear here after registration." />
+            <EmptyState title="No waiting-license applicants" body="Applicants appear after registration." />
           )}
         </div>
       </section>
@@ -328,7 +328,7 @@ function ApplicationList({ mode }: { mode: "applications" | "credentials" | "pay
             </DataRow>
           ))
         ) : (
-          <EmptyState title="No applications loaded" body="Application records appear here after professionals submit." />
+          <EmptyState title="No applications loaded" body="Submissions appear here." />
         )}
       </div>
     </section>
@@ -1103,7 +1103,7 @@ function ReportsDashboard() {
             </section>
           ))
         ) : (
-          <EmptyState title="No report data" body="Aggregated reporting data will appear after workflow activity starts." />
+          <EmptyState title="No report data" body="Reports appear after activity." />
         )}
       </div>
     </div>
@@ -1261,7 +1261,7 @@ function AdminRows({
             </DataRow>
           ))
         ) : (
-          <EmptyState title="No records" body="No matching records were returned by the backend." />
+          <EmptyState title="No records" body="No backend records returned." />
         )}
       </div>
     </section>
@@ -1297,7 +1297,7 @@ function RequisitionManager() {
             </DataRow>
           ))
         ) : (
-          <EmptyState title="No requisitions" body="Submitted facility staffing needs appear here." />
+          <EmptyState title="No requisitions" body="Staffing needs appear here." />
         )}
       </div>
     </section>
@@ -1402,7 +1402,7 @@ function RequisitionDetail({ id }: { id: string }) {
               />
             ))
           ) : (
-            <EmptyState title="No matches yet" body="Run matching to generate deterministic candidate fit explanations." />
+            <EmptyState title="No matches yet" body="Run matching first." />
           )}
         </div>
       </section>
@@ -1453,7 +1453,7 @@ function PlacementManager() {
             { label: "Start", value: placement.start_date },
             { label: "Updated", value: placement.updated_at },
           ]} />
-        )) : <EmptyState title="No placements" body="Placements are created from reviewed shortlists or admin-approved opportunities." />}
+        )) : <EmptyState title="No placements" body="Reviewed placements appear here." />}
       </div>
     </section>
   );
@@ -1474,7 +1474,7 @@ function CommunicationManager() {
             { label: "Facility", value: thread.facility_id },
             { label: "Professional", value: thread.professional_user_id },
           ]} />
-        )) : <EmptyState title="No communication threads" body="Admin-mediated facility/professional conversations appear here." />}
+        )) : <EmptyState title="No communication threads" body="Mediated conversations appear here." />}
       </div>
     </section>
   );

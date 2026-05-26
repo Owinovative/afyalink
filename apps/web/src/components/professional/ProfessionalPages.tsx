@@ -44,18 +44,18 @@ const professionalSectionTitles: Record<ProfessionalSection, string> = {
 
 const professionalSectionBodies: Record<ProfessionalSection, string> = {
   home: "Your verification workspace.",
-  dashboard: "Track readiness, credentials, payment, consent, and publication state.",
-  profile: "Keep professional and pre-licensure details current.",
-  credentials: "Upload private documents for Afyalink review.",
-  "waiting-license": "Prepare early while license evidence is still pending.",
-  "consent-payment": "Accept consent and create the required payment reference.",
-  application: "Submit only after backend readiness is complete.",
-  verification: "Follow regulatory verification without internal notes.",
-  interview: "Track interview schedule and outcome.",
-  publication: "See high-level facility catalogue visibility.",
-  "placement-preferences": "Control availability and placement preferences.",
-  opportunities: "Review admin-approved placement opportunities.",
-  "opportunity-detail": "Inspect one placement opportunity.",
+  dashboard: "Status and next steps.",
+  profile: "Keep details current.",
+  credentials: "Upload private records.",
+  "waiting-license": "License pending. Prepare safely.",
+  "consent-payment": "Consent and payment reference.",
+  application: "Submit when ready.",
+  verification: "Regulatory review status.",
+  interview: "Schedule and outcome.",
+  publication: "Facility visibility status.",
+  "placement-preferences": "Availability and preferences.",
+  opportunities: "Approved placement leads.",
+  "opportunity-detail": "One opportunity.",
 };
 
 const documentTypes = [
@@ -184,7 +184,7 @@ function DashboardSummary({
               ))}
             </div>
           ) : (
-            <p>Backend readiness checks do not report any missing requirements.</p>
+            <p>No missing requirements.</p>
           )}
         </div>
         <div className="card">
@@ -203,7 +203,7 @@ function DashboardSummary({
         {prelicensure.active ? (
           <div className="card">
             <h3>Waiting-license track</h3>
-            <p>Prepare your profile now. Full application and facility visibility unlock only after license conversion.</p>
+            <p>Prepare now. Publish after conversion.</p>
             <MetaGrid
               items={[
                 { label: "Status", value: prelicensure.student_status },
@@ -316,7 +316,7 @@ function ProfessionalOpportunities() {
               Open
             </Link>
           </DataRow>
-        )) : <EmptyState title="No opportunities yet" body="Afyalink shows opportunities only after admin-approved placement contact is created." />}
+        )) : <EmptyState title="No opportunities yet" body="Approved placement leads appear here." />}
       </div>
     </section>
   );
@@ -453,7 +453,7 @@ function WaitingLicensePanel({
     return (
       <section className="card">
         <h2>Waiting-license track</h2>
-        <p>Your current profile is on the licensed professional path. Use this page only if Afyalink registered you before licensure.</p>
+        <p>This page is for pre-licensure accounts.</p>
       </section>
     );
   }
@@ -462,8 +462,8 @@ function WaitingLicensePanel({
     <div className="data-list">
       <section className="secure-profile" data-watermark="Afyalink waiting-license track">
         <div className="eyebrow">Pre-licensure pathway</div>
-        <h2>You are registered in the Waiting for License track.</h2>
-        <p>Complete preliminary profile and documents now. Application, verification, interview, and publication stay locked until conversion.</p>
+        <h2>Waiting for license.</h2>
+        <p>Prepare now. Apply after conversion.</p>
         <MetaGrid
           items={[
             { label: "Target profession", value: profile.target_profession ?? profile.profession },
@@ -484,7 +484,7 @@ function WaitingLicensePanel({
               title={display(item.document_type)}
               status={item.uploaded ? item.review_status ?? "uploaded" : "missing"}
               meta={[
-                { label: "Purpose", value: item.unlocks ? "Unlocks conversion after license review" : "Pre-licensure readiness" },
+                { label: "Purpose", value: item.unlocks ? "Conversion" : "Readiness" },
               ]}
             />
           ))}
@@ -539,7 +539,7 @@ function CredentialsPanel({
         },
       });
       form.reset();
-      setMessage("Credential uploaded. Review status will update after Afyalink checks it.");
+      setMessage("Credential uploaded for review.");
       await refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not upload credential.");
@@ -591,7 +591,7 @@ function CredentialsPanel({
               />
             ))
           ) : (
-            <EmptyState title="No credentials uploaded" body="Upload required credential documents from this routed page." />
+            <EmptyState title="No credentials uploaded" body="Upload required documents here." />
           )}
         </div>
       </section>
@@ -641,7 +641,7 @@ function ConsentPaymentPanel({
           idempotency_key: values.idempotency_key || `web-${Date.now()}`,
         },
       });
-      setMessage("Payment reference created. Admin confirmation controls remain on the backend.");
+      setMessage("Payment reference created.");
       await refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not create payment reference.");
@@ -652,7 +652,7 @@ function ConsentPaymentPanel({
     <div className="split-panel">
       <section className="form-card">
         <h2>Consent</h2>
-        <p>{display(consent.current_text, "Accept the current Afyalink processing consent before submission.")}</p>
+        <p>{display(consent.current_text, "Accept consent before submission.")}</p>
         <MetaGrid
           items={[
             { label: "Current version", value: consent.current_version },
@@ -719,7 +719,7 @@ function ApplicationPanel({
     setError("");
     try {
       await apiRequest("/api/professional/application/submit", { method: "POST", token, body: {} });
-      setMessage("Application submitted. The backend accepted the current readiness state.");
+      setMessage("Application submitted.");
       await refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not submit application.");
@@ -742,7 +742,7 @@ function ApplicationPanel({
           className="button"
           type="button"
           disabled={!token || !ready}
-          title={ready ? "" : "Complete backend readiness requirements before submitting."}
+          title={ready ? "" : "Complete readiness first."}
           onClick={submit}
         >
           Submit application
@@ -781,7 +781,7 @@ function VerificationPanel({ cases }: { cases: Record<string, unknown>[] }) {
             />
           ))
         ) : (
-          <EmptyState title="No verification cases yet" body="Cases appear after Afyalink starts the verification workflow." />
+          <EmptyState title="No verification cases yet" body="Cases appear after review starts." />
         )}
       </div>
     </section>
@@ -807,7 +807,7 @@ function InterviewPanel({ interviews }: { interviews: Record<string, unknown>[] 
             />
           ))
         ) : (
-          <EmptyState title="No interview scheduled" body="Interview details appear here once Afyalink schedules them." />
+          <EmptyState title="No interview scheduled" body="Interview details appear here." />
         )}
       </div>
     </section>
@@ -818,10 +818,7 @@ function PublicationPanel({ visibility }: { visibility: Record<string, unknown> 
   return (
     <section className="secure-profile" data-watermark="Afyalink professional visibility">
       <h2>Facility catalogue visibility</h2>
-      <p>
-        This page shows high-level publication status. Facility identities and sensitive view details remain protected
-        unless the product explicitly permits broader disclosure later.
-      </p>
+      <p>High-level visibility only. Sensitive view details stay protected.</p>
       <MetaGrid
         items={[
           { label: "Visible to facilities", value: visibility.visible },
