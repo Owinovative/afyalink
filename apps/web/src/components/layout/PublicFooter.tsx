@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BrandLockup } from "@/components/layout/BrandLockup";
-import { contactAddresses } from "@/lib/contact";
+import { publicContact } from "@/lib/contact";
 
 export function PublicFooter() {
   return (
@@ -27,8 +27,11 @@ export function PublicFooter() {
         </div>
         <div className="footer-links">
           <strong>Contact</strong>
-          <a href={`mailto:${contactAddresses.public}`}>{contactAddresses.public}</a>
-          <a href={`mailto:${contactAddresses.support}`}>{contactAddresses.support}</a>
+          <span>{publicContact.location}</span>
+          {publicContact.phoneHref ? <a href={publicContact.phoneHref}>{publicContact.phone}</a> : null}
+          <a href={publicContact.siteUrl}>{publicContact.website}</a>
+          {publicContact.email ? <a href={`mailto:${publicContact.email}`}>{publicContact.email}</a> : null}
+          {publicContact.supportEmail ? <a href={`mailto:${publicContact.supportEmail}`}>{publicContact.supportEmail}</a> : null}
           <Link href="/trust-security">Security</Link>
         </div>
       </div>

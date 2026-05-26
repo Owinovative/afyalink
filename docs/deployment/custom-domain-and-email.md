@@ -4,10 +4,10 @@ This guide prepares Afyalink for:
 
 - `https://www.afyalinks.org` for the Next.js frontend
 - `https://api.afyalinks.org` for the PHP API
-- `info@afyalinks.org` for public contact
-- `support@afyalinks.org` for support
+- `info@afyalinks.org` for public contact after mail hosting is configured
+- `support@afyalinks.org` for support after mail hosting is configured
 - `no-reply@afyalinks.org` for system email
-- `admin@afyalinks.org` for internal admin use
+- `admin@afyalinks.org` for internal admin use after mail hosting is configured
 
 Do not add secrets to git. Copy provider-generated targets and credentials into Cloudflare, Render, Zoho Mail, or Google Workspace only.
 
@@ -70,12 +70,14 @@ SMTP_PORT=587
 SMTP_USERNAME=
 SMTP_PASSWORD=
 SMTP_ENCRYPTION=tls
-SUPPORT_EMAIL=support@afyalinks.org
-PUBLIC_CONTACT_EMAIL=info@afyalinks.org
-ADMIN_EMAIL=admin@afyalinks.org
+PUBLIC_CONTACT_PHONE=+254711776391
+PUBLIC_LOCATION=Hardy, Karen
+SUPPORT_EMAIL=
+PUBLIC_CONTACT_EMAIL=
+ADMIN_EMAIL=
 ```
 
-Keep `MAIL_DRIVER=log` until a live SMTP/provider adapter is configured and tested.
+Keep `MAIL_DRIVER=log` until a live SMTP provider is configured and tested. The public site hides email links when `PUBLIC_CONTACT_EMAIL` or `SUPPORT_EMAIL` is blank.
 
 ## Zoho Mail DNS
 
@@ -88,7 +90,7 @@ Zoho generates domain-specific values during setup. Copy the exact values from Z
 | Mail routing | `MX` | `@` | `<ZOHO_MX_2>` with priority `<ZOHO_PRIORITY_2>` |
 | SPF | `TXT` | `@` | `v=spf1 include:<ZOHO_SPF_INCLUDE> ~all` |
 | DKIM | `TXT` | `<ZOHO_DKIM_SELECTOR>._domainkey` | `<ZOHO_DKIM_TXT_VALUE>` |
-| DMARC | `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:admin@afyalinks.org; fo=1` |
+| DMARC | `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:<DMARC_REPORT_INBOX>; fo=1` |
 
 Do not invent the DKIM value. Zoho generates it per domain and selector.
 
@@ -103,7 +105,7 @@ Google Workspace also provides setup checks in Admin Console. Use the Google-pro
 | Mail routing | `MX` | `@` | `<GOOGLE_WORKSPACE_MX_HOST_2>` with priority `<GOOGLE_PRIORITY_2>` |
 | SPF | `TXT` | `@` | `v=spf1 include:_spf.google.com ~all` |
 | DKIM | `TXT` | `<GOOGLE_DKIM_SELECTOR>._domainkey` | `<GOOGLE_DKIM_TXT_VALUE>` |
-| DMARC | `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:admin@afyalinks.org; fo=1` |
+| DMARC | `TXT` | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:<DMARC_REPORT_INBOX>; fo=1` |
 
 Only one SPF TXT record should exist at the root. If the domain uses more than one sender, merge include mechanisms into a single SPF value.
 
@@ -118,7 +120,7 @@ no-reply@afyalinks.org
 admin@afyalinks.org
 ```
 
-Use `no-reply@afyalinks.org` only for system-sent messages. Replies and public website contact should route to `info@afyalinks.org` or `support@afyalinks.org`.
+Use `no-reply@afyalinks.org` only for system-sent messages. After inboxes exist, set `PUBLIC_CONTACT_EMAIL=info@afyalinks.org`, `SUPPORT_EMAIL=support@afyalinks.org`, and `ADMIN_EMAIL=admin@afyalinks.org` in Render.
 
 ## Custom Domain Launch Checklist
 

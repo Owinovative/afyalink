@@ -82,9 +82,11 @@ SMTP_PORT=587
 SMTP_USERNAME=
 SMTP_PASSWORD=
 SMTP_ENCRYPTION=tls
-SUPPORT_EMAIL=support@afyalinks.org
-PUBLIC_CONTACT_EMAIL=info@afyalinks.org
-ADMIN_EMAIL=admin@afyalinks.org
+PUBLIC_CONTACT_PHONE=+254711776391
+PUBLIC_LOCATION=Hardy, Karen
+SUPPORT_EMAIL=
+PUBLIC_CONTACT_EMAIL=
+ADMIN_EMAIL=
 MPESA_ENV=sandbox
 MPESA_CALLBACK_URL=https://YOUR-API-STAGING.onrender.com/api/payments/mpesa/callback
 AI_RECOMMENDATION_DRIVER=local
@@ -99,6 +101,10 @@ Set this for `afyalink-web-staging`:
 ```text
 NEXT_PUBLIC_SITE_URL=https://YOUR-WEB-STAGING.onrender.com
 NEXT_PUBLIC_AFYA_API_BASE=https://YOUR-API-STAGING.onrender.com
+PUBLIC_CONTACT_PHONE=+254711776391
+PUBLIC_LOCATION=Hardy, Karen
+PUBLIC_CONTACT_EMAIL=
+SUPPORT_EMAIL=
 ```
 
 Render should build the web service with:
@@ -124,10 +130,11 @@ php scripts/process-notifications.php 50
 Recommended schedule:
 
 ```text
-*/15 * * * *
+*/10 * * * *
 ```
 
 Use the same `DATABASE_URL`, storage, and mail variables as the API. Keep `MAIL_DRIVER=log` until a live provider adapter is configured. Do not run overlapping duplicate notification jobs unless delivery idempotency has been reviewed.
+Recommended Render Cron Job name: `afyalink-notification-worker`.
 
 ## Custom Domain Launch Checklist
 
@@ -187,6 +194,16 @@ php scripts/create-admin.php "Afyalink Admin" admin@example.com 0799999999 Admin
 ```
 
 Use a strong staging password and rotate it after first login.
+
+## Demo Seed
+
+For staging workflow QA only, run:
+
+```bash
+php scripts/seed-demo-data.php
+```
+
+The seed creates `@afyalinks.test` users with `Password123!`, demo credential metadata, a facility, a requisition, a reviewed match, a shortlist, a placement, and notification records. It refuses production and is idempotent.
 
 ## Staging Verification
 

@@ -11,7 +11,7 @@ import {
   getVisualForSlug,
 } from "@/components/marketing/VisualSystem";
 import { BreadcrumbStructuredData } from "@/components/seo/StructuredData";
-import { contactAddresses } from "@/lib/contact";
+import { publicContact } from "@/lib/contact";
 import type { MarketingPageContent } from "@/lib/content/marketing";
 
 const companionBySlug: Record<string, string> = {
@@ -54,8 +54,11 @@ function contactSection() {
           <span className="eyebrow">Message</span>
           <h2>Send a focused note</h2>
           <div className="contact-addresses" aria-label="Afyalink inboxes">
-            <a href={`mailto:${contactAddresses.public}`}>{contactAddresses.public}</a>
-            <a href={`mailto:${contactAddresses.support}`}>{contactAddresses.support}</a>
+            <span>{publicContact.location}</span>
+            {publicContact.phoneHref ? <a href={publicContact.phoneHref}>{publicContact.phone}</a> : null}
+            <a href={publicContact.siteUrl}>{publicContact.website}</a>
+            {publicContact.email ? <a href={`mailto:${publicContact.email}`}>{publicContact.email}</a> : null}
+            {publicContact.supportEmail ? <a href={`mailto:${publicContact.supportEmail}`}>{publicContact.supportEmail}</a> : null}
           </div>
           <form className="form-grid">
             <label>
@@ -64,7 +67,7 @@ function contactSection() {
             </label>
             <label>
               Email
-              <input type="email" placeholder="you@example.com" />
+              <input type="email" placeholder="Email address" />
             </label>
             <label>
               Topic

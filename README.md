@@ -114,6 +114,7 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - Student / graduate awaiting-license track for pre-licensure applicants, including student registration, preliminary credential requirements, waiting-license dashboard guidance, admin pre-licensure queue, and controlled conversion into the licensed professional track.
 - Milestone 4 operations engine with notification delivery attempts, log/null email provider adapter, notification worker script, M-PESA callback event persistence, redacted payment callback handling, facility subscription payment linkage, admin command center, reporting summaries, privacy request lifecycle, and new admin routes for notifications, reports, and privacy work.
 - Milestone 5 intelligent placement engine with facility requisitions, professional availability/preferences, deterministic matching, AI-assisted draft rationale governance, placement shortlists, placement lifecycle events, controlled communication threads, facility team invitation foundation, FHIR/SMART-readiness mappings, ASVS-readiness checklist, and placement-focused portal routes.
+- Production launch readiness foundations for `www.afyalinks.org`, optional branded inboxes, SMTP notification delivery, idempotent staging demo seed data, browser smoke tests, and launch QA checklists.
 
 ## Run Locally
 
@@ -124,6 +125,7 @@ cd apps/api
 composer install
 composer dump-autoload
 php scripts/migrate.php
+php scripts/seed-demo-data.php # local/staging only
 php scripts/process-notifications.php 25
 composer check
 php -S localhost:8000 -t public
@@ -143,6 +145,7 @@ npm install
 npm.cmd run check
 npm.cmd run typecheck
 npm.cmd run build
+npm.cmd run test:e2e
 ```
 
 Run the routed Next.js frontend:
@@ -191,6 +194,7 @@ The current tests verify:
 - students awaiting license can register without a professional license, cannot submit licensed applications or enter facility publication, and can be converted by admin only after license details and evidence are available.
 - notification processing records delivery attempts and sent/retry/failed state;
 - M-PESA callbacks are persisted idempotently with redacted payloads and can confirm matched payments;
+- the staging demo seed is idempotent and keeps students awaiting license out of licensed publication;
 - privacy requests can be submitted, reviewed, updated, and audited.
 - Milestone 5 matching blocks student-awaiting-license applicants from normal matching, scores eligible published professionals transparently, records AI draft usage, creates shortlists/placements, hashes facility invitation tokens, and maps safe FHIR metadata without exposing private document storage keys.
 
@@ -229,6 +233,7 @@ Read the deployment guides before changing staging or production settings:
 14. Test email verification.
 15. Test password reset.
 16. Test notification worker.
+17. Test seeded staging users if demo data was enabled outside production.
 
 ## Documents
 
@@ -244,6 +249,10 @@ Read the deployment guides before changing staging or production settings:
 - [Render Platform Architecture](docs/deployment/render-platform.md)
 - [Custom Domain and Branded Email](docs/deployment/custom-domain-and-email.md)
 - [Search Engine Indexing](docs/deployment/search-engine-indexing.md)
+- [Production Launch Readiness Plan](docs/operations/production-launch-readiness-plan.md)
+- [Full Launch QA Checklist](docs/operations/full-launch-qa-checklist.md)
+- [Render Launch Checklist](docs/operations/render-launch-checklist.md)
+- [Seeded Demo Data](docs/operations/seeded-demo-data.md)
 - [Frontend Benchmark Synthesis](docs/frontend/benchmark-synthesis.md)
 - [Visual Rejection Audit](docs/frontend/visual-rejection-audit.md)
 - [Privacy Requests and Retention](docs/security/privacy-requests-and-retention.md)

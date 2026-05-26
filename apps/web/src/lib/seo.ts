@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { contactAddresses } from "@/lib/contact";
+import { publicContact } from "@/lib/contact";
 
 export const defaultSiteUrl = "https://www.afyalinks.org";
 export const defaultOgImagePath = "/images/hero/healthcare-professional-reviewing-records.jpg";
@@ -150,30 +150,44 @@ export function metadataForPath(path: string): Metadata {
 
 export function siteJsonLd() {
   const siteUrl = getSiteUrl();
+  const contactPoint = [
+    publicContact.email
+      ? {
+          "@type": "ContactPoint",
+          email: publicContact.email,
+          telephone: publicContact.phone,
+          contactType: "public contact",
+        }
+      : null,
+    publicContact.supportEmail
+      ? {
+          "@type": "ContactPoint",
+          email: publicContact.supportEmail,
+          telephone: publicContact.phone,
+          contactType: "customer support",
+        }
+      : null,
+  ].filter(Boolean);
+  const organization = {
+    "@type": "Organization",
+    "@id": `${siteUrl}/#organization`,
+    name: "Afyalink",
+    url: siteUrl,
+    logo: absoluteUrl("/brand/afyalink-logo.png"),
+    telephone: publicContact.phone,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: publicContact.location,
+      addressCountry: "KE",
+    },
+    ...(publicContact.email ? { email: publicContact.email } : {}),
+    ...(contactPoint.length > 0 ? { contactPoint } : {}),
+  };
 
   return {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "Organization",
-        "@id": `${siteUrl}/#organization`,
-        name: "Afyalink",
-        url: siteUrl,
-        logo: absoluteUrl("/brand/afyalink-logo.png"),
-        email: contactAddresses.public,
-        contactPoint: [
-          {
-            "@type": "ContactPoint",
-            email: contactAddresses.public,
-            contactType: "public contact",
-          },
-          {
-            "@type": "ContactPoint",
-            email: contactAddresses.support,
-            contactType: "customer support",
-          },
-        ],
-      },
+      organization,
       {
         "@type": "WebSite",
         "@id": `${siteUrl}/#website`,

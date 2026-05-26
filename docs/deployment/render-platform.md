@@ -84,9 +84,11 @@ SMTP_PORT=587
 SMTP_USERNAME=<Render secret>
 SMTP_PASSWORD=<Render secret>
 SMTP_ENCRYPTION=tls
-SUPPORT_EMAIL=support@afyalinks.org
-PUBLIC_CONTACT_EMAIL=info@afyalinks.org
-ADMIN_EMAIL=admin@afyalinks.org
+PUBLIC_CONTACT_PHONE=+254711776391
+PUBLIC_LOCATION=Hardy, Karen
+SUPPORT_EMAIL=
+PUBLIC_CONTACT_EMAIL=
+ADMIN_EMAIL=
 ```
 
 For the Afyalink custom domain launch, use:
@@ -115,6 +117,10 @@ Required frontend variables:
 ```text
 NEXT_PUBLIC_SITE_URL=https://your-web-domain
 NEXT_PUBLIC_AFYA_API_BASE=https://your-api-domain
+PUBLIC_CONTACT_PHONE=+254711776391
+PUBLIC_LOCATION=Hardy, Karen
+PUBLIC_CONTACT_EMAIL=
+SUPPORT_EMAIL=
 ```
 
 For the Afyalink custom domain launch, use:
@@ -134,10 +140,11 @@ The processor is safe to run as a Render Cron Job:
 Runtime: Docker
 Root directory: apps/api
 Docker command: php scripts/process-notifications.php 50
-Schedule: */15 * * * *
+Schedule: */10 * * * *
 ```
 
 The processor records delivery attempts and works from the outbox. Keep batches bounded so a retry spike does not monopolize the instance. Do not run multiple schedules with the same outbox unless duplicate-send protection has been reviewed.
+Recommended Render Cron Job name: `afyalink-notification-worker`.
 
 ## Database Strategy
 
