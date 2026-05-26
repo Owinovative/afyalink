@@ -9,9 +9,7 @@ export function PublicFooter() {
           <Link className="brand" href="/">
             <BrandLockup />
           </Link>
-          <p style={{ marginTop: 16 }}>
-            Secure healthcare verification, controlled facility access, and audited candidate recommendation workflows.
-          </p>
+          <p style={{ marginTop: 16 }}>Verified healthcare talent. Controlled facility access.</p>
         </div>
         <div className="footer-links">
           <strong>Platform</strong>
@@ -35,8 +33,7 @@ export function PublicFooter() {
         </div>
       </div>
       <div className="footer-note">
-        Afyalink protects sensitive credential data through private storage, authorization, audit trails, and controlled
-        viewing workflows.
+        Private records. Approved access. Audited viewing.
       </div>
     </footer>
   );

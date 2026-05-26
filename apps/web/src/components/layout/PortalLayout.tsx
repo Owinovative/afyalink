@@ -53,7 +53,7 @@ export function PortalLayout({
         <main className="portal-main">
           {!token ? (
             <div className="notice">
-              Sign in to load live records. Backend authorization remains the source of truth for every workflow action.
+              Sign in to load live records.
             </div>
           ) : null}
           {children}
