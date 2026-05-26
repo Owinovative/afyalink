@@ -80,14 +80,17 @@ export function FacilityPage({ section, publicationId, id }: { section: Facility
   const requests = asArray<Record<string, unknown>>(data.requests);
   const recommendationRequests = asArray<Record<string, unknown>>(data.recommendation_requests);
   const packages = asArray<Record<string, unknown>>(data.recommendation_packages);
+  const useEmbeddedHeader = ["home", "dashboard", "requisitions", "requisition-new", "requisition-detail"].includes(section);
 
   return (
     <>
-      <PageHeader
-        eyebrow="Facility portal"
-        title={facilitySectionTitles[section]}
-        body={facilitySectionBodies[section]}
-      />
+      {!useEmbeddedHeader ? (
+        <PageHeader
+          eyebrow="Facility portal"
+          title={facilitySectionTitles[section]}
+          body={facilitySectionBodies[section]}
+        />
+      ) : null}
       {resource.loading ? <div className="notice">Loading facility dashboard...</div> : null}
       {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
       {section === "home" || section === "dashboard" ? (
@@ -130,7 +133,18 @@ function FacilityDashboard({
   const activeSubscription = asRecord(access.active_subscription);
 
   return (
-    <div className="data-list">
+    <div className="facility-dashboard">
+      <section className="facility-portal-hero">
+        <div>
+          <span className="eyebrow">Facility command</span>
+          <h2>{display(facility.display_name, "Complete onboarding")}</h2>
+          <p>Access, needs, shortlists, placements.</p>
+        </div>
+        <div className="facility-hero-actions">
+          <Link className="button" href="/portal/facility/requisitions/new">New requisition</Link>
+          <Link className="button secondary translucent" href="/portal/facility/candidates">Browse candidates</Link>
+        </div>
+      </section>
       <MetricGrid
         metrics={[
           { label: "Facility review", value: facility.review_status ?? "Not started" },
@@ -139,9 +153,9 @@ function FacilityDashboard({
           { label: "Shared packages", value: packages.length },
         ]}
       />
-      <div className="grid-2">
+      <div className="grid-2 facility-dashboard-grid">
         <div className="card">
-          <h2>{display(facility.display_name, "Facility onboarding required")}</h2>
+          <h2>Organization</h2>
           <MetaGrid
             items={[
               { label: "Legal name", value: facility.legal_name },
@@ -612,26 +626,36 @@ function FacilityRequisitions({ token }: { token: string }) {
   const requisitions = asArray<Record<string, unknown>>(asRecord(resource.data).requisitions);
 
   return (
-    <section className="card">
-      <div className="action-row" style={{ justifyContent: "space-between" }}>
-        <h2>Staffing needs</h2>
-        <Link className="button secondary" href="/portal/facility/requisitions/new">
+    <section className="facility-requisition-board">
+      <div className="facility-requisition-hero">
+        <div>
+          <span className="eyebrow">Requisitions</span>
+          <h2>Staffing needs, reviewed clearly.</h2>
+          <p>Create demand. Track shortlist progress.</p>
+        </div>
+        <Link className="button" href="/portal/facility/requisitions/new">
           New requisition
         </Link>
       </div>
       {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
-      <div className="data-list">
+      {resource.loading ? <div className="notice">Loading requisitions...</div> : null}
+      <div className="facility-requisition-list">
         {requisitions.length ? requisitions.map((row) => (
-          <DataRow key={String(row.id)} title={display(row.title)} status={row.status} meta={[
-            { label: "Profession", value: row.profession_required },
-            { label: "County", value: row.county },
-            { label: "Employment", value: row.employment_type },
-            { label: "Urgency", value: row.urgency },
-          ]}>
+          <article className="facility-requisition-card" key={String(row.id)}>
+            <div>
+              <span className="badge green">{display(row.status, "Draft")}</span>
+              <h3>{display(row.title, "Untitled need")}</h3>
+              <MetaGrid items={[
+                { label: "Profession", value: row.profession_required },
+                { label: "County", value: row.county },
+                { label: "Employment", value: row.employment_type },
+                { label: "Urgency", value: row.urgency },
+              ]} />
+            </div>
             <Link className="button secondary" href={`/portal/facility/requisitions/${row.id}`}>
               Open
             </Link>
-          </DataRow>
+          </article>
         )) : <EmptyState title="No staffing needs" body="Create a requisition." />}
       </div>
     </section>
@@ -655,51 +679,79 @@ function FacilityRequisitionForm({ token }: { token: string }) {
   }
 
   return (
-    <section className="form-card">
-      <h2>Structured staffing need</h2>
-      <form className="form-grid" onSubmit={submit}>
-        <Field label="Title" name="title" required placeholder="Night shift registered nurse cover" />
-        <Field label="Profession required" name="profession_required" required placeholder="Registered Nurse" />
-        <Field label="Specialty" name="specialty_required" placeholder="ICU, theatre, maternity..." />
-        <Field label="Department" name="facility_department" placeholder="Ward, outpatient, emergency..." />
-        <label>
-          Employment type
-          <select name="employment_type" defaultValue="full_time">
-            <option value="full_time">Full time</option>
-            <option value="part_time">Part time</option>
-            <option value="locum">Locum</option>
-            <option value="contract">Contract</option>
-            <option value="internship">Internship</option>
-            <option value="attachment">Attachment</option>
-            <option value="temporary">Temporary</option>
-          </select>
-        </label>
-        <Field label="Positions" name="number_of_positions" type="number" defaultValue="1" />
-        <Field label="County" name="county" required />
-        <Field label="Facility site" name="facility_site" />
-        <Field label="Required start date" name="required_start_date" type="date" />
-        <Field label="Minimum years experience" name="minimum_experience_years" type="number" />
-        <label>
-          Urgency
-          <select name="urgency" defaultValue="normal">
-            <option value="low">Low</option>
-            <option value="normal">Normal</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
-          </select>
-        </label>
-        <Field label="Shift pattern" name="shift_pattern" />
-        <Field label="Preferred skills" name="preferred_skills" placeholder="ICU, triage, EMR" />
-        <TextArea label="Notes" name="notes" />
-        <button className="button full" type="submit" disabled={!token}>
-          Submit requisition
-        </button>
-      </form>
-      <div className="data-list" style={{ marginTop: 18 }}>
-        {message ? <Feedback message={message} /> : null}
-        {error ? <Feedback message={error} tone="error" /> : null}
+    <div className="facility-requisition-create">
+      <section className="facility-requisition-hero">
+        <div>
+          <span className="eyebrow">New requisition</span>
+          <h2>Define the need.</h2>
+          <p>Afyalink reviews fit before sharing candidates.</p>
+        </div>
+        <Link className="button secondary translucent" href="/portal/facility/requisitions">
+          Back to board
+        </Link>
+      </section>
+
+      <div className="facility-requisition-form-grid">
+        <section className="form-card facility-requisition-form">
+          <span className="eyebrow">Staffing brief</span>
+          <h2>Role details</h2>
+          <form className="form-grid" onSubmit={submit}>
+            <Field label="Title" name="title" required placeholder="Night shift registered nurse cover" />
+            <Field label="Profession required" name="profession_required" required placeholder="Registered Nurse" />
+            <Field label="Specialty" name="specialty_required" placeholder="ICU, theatre, maternity" />
+            <Field label="Department" name="facility_department" placeholder="Ward, outpatient, emergency" />
+            <label>
+              Employment type
+              <select name="employment_type" defaultValue="full_time">
+                <option value="full_time">Full time</option>
+                <option value="part_time">Part time</option>
+                <option value="locum">Locum</option>
+                <option value="contract">Contract</option>
+                <option value="internship">Internship</option>
+                <option value="attachment">Attachment</option>
+                <option value="temporary">Temporary</option>
+              </select>
+            </label>
+            <Field label="Positions" name="number_of_positions" type="number" defaultValue="1" />
+            <Field label="County" name="county" required />
+            <Field label="Facility site" name="facility_site" />
+            <Field label="Required start date" name="required_start_date" type="date" />
+            <Field label="Minimum years experience" name="minimum_experience_years" type="number" />
+            <label>
+              Urgency
+              <select name="urgency" defaultValue="normal">
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </select>
+            </label>
+            <Field label="Shift pattern" name="shift_pattern" />
+            <Field label="Preferred skills" name="preferred_skills" placeholder="ICU, triage, EMR" />
+            <TextArea label="Notes" name="notes" />
+            <button className="button full" type="submit" disabled={!token}>
+              Submit requisition
+            </button>
+          </form>
+          <div className="data-list" style={{ marginTop: 18 }}>
+            {message ? <Feedback message={message} /> : null}
+            {error ? <Feedback message={error} tone="error" /> : null}
+          </div>
+        </section>
+        <aside className="facility-form-aside" aria-label="Requisition review model">
+          <div>
+            <span className="eyebrow">Review model</span>
+            <h3>Need first. Match second.</h3>
+            <p>Shortlists stay reviewed before facility sharing.</p>
+          </div>
+          <div className="home-chip-row">
+            <span>Score</span>
+            <span>Review</span>
+            <span>Share</span>
+          </div>
+        </aside>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -710,10 +762,13 @@ function FacilityRequisitionDetail({ token, id }: { token: string; id: string })
   const placements = asArray<Record<string, unknown>>(asRecord(resource.data).placements);
 
   return (
-    <div className="data-list">
+    <div className="facility-requisition-detail">
       {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
-      <section className="card">
-        <h2>{display(requisition.title, "Requisition")}</h2>
+      <section className="facility-requisition-hero">
+        <div>
+          <span className="eyebrow">Requisition</span>
+          <h2>{display(requisition.title, "Requisition")}</h2>
+        </div>
         <MetaGrid items={[
           { label: "Status", value: requisition.status },
           { label: "Profession", value: requisition.profession_required },
@@ -722,13 +777,13 @@ function FacilityRequisitionDetail({ token, id }: { token: string; id: string })
           { label: "Urgency", value: requisition.urgency },
         ]} />
       </section>
-      <section className="card">
+      <section className="card facility-detail-panel">
         <h2>Shared shortlists</h2>
         <div className="data-list">
           {shortlists.length ? shortlists.map((shortlist) => <DataRow key={String(shortlist.id)} title={display(shortlist.title)} status={shortlist.status} meta={[{ label: "Shared", value: shortlist.shared_at }, { label: "Candidates", value: asArray(shortlist.candidates).length }]} />) : <EmptyState title="No shortlist yet" body="Reviewed candidates appear here." />}
         </div>
       </section>
-      <section className="card">
+      <section className="card facility-detail-panel">
         <h2>Placements</h2>
         <div className="data-list">
           {placements.length ? placements.map((placement) => <DataRow key={String(placement.id)} title={`Placement ${display(placement.id)}`} status={placement.status} meta={[{ label: "Employment", value: placement.employment_type }, { label: "Start", value: placement.start_date }]} />) : <EmptyState title="No placements yet" body="Placement records appear here." />}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clearToken, useSessionToken } from "@/lib/auth/session";
 import { BrandLockup } from "@/components/layout/BrandLockup";
+import { ProtectedPortalGate } from "@/components/layout/ProtectedPortalGate";
 import type { ApiRole } from "@/lib/api/client";
 
 export function PortalLayout({
@@ -20,6 +21,26 @@ export function PortalLayout({
   const pathname = usePathname();
   const token = useSessionToken(role);
   const loginHref = "/auth/login";
+
+  if (!token) {
+    return (
+      <div className="portal-frame">
+        <header className="marketing-nav">
+          <div className="portal-topbar">
+            <Link className="brand" href="/">
+              <BrandLockup kicker={title} />
+            </Link>
+            <div className="nav-actions">
+              <Link className="button" href={loginHref}>
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </header>
+        <ProtectedPortalGate role={role} title={title} />
+      </div>
+    );
+  }
 
   return (
     <div className="portal-frame">
@@ -51,11 +72,6 @@ export function PortalLayout({
           </nav>
         </aside>
         <main className="portal-main">
-          {!token ? (
-            <div className="notice">
-              Sign in to load live records.
-            </div>
-          ) : null}
           {children}
         </main>
       </div>
