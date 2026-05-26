@@ -45,7 +45,7 @@ services:
       - key: MAIL_DRIVER
         value: log
       - key: MAIL_FROM_ADDRESS
-        value: no-reply@afyalink.com
+        value: no-reply@afyalinks.org
       - key: MAIL_FROM_NAME
         value: Afyalink
       - key: SMTP_HOST
@@ -59,11 +59,11 @@ services:
       - key: SMTP_ENCRYPTION
         value: tls
       - key: SUPPORT_EMAIL
-        value: support@afyalink.com
+        value: support@afyalinks.org
       - key: PUBLIC_CONTACT_EMAIL
-        value: info@afyalink.com
+        value: info@afyalinks.org
       - key: ADMIN_EMAIL
-        value: admin@afyalink.com
+        value: admin@afyalinks.org
       - key: MPESA_ENV
         value: sandbox
       - key: MPESA_CONSUMER_KEY
@@ -93,6 +93,8 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm run start -- -p $PORT
     envVars:
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
       - key: NEXT_PUBLIC_AFYA_API_BASE
         sync: false
 
@@ -130,7 +132,7 @@ services:
       - key: MAIL_DRIVER
         value: log
       - key: MAIL_FROM_ADDRESS
-        value: no-reply@afyalink.com
+        value: no-reply@afyalinks.org
       - key: MAIL_FROM_NAME
         value: Afyalink
       - key: SMTP_HOST
@@ -144,9 +146,9 @@ services:
       - key: SMTP_ENCRYPTION
         value: tls
       - key: SUPPORT_EMAIL
-        value: support@afyalink.com
+        value: support@afyalinks.org
       - key: PUBLIC_CONTACT_EMAIL
-        value: info@afyalink.com
+        value: info@afyalinks.org
       - key: ADMIN_EMAIL
-        value: admin@afyalink.com
+        value: admin@afyalinks.org
 

@@ -77,24 +77,24 @@ Mail variables:
 
 ```text
 MAIL_DRIVER=log or smtp
-MAIL_FROM_ADDRESS=no-reply@afyalink.com
+MAIL_FROM_ADDRESS=no-reply@afyalinks.org
 MAIL_FROM_NAME=Afyalink
 SMTP_HOST=<Render secret>
 SMTP_PORT=587
 SMTP_USERNAME=<Render secret>
 SMTP_PASSWORD=<Render secret>
 SMTP_ENCRYPTION=tls
-SUPPORT_EMAIL=support@afyalink.com
-PUBLIC_CONTACT_EMAIL=info@afyalink.com
-ADMIN_EMAIL=admin@afyalink.com
+SUPPORT_EMAIL=support@afyalinks.org
+PUBLIC_CONTACT_EMAIL=info@afyalinks.org
+ADMIN_EMAIL=admin@afyalinks.org
 ```
 
 For the Afyalink custom domain launch, use:
 
 ```text
-APP_URL=https://www.afyalink.com
-API_URL=https://api.afyalink.com
-CORS_ALLOWED_ORIGINS=https://www.afyalink.com
+APP_URL=https://www.afyalinks.org
+API_URL=https://api.afyalinks.org
+CORS_ALLOWED_ORIGINS=https://www.afyalinks.org
 ```
 
 See [Custom Domain and Branded Email](custom-domain-and-email.md) for DNS and email-provider records.
@@ -110,16 +110,18 @@ Build command: npm install && npm run build
 Start command: npm run start -- -p $PORT
 ```
 
-Required frontend variable:
+Required frontend variables:
 
 ```text
+NEXT_PUBLIC_SITE_URL=https://your-web-domain
 NEXT_PUBLIC_AFYA_API_BASE=https://your-api-domain
 ```
 
 For the Afyalink custom domain launch, use:
 
 ```text
-NEXT_PUBLIC_AFYA_API_BASE=https://api.afyalink.com
+NEXT_PUBLIC_SITE_URL=https://www.afyalinks.org
+NEXT_PUBLIC_AFYA_API_BASE=https://api.afyalinks.org
 ```
 
 The frontend contains no secrets. Only public runtime configuration should use `NEXT_PUBLIC_`.

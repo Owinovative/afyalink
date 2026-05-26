@@ -75,16 +75,16 @@ AFYALINK_EMAIL_VERIFICATION_TTL_SECONDS=86400
 AFYALINK_PASSWORD_RESET_TTL_SECONDS=3600
 AFYALINK_MAX_UPLOAD_BYTES=8388608
 MAIL_DRIVER=log
-MAIL_FROM_ADDRESS=no-reply@afyalink.com
+MAIL_FROM_ADDRESS=no-reply@afyalinks.org
 MAIL_FROM_NAME=Afyalink
 SMTP_HOST=
 SMTP_PORT=587
 SMTP_USERNAME=
 SMTP_PASSWORD=
 SMTP_ENCRYPTION=tls
-SUPPORT_EMAIL=support@afyalink.com
-PUBLIC_CONTACT_EMAIL=info@afyalink.com
-ADMIN_EMAIL=admin@afyalink.com
+SUPPORT_EMAIL=support@afyalinks.org
+PUBLIC_CONTACT_EMAIL=info@afyalinks.org
+ADMIN_EMAIL=admin@afyalinks.org
 MPESA_ENV=sandbox
 MPESA_CALLBACK_URL=https://YOUR-API-STAGING.onrender.com/api/payments/mpesa/callback
 AI_RECOMMENDATION_DRIVER=local
@@ -97,6 +97,7 @@ Keep `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_PASSKEY`, `MPESA_SHOR
 Set this for `afyalink-web-staging`:
 
 ```text
+NEXT_PUBLIC_SITE_URL=https://YOUR-WEB-STAGING.onrender.com
 NEXT_PUBLIC_AFYA_API_BASE=https://YOUR-API-STAGING.onrender.com
 ```
 
@@ -207,5 +208,5 @@ After deployment:
 - `DATABASE_URL is required`: confirm the API and notification cron have the same database secret.
 - CORS failures: ensure `CORS_ALLOWED_ORIGINS` includes the exact web origin.
 - Credential upload succeeds but later files are missing: local storage was used on Render; switch to R2/S3-compatible storage.
-- Web calls localhost: set `NEXT_PUBLIC_AFYA_API_BASE` and redeploy the web service.
+- Web calls localhost or sitemap uses the wrong host: set `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_AFYA_API_BASE`, then redeploy the web service.
 - M-PESA callback not matching payments: verify callback URL, environment, account reference, and redacted provider event records.

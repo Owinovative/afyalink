@@ -43,16 +43,16 @@ The worker is idempotent enough for cron-style execution. A repeated run does no
 
 ```env
 MAIL_DRIVER=log
-MAIL_FROM_ADDRESS=no-reply@afyalink.com
+MAIL_FROM_ADDRESS=no-reply@afyalinks.org
 MAIL_FROM_NAME=Afyalink
 SMTP_HOST=
 SMTP_PORT=587
 SMTP_USERNAME=
 SMTP_PASSWORD=
 SMTP_ENCRYPTION=tls
-SUPPORT_EMAIL=support@afyalink.com
-PUBLIC_CONTACT_EMAIL=info@afyalink.com
-ADMIN_EMAIL=admin@afyalink.com
+SUPPORT_EMAIL=support@afyalinks.org
+PUBLIC_CONTACT_EMAIL=info@afyalinks.org
+ADMIN_EMAIL=admin@afyalinks.org
 ```
 
 `MAIL_DRIVER=log` is safe for staging because it does not require live provider credentials. Production should add a real provider adapter such as Postmark, SendGrid, Mailgun, or SMTP-backed delivery before turning on real email.

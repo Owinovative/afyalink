@@ -1,14 +1,22 @@
 import type { Metadata, Viewport } from "next";
+import { absoluteUrl, getSiteUrl, metadataForPath } from "@/lib/seo";
 import "./globals.css";
 
+const homeMetadata = metadataForPath("/");
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://afyalink.health"),
+  metadataBase: new URL(getSiteUrl()),
+  applicationName: "Afyalink",
   title: {
-    default: "Afyalink | Healthcare verification and placement infrastructure",
+    default: "Afyalink | Verified Healthcare Talent",
     template: "%s | Afyalink",
   },
-  description:
-    "Afyalink verifies healthcare professionals, protects credential data, and gives approved facilities controlled access to trusted candidate profiles.",
+  description: homeMetadata.description,
+  openGraph: homeMetadata.openGraph,
+  twitter: homeMetadata.twitter,
+  icons: {
+    icon: absoluteUrl("/brand/afyalink-logo.png"),
+  },
 };
 
 export const viewport: Viewport = {

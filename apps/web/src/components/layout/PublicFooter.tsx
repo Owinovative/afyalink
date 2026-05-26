@@ -26,10 +26,10 @@ export function PublicFooter() {
           <Link href="/auth/login">Sign in</Link>
         </div>
         <div className="footer-links">
-          <strong>Trust</strong>
+          <strong>Contact</strong>
+          <a href={`mailto:${contactAddresses.public}`}>{contactAddresses.public}</a>
+          <a href={`mailto:${contactAddresses.support}`}>{contactAddresses.support}</a>
           <Link href="/trust-security">Security</Link>
-          <Link href="/verification">Review</Link>
-          <Link href="/pricing-access">Access</Link>
         </div>
       </div>
       <div className="footer-note">
