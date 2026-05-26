@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { BrandLockup } from "@/components/layout/BrandLockup";
-import { marketingLinks } from "@/lib/routes";
+
+const primaryLinks = [
+  { href: "/professionals", label: "Professionals" },
+  { href: "/students", label: "Students" },
+  { href: "/facilities", label: "Facilities" },
+  { href: "/matching", label: "Matching" },
+  { href: "/trust-security", label: "Trust" },
+  { href: "/pricing-access", label: "Access" },
+];
 
 export function MarketingNav() {
   return (
@@ -10,7 +18,7 @@ export function MarketingNav() {
           <BrandLockup />
         </Link>
         <nav className="nav-links" aria-label="Public navigation">
-          {marketingLinks.slice(0, 6).map((link) => (
+          {primaryLinks.map((link) => (
             <Link href={link.href} key={link.href}>
               {link.label}
             </Link>

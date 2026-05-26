@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BrandLockup } from "@/components/layout/BrandLockup";
-import { marketingLinks } from "@/lib/routes";
 
 export function PublicFooter() {
   return (
@@ -16,15 +15,15 @@ export function PublicFooter() {
         </div>
         <div className="footer-links">
           <strong>Platform</strong>
-          {marketingLinks.slice(0, 4).map((link) => (
-            <Link href={link.href} key={link.href}>
-              {link.label}
-            </Link>
-          ))}
+          <Link href="/how-it-works">How it works</Link>
+          <Link href="/matching">Matching</Link>
+          <Link href="/verification">Verification</Link>
+          <Link href="/trust-security">Trust & security</Link>
         </div>
         <div className="footer-links">
           <strong>Portals</strong>
           <Link href="/auth/register/professional">Professional application</Link>
+          <Link href="/auth/register/student">Student track</Link>
           <Link href="/auth/register/facility">Facility onboarding</Link>
           <Link href="/auth/login">Sign in</Link>
         </div>

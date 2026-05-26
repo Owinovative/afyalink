@@ -30,6 +30,7 @@ The current implementation documents executable account lifecycle, operational n
 - [FHIR and SMART Readiness](integrations/fhir-smart-readiness.md)
 - [Admin Command Center](operations/admin-command-center.md)
 - [Benchmark Synthesis](frontend/benchmark-synthesis.md)
+- [Visual Rejection Audit](frontend/visual-rejection-audit.md)
 - [Visual Route Audit](frontend/visual-route-audit.md)
 - [Photo Asset Plan](frontend/photo-asset-plan.md)
 - [Public Landing Page](product/public-landing-page.md)
@@ -44,6 +45,7 @@ The current implementation documents executable account lifecycle, operational n
 - [Milestone 4 API Endpoints](api/milestone-4-endpoints.md)
 - [Milestone 5 API Endpoints](api/milestone-5-endpoints.md)
 - [Render Staging Deployment](deployment/render-staging.md)
+- [Render Platform Architecture](deployment/render-platform.md)
 
 ## Source Documents
 

@@ -4,25 +4,25 @@ This guide deploys Afyalink staging to Render using:
 
 - Render Docker web service for the PHP API.
 - Render Node web service for the Next.js public site and routed portals.
+- Render Cron Job for notification outbox processing.
 - Neon PostgreSQL through `DATABASE_URL`.
-- Temporary local credential storage on the API container filesystem.
+- Cloudflare R2/S3-compatible private object storage for credential files.
 
-## Important Storage Limitation
-
-`AFYALINK_CREDENTIAL_STORAGE=local` on Render is temporary staging-only storage. Files written under `/tmp/afyalink/credentials` can be lost when Render restarts, redeploys, or moves the service. Use S3/R2/MinIO-compatible private object storage before production credential intake.
+For the complete Render-first architecture, see [Render Platform Architecture](render-platform.md).
 
 ## Render Blueprint
 
-The repository includes `render.yaml` with two services:
+The repository includes `render.yaml` with three deployable services:
 
 - `afyalink-api-staging`
 - `afyalink-web-staging`
+- `afyalink-notifications-staging`
 
 Create a Render Blueprint from the repository and point Render at `render.yaml`.
 
-## Neon PostgreSQL
+## Database
 
-Create a Neon database for staging and copy the pooled or direct PostgreSQL connection string. Set it as the API service `DATABASE_URL`.
+Create a Neon PostgreSQL database for staging and set the API and notification cron `DATABASE_URL`.
 
 Use SSL in the URL, for example:
 
@@ -30,21 +30,46 @@ Use SSL in the URL, for example:
 postgresql://USER:PASSWORD@HOST.neon.tech/DBNAME?sslmode=require
 ```
 
-The API Docker start command runs `php scripts/migrate.php` before starting the web server, so the Neon database is migrated on each deploy. Migrations are idempotent through `schema_migrations`.
+The API service uses Render `preDeployCommand` to run:
+
+```bash
+php scripts/migrate.php
+```
+
+Review migration SQL before deployment. Do not run destructive schema changes without a backup.
+
+## Object Storage
+
+Use Cloudflare R2 or another S3-compatible private bucket:
+
+```text
+AFYALINK_CREDENTIAL_STORAGE=r2
+S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+S3_REGION=auto
+S3_BUCKET=afyalink-credentials
+S3_ACCESS_KEY_ID=<Render secret>
+S3_SECRET_ACCESS_KEY=<Render secret>
+```
+
+Temporary local storage (`AFYALINK_CREDENTIAL_STORAGE=local`) is acceptable only for throwaway smoke tests. It is not durable on Render.
 
 ## API Environment Variables
 
-Set these in Render for `afyalink-api-staging`:
+Set these for `afyalink-api-staging`:
 
 ```text
 APP_ENV=staging
 APP_URL=https://YOUR-WEB-STAGING.onrender.com
 API_URL=https://YOUR-API-STAGING.onrender.com
-CORS_ALLOWED_ORIGINS=https://YOUR-WEB-STAGING.onrender.com
+CORS_ALLOWED_ORIGINS=https://YOUR-WEB-STAGING.onrender.com,http://localhost:3000
 AFYALINK_DATASTORE=pgsql
 DATABASE_URL=postgresql://USER:PASSWORD@HOST.neon.tech/DBNAME?sslmode=require
-AFYALINK_CREDENTIAL_STORAGE=local
-AFYALINK_LOCAL_CREDENTIAL_ROOT=/tmp/afyalink/credentials
+AFYALINK_CREDENTIAL_STORAGE=r2
+S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+S3_REGION=auto
+S3_BUCKET=afyalink-credentials
+S3_ACCESS_KEY_ID=<Render secret>
+S3_SECRET_ACCESS_KEY=<Render secret>
 AFYALINK_SESSION_TTL_SECONDS=43200
 AFYALINK_EMAIL_VERIFICATION_TTL_SECONDS=86400
 AFYALINK_PASSWORD_RESET_TTL_SECONDS=3600
@@ -54,19 +79,20 @@ MAIL_FROM_ADDRESS=no-reply@afyalink.local
 MAIL_FROM_NAME=Afyalink
 MPESA_ENV=sandbox
 MPESA_CALLBACK_URL=https://YOUR-API-STAGING.onrender.com/api/payments/mpesa/callback
+AI_RECOMMENDATION_DRIVER=local
 ```
 
-Do not set S3 credentials while using temporary local staging storage.
+Keep `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_PASSKEY`, `MPESA_SHORTCODE`, SMTP secrets, R2 keys, and any AI provider keys in Render secrets only.
 
 ## Web Environment Variables
 
-Set this in Render for `afyalink-web-staging`:
+Set this for `afyalink-web-staging`:
 
 ```text
 NEXT_PUBLIC_AFYA_API_BASE=https://YOUR-API-STAGING.onrender.com
 ```
 
-The Next.js browser client reads this public build/runtime value so routed pages call the deployed API rather than localhost. Render should build the web service with:
+Render should build the web service with:
 
 ```bash
 npm install && npm run build
@@ -78,16 +104,21 @@ and start it with:
 npm run start -- -p $PORT
 ```
 
-## Admin Bootstrap
+## Notification Worker
 
-After the API service is deployed and migrations have run, open a Render shell for the API service and run:
+The notification cron service runs:
 
 ```bash
-cd /var/www/afyalink/apps/api
-php scripts/create-admin.php "Afyalink Admin" admin@example.com 0799999999 AdminPass123
+php scripts/process-notifications.php 50
 ```
 
-Use a strong staging password and rotate it after first login.
+Recommended schedule:
+
+```text
+*/15 * * * *
+```
+
+Use the same `DATABASE_URL`, storage, and mail variables as the API. Keep `MAIL_DRIVER=log` until a live provider adapter is configured. Do not run overlapping duplicate notification jobs unless delivery idempotency has been reviewed.
 
 ## Health Check
 
@@ -108,48 +139,46 @@ Expected response:
 }
 ```
 
+## M-PESA Callback
+
+The callback endpoint is:
+
+```text
+https://YOUR-API-STAGING.onrender.com/api/payments/mpesa/callback
+```
+
+Use sandbox credentials for staging. Do not configure production Daraja credentials until callback IP policy, provider validation, reconciliation, and operational ownership are reviewed.
+
+## Admin Bootstrap
+
+After migrations run, open a Render shell for the API service:
+
+```bash
+cd /var/www/afyalink/apps/api
+php scripts/create-admin.php "Afyalink Admin" admin@example.com 0799999999 AdminPass123
+```
+
+Use a strong staging password and rotate it after first login.
+
 ## Staging Verification
 
 After deployment:
 
-1. Open the web staging URL and confirm `/`, `/professionals`, `/facilities`, `/trust-security`, and `/auth/login` render.
-2. Register a professional.
-3. Inspect `notification_outbox` in Neon to retrieve the verification URL while no mail worker exists.
-4. Complete profile, credential upload, consent, payment reference, and application submission.
-5. Sign in as admin and review the application.
-6. Complete verification and interview qualification for one candidate.
-7. Publish the candidate from the admin facility operations console.
-8. Register a facility, submit it for review, approve it as admin, and activate facility access.
-9. Open `/portal/admin/notifications` to inspect queued notifications and process local log delivery if needed.
-10. Open `/portal/admin/reports` and `/portal/admin/privacy` to verify Milestone 4 operational routes.
-11. Open `/matching`, `/portal/facility/requisitions`, `/portal/admin/requisitions`, and `/portal/admin/matching` to verify Milestone 5 route availability.
+1. Open the web staging URL and confirm `/`, `/professionals`, `/students`, `/facilities`, `/matching`, `/trust-security`, and `/auth/login` render.
+2. Register a professional and verify email through the queued notification link.
+3. Complete profile, credential upload, consent, payment reference, and application submission.
+4. Sign in as admin and review the application.
+5. Complete verification and interview qualification for one candidate.
+6. Publish the candidate from the admin facility operations console.
+7. Register a facility, submit it for review, approve it as admin, and activate facility access.
+8. Confirm the facility can browse/open the published candidate and that `candidate_profile_views` and `audit_logs` receive view records.
+9. Open `/portal/admin/notifications`, `/portal/admin/reports`, `/portal/admin/privacy`, `/portal/admin/matching`, and `/portal/admin/placements`.
+10. Confirm the notification cron job records delivery attempts without duplicates.
 
-## Notification Worker
+## Troubleshooting
 
-For staging without a long-running worker, run the notification processor manually from a Render shell:
-
-```bash
-cd /var/www/afyalink/apps/api
-php scripts/process-notifications.php 25
-```
-
-For production, run the command on a scheduler or background worker. Keep `MAIL_DRIVER=log` until a live provider adapter is configured.
-
-## AI Recommendation Notes
-
-Milestone 5 uses `AI_RECOMMENDATION_DRIVER=local` by default. Do not add `AI_API_KEY` in staging unless a provider adapter, prompt redaction review, and usage monitoring process are in place.
-
-## M-PESA Notes
-
-The callback endpoint is deployed at `/api/payments/mpesa/callback`. Staging should use sandbox credentials only. Do not configure live credentials until provider validation, callback IP policy, and operational reconciliation have been reviewed.
-9. Confirm the facility can browse/open the published candidate at `/portal/facility/candidates/:publicationId` and that `candidate_profile_views` and `audit_logs` receive view records.
-
-## Production Changes Required Later
-
-Before production:
-
-- Replace temporary local credential storage with private S3/R2 storage.
-- Add a real mail delivery worker for `notification_outbox`.
-- Add production M-PESA callbacks and reconciliation for facility access subscriptions.
-- Use a dedicated migration/predeploy step instead of running migrations in the API start command if zero-downtime deploys are required.
-- Add a Render persistent disk only if intentionally accepting single-instance storage constraints. Object storage is preferred for credentials.
+- `DATABASE_URL is required`: confirm the API and notification cron have the same database secret.
+- CORS failures: ensure `CORS_ALLOWED_ORIGINS` includes the exact web origin.
+- Credential upload succeeds but later files are missing: local storage was used on Render; switch to R2/S3-compatible storage.
+- Web calls localhost: set `NEXT_PUBLIC_AFYA_API_BASE` and redeploy the web service.
+- M-PESA callback not matching payments: verify callback URL, environment, account reference, and redacted provider event records.

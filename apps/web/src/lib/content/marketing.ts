@@ -13,7 +13,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   "how-it-works": {
     slug: "how-it-works",
     eyebrow: "Operating model",
-    title: "From intake to trusted placement, in controlled steps.",
+    title: "A controlled path from credential intake to placement.",
     description:
       "Afyalink guides professionals, reviewers, and facilities through one secure verification and placement workflow.",
     primaryCta: { label: "Start professional path", href: "/auth/register/professional" },
@@ -65,7 +65,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   professionals: {
     slug: "professionals",
     eyebrow: "Professional portal",
-    title: "A clearer path for licensed healthcare professionals.",
+    title: "Get verified without losing control of your records.",
     description:
       "Create your profile, upload credentials privately, submit when ready, and follow verification through to interview and publication status.",
     primaryCta: { label: "Start application", href: "/auth/register/professional" },
@@ -117,7 +117,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   facilities: {
     slug: "facilities",
     eyebrow: "Facility portal",
-    title: "Verified candidate access for approved facilities.",
+    title: "Fill healthcare roles through approved, accountable access.",
     description:
       "Onboard your organization, activate access, define staffing requisitions, review shared shortlists, and request curated recommendations.",
     primaryCta: { label: "Join as a facility", href: "/auth/register/facility" },
@@ -143,7 +143,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   "trust-security": {
     slug: "trust-security",
     eyebrow: "Security posture",
-    title: "Private credentials. Permissioned views. Full auditability.",
+    title: "Private credentials, permissioned views, full auditability.",
     description:
       "Afyalink keeps sensitive records behind private storage, backend authorization, watermarked views, explainable matching, and audit logs.",
     primaryCta: { label: "Verification model", href: "/verification" },
@@ -169,7 +169,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   verification: {
     slug: "verification",
     eyebrow: "Verification engine",
-    title: "Credential review, verification, interview, and publication control.",
+    title: "Verification that protects candidates and facilities.",
     description:
       "Afyalink keeps each assessment step explicit before any candidate can be published or matched.",
     primaryCta: { label: "Apply now", href: "/auth/register/professional" },
@@ -195,7 +195,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   "pricing-access": {
     slug: "pricing-access",
     eyebrow: "Facility access",
-    title: "Facility access without fake public pricing.",
+    title: "Commercial access built for approved facilities.",
     description:
       "Afyalink supports approved facility access, payment references, M-PESA-ready callbacks, active or suspended status, and admin confirmation.",
     primaryCta: { label: "Join as a facility", href: "/auth/register/facility" },
@@ -221,7 +221,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   about: {
     slug: "about",
     eyebrow: "Company",
-    title: "Healthcare hiring needs trust infrastructure.",
+    title: "Afyalink exists to make healthcare staffing safer.",
     description:
       "Afyalink helps professionals, facilities, and reviewers manage credential risk, privacy, and placement readiness.",
     primaryCta: { label: "Explore platform", href: "/how-it-works" },
@@ -247,7 +247,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   contact: {
     slug: "contact",
     eyebrow: "Contact",
-    title: "Start the right Afyalink conversation.",
+    title: "Talk to Afyalink about access, verification, or placement.",
     description:
       "Use secure portals for records. Use contact for facility access, commercial, operations, or partnership questions.",
     primaryCta: { label: "Join as a facility", href: "/auth/register/facility" },
@@ -273,7 +273,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   faq: {
     slug: "faq",
     eyebrow: "FAQ",
-    title: "Clear answers for each Afyalink role.",
+    title: "Answers by role, without the fine print maze.",
     description:
       "Public pages explain the model. Portals handle records, permissions, and live workflow state.",
     primaryCta: { label: "Open professional portal", href: "/portal/professional" },

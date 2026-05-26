@@ -45,6 +45,23 @@ Stripe is strongest in complex product explanation: dense but clean section rhyt
 
 Afyalink should feel like a high-trust healthcare infrastructure company: human, warm, serious, photo-led, and operationally precise. Photography should carry the emotional credibility, while the layout and copy communicate backend-governed verification, private credentials, facility gating, student pre-licensure safety, and auditability.
 
+## Milestone 6 Reset Direction
+
+The rejected frontend direction was too dependent on software cards and explanatory copy. Milestone 6 resets the presentation to:
+
+**Premium healthcare trust platform with real human photography, strong editorial layout, calm authority, and operational clarity.**
+
+The public site should open with human healthcare context, then progressively explain the platform. The homepage should not look like a dashboard preview. Public pages should avoid copied grids and instead use role-specific photo-led layouts. Portals should keep operational density, but with cleaner grouping and less visual noise.
+
+Applied principles:
+
+- Apple: first-screen confidence, fewer competing messages, precise CTA rhythm.
+- Airbnb: human photo credibility and broad desktop compositions.
+- Mayo Clinic: serious healthcare tone, calm hierarchy, credible navigation.
+- Maven Clinic: premium health-tech warmth without gimmicks.
+- Oscar Health: approachable visual language and human-facing support moments.
+- Stripe: structured explanation for a complex multi-sided platform.
+
 ## Invinceible Core HMS V2 Design Lessons
 
 Invinceible Core HMS V2 is now the primary internal visual benchmark for Afyalink. Its landing page works because it is compact, healthcare-specific, and disciplined: a full-screen clinical hero, strong dark overlay, contained header, short copy, grouped metrics, and photo tiles that support the message without turning every section into a large billboard.

@@ -14,12 +14,11 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 COPY . ./
 RUN mkdir -p storage/runtime storage/private/credentials
 
-ENV APP_ENV=staging \
+ENV APP_ENV=production \
     AFYALINK_DATASTORE=pgsql \
     AFYALINK_CREDENTIAL_STORAGE=local \
     AFYALINK_LOCAL_CREDENTIAL_ROOT=/tmp/afyalink/credentials
 
 CMD mkdir -p "${AFYALINK_LOCAL_CREDENTIAL_ROOT:-/tmp/afyalink/credentials}" \
-    && php scripts/migrate.php \
     && php -S 0.0.0.0:${PORT:-10000} -t public public/index.php
 

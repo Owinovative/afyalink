@@ -6,6 +6,7 @@ services:
     plan: starter
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
+    preDeployCommand: php scripts/migrate.php
     envVars:
       - key: APP_ENV
         value: staging
@@ -20,9 +21,19 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: AFYALINK_CREDENTIAL_STORAGE
-        value: local
+        value: r2
       - key: AFYALINK_LOCAL_CREDENTIAL_ROOT
         value: /tmp/afyalink/credentials
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
       - key: AFYALINK_SESSION_TTL_SECONDS
         value: "43200"
       - key: AFYALINK_EMAIL_VERIFICATION_TTL_SECONDS
@@ -39,7 +50,23 @@ services:
         value: Afyalink
       - key: MPESA_ENV
         value: sandbox
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      - key: MPESA_SHORTCODE
+        sync: false
       - key: MPESA_CALLBACK_URL
+        sync: false
+      - key: AI_RECOMMENDATION_DRIVER
+        value: local
+      - key: AI_PROVIDER
+        sync: false
+      - key: AI_MODEL
+        sync: false
+      - key: AI_API_KEY
         sync: false
 
   - type: web
@@ -52,4 +79,42 @@ services:
     envVars:
       - key: NEXT_PUBLIC_AFYA_API_BASE
         sync: false
+
+  - type: cron
+    name: afyalink-notifications-staging
+    runtime: docker
+    rootDir: apps/api
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    schedule: "*/15 * * * *"
+    dockerCommand: php scripts/process-notifications.php 50
+    envVars:
+      - key: APP_ENV
+        value: staging
+      - key: APP_URL
+        sync: false
+      - key: API_URL
+        sync: false
+      - key: AFYALINK_DATASTORE
+        value: pgsql
+      - key: DATABASE_URL
+        sync: false
+      - key: AFYALINK_CREDENTIAL_STORAGE
+        value: r2
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: MAIL_DRIVER
+        value: log
+      - key: MAIL_FROM_ADDRESS
+        value: no-reply@afyalink.local
+      - key: MAIL_FROM_NAME
+        value: Afyalink
 

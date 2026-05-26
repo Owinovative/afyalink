@@ -194,17 +194,19 @@ The current tests verify:
 - privacy requests can be submitted, reviewed, updated, and audited.
 - Milestone 5 matching blocks student-awaiting-license applicants from normal matching, scores eligible published professionals transparently, records AI draft usage, creates shortlists/placements, hashes facility invitation tokens, and maps safe FHIR metadata without exposing private document storage keys.
 
-## Render Staging
+## Render Deployment
 
-This repository now includes `render.yaml` and an API `Dockerfile` for Render staging:
+This repository includes a Render-first deployment shape:
 
-- API: Render Docker web service running PHP 8.3, PostgreSQL migrations, and the API public router.
-- Database: Neon PostgreSQL through `DATABASE_URL`.
+- API: Render Docker web service running PHP 8.3 and the API public router.
 - Web: Render Node web service running the Next.js frontend from `apps/web`.
-- Credential files: temporary local staging storage at `/tmp/afyalink/credentials`.
+- Worker: Render Cron Job for `notification_outbox` processing.
+- Database: Neon PostgreSQL today, with Render PostgreSQL as a documented future option.
+- Credential files: Cloudflare R2 or S3-compatible private object storage. Render local disk is staging-only and not durable.
 
-Read the deployment guide before using staging credential uploads:
+Read the deployment guides before changing staging or production settings:
 
+- [Render Platform Architecture](docs/deployment/render-platform.md)
 - [Render Staging Deployment](docs/deployment/render-staging.md)
 
 ## Documents
@@ -218,6 +220,9 @@ Read the deployment guide before using staging credential uploads:
 - [Candidate Publication and Access Control](docs/architecture/candidate-publication-access-control.md)
 - [Security Foundation](docs/security/security-foundation.md)
 - [Secure Candidate Viewing](docs/security/secure-candidate-viewing.md)
+- [Render Platform Architecture](docs/deployment/render-platform.md)
+- [Frontend Benchmark Synthesis](docs/frontend/benchmark-synthesis.md)
+- [Visual Rejection Audit](docs/frontend/visual-rejection-audit.md)
 - [Privacy Requests and Retention](docs/security/privacy-requests-and-retention.md)
 - [ASVS Readiness Checklist](docs/security/asvs-readiness-checklist.md)
 - [AI-Assisted Recommendations Governance](docs/ai/ai-assisted-recommendations-governance.md)
