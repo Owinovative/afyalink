@@ -11,9 +11,9 @@ The Afyalink public page positions the platform as healthcare verification infra
 
 ## Page Structure
 
-- Hero: photo-led healthcare trust platform positioning with short headline, two CTAs, and compact proof signals.
+- Hero: large photo-led healthcare trust platform positioning with short headline and two clear CTAs.
 - Three-audience story: licensed professionals, students awaiting license, and approved facilities.
-- Trust workflow: submit credentials, verify, interview, publish, match, and place.
+- Trust workflow: apply, verify, interview, publish, match, and place.
 - Facility demand: requisitions, matching, reviewed shortlists, and placement lifecycle.
 - Security section: private storage, RBAC, consent, watermarking, audit.
 - Human placement story: Afyalink as the link between verified professionals and accountable facility hiring.
@@ -30,6 +30,6 @@ The Afyalink public page positions the platform as healthcare verification infra
 - Keep source photos under 250 KB where possible and avoid loading the oversized full logo PNG in runtime navigation.
 - Public pages should feel individually art-directed rather than copies of one card grid.
 
-## Milestone 6 Photo Direction
+## Clean Rebuild Photo Direction
 
-The current public site follows the benchmark synthesis in `docs/frontend/benchmark-synthesis.md`: premium healthcare trust platform with real human photography, strong editorial layout, calm authority, and operational clarity. Apple, Airbnb, Maven, Oscar, Mayo, and Stripe remain supporting references for image discipline, healthcare warmth, authority, and hierarchy.
+The current public site follows the benchmark synthesis in `docs/frontend/benchmark-synthesis.md` and the clean rebuild direction in `docs/frontend/frontend-rebuild-design-direction.md`: real healthcare photography, strong editorial layout, calm authority, and operational clarity. Apple, Airbnb, Maven, Oscar, Mayo, and Stripe remain supporting references for image discipline, healthcare warmth, authority, and hierarchy.

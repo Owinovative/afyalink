@@ -1,146 +1,111 @@
-import Link from "next/link";
 import {
-  AudienceCard,
-  FeatureSplit,
-  LargeCTA,
-  PhotoMosaic,
-  ProcessTimeline,
+  AudienceTile,
+  CTASection,
+  EditorialSplit,
+  PhotoBand,
+  PhotoHero,
+  ProcessSteps,
   SectionFrame,
-  SectionIntro,
-  TrustBand,
+  PageIntro,
+  TrustPanel,
   VisualCard,
   getVisualForSlug,
 } from "@/components/marketing/VisualSystem";
 
-const heroVisual = getVisualForSlug("home");
-const facilityVisual = getVisualForSlug("facilities");
-const studentVisual = getVisualForSlug("students");
+const workflowSteps = [
+  { title: "Apply", body: "Professionals and students enter the correct path from the start." },
+  { title: "Verify", body: "Credential and regulatory checks stay private, structured, and auditable." },
+  { title: "Interview", body: "Assessment outcomes are recorded before publication or placement." },
+  { title: "Publish", body: "Only eligible, consented candidates become visible to approved facilities." },
+  { title: "Match", body: "Facility needs are matched with explainable eligibility and human review." },
+  { title: "Place", body: "Shortlists, communication, and placement outcomes stay traceable." },
+];
 
 export default function HomePage() {
   return (
     <>
-      <section className="hero full-hero editorial-hero">
-        <div className="hero-container hero-shell">
-          <div className="hero-copy">
-            <div className="eyebrow">Healthcare trust infrastructure</div>
-            <h1>Trusted healthcare hiring starts before the shortlist.</h1>
-            <p className="lead">
-              Afyalink verifies professional readiness, protects private credentials, and gives approved facilities a
-              controlled path from need to placement.
-            </p>
-            <div className="hero-actions">
-              <Link className="button" href="/auth/register/professional">
-                Apply as a professional
-              </Link>
-              <Link className="button secondary" href="/auth/register/facility">
-                Join as a facility
-              </Link>
-            </div>
-            <TrustBand
-              items={[
-                { title: "Private", body: "credential intake" },
-                { title: "Audited", body: "verification decisions" },
-                { title: "Gated", body: "facility access" },
-              ]}
-            />
-          </div>
-          <PhotoMosaic
-            primary={heroVisual}
-            secondary={facilityVisual}
-            tertiary={studentVisual}
-            priority
-          />
-        </div>
-      </section>
+      <PhotoHero
+        eyebrow="Healthcare trust platform"
+        title="Verified healthcare talent, placed with confidence."
+        body="Afyalink connects licensed professionals, students awaiting registration, and approved facilities through secure verification, matching, and placement workflows."
+        primary={getVisualForSlug("home")}
+        secondary={getVisualForSlug("facilities")}
+        actions={[
+          { label: "Apply as a professional", href: "/auth/register/professional" },
+          { label: "Join as a facility", href: "/auth/register/facility", kind: "secondary" },
+        ]}
+      />
 
-      <SectionFrame className="audience-section">
+      <SectionFrame tone="white" className="audience-section">
         <div className="wide-container">
-          <SectionIntro
-            eyebrow="Three entry points"
-            title="A calm, controlled platform for every Afyalink role."
-            body="Public pages guide people to the right portal. The backend decides which actions are valid."
+          <PageIntro
+            eyebrow="Choose the right path"
+            title="One platform. Three carefully separated journeys."
+            body="Afyalink is not a public job board. It is controlled infrastructure for readiness, verification, access, and placement."
             align="center"
           />
           <div className="audience-grid">
-            <AudienceCard
+            <AudienceTile
               eyebrow="Licensed professionals"
-              title="Build a verified profile."
-              body="Upload credentials, consent to verification, complete assessment, and set placement preferences."
+              title="Build a verified professional record."
+              body="Upload credentials privately, complete review, and set availability for future placement."
               visual={getVisualForSlug("professionals")}
               href="/professionals"
-              cta="View professional path"
+              cta="Professional journey"
             />
-            <AudienceCard
+            <AudienceTile
               eyebrow="Students and graduates"
-              title="Start early without being misrepresented."
-              body="Prepare a pre-licensure profile now; unlock the licensed workflow only after license evidence is reviewed."
+              title="Start early while waiting for license."
+              body="Create a pre-licensure profile without being represented as a licensed candidate."
               visual={getVisualForSlug("students")}
               href="/students"
-              cta="View student path"
+              cta="Student pathway"
             />
-            <AudienceCard
-              eyebrow="Facilities"
-              title="Hire through approved access."
-              body="Submit requisitions, review matched shortlists, and track placements through Afyalink operations."
+            <AudienceTile
+              eyebrow="Healthcare facilities"
+              title="Access candidates through approved controls."
+              body="Submit staffing needs, receive reviewed shortlists, and track placement outcomes."
               visual={getVisualForSlug("facilities")}
               href="/facilities"
-              cta="View facility access"
+              cta="Facility access"
             />
           </div>
         </div>
       </SectionFrame>
 
-      <SectionFrame tone="soft">
-        <div className="wide-container feature-split">
-          <div className="feature-copy">
-            <div className="eyebrow">Trust workflow</div>
-            <h2>From credential intake to placement, every step is explicit.</h2>
-            <p>
-              Afyalink separates sensitive review work from facility visibility. Candidates become market-visible only
-              after qualification, consent, publication, and access rules align.
-            </p>
+      <SectionFrame tone="mist">
+        <div className="wide-container">
+          <div className="workflow-panel">
+            <PageIntro
+              eyebrow="Trust workflow"
+              title="The platform stays useful because the rules stay explicit."
+              body="Every movement from applicant intake to facility placement is governed by backend state, permissions, and audit records."
+            />
+            <ProcessSteps steps={workflowSteps} />
           </div>
-          <ProcessTimeline
-            steps={[
-              { title: "Submit credentials", body: "Private uploads, profile data, consent, and payment reference." },
-              { title: "Verify and interview", body: "Credential review, regulatory cases, interview scoring, and qualification." },
-              { title: "Publish safely", body: "Admin-controlled catalogue status and watermarked candidate profiles." },
-              { title: "Match and place", body: "Facility requisitions, explainable matching, shortlists, and placement tracking." },
-            ]}
-          />
         </div>
       </SectionFrame>
 
-      <SectionFrame>
+      <SectionFrame tone="white">
         <div className="wide-container">
-          <FeatureSplit
-            eyebrow="Facility demand"
-            title="Requisitions, matching, shortlists, and placements now sit in one operating model."
-            body="Facilities can move from a staffing need to reviewed candidate packages without turning Afyalink into an open directory."
-            points={[
-              "Structured facility requisitions",
-              "Deterministic matching with human review",
-              "Shortlists with rationale",
-              "Placement lifecycle visibility",
-            ]}
+          <EditorialSplit
+            eyebrow="Facility staffing"
+            title="Demand starts with real requisitions, not uncontrolled browsing."
+            body="Facilities describe the role, location, urgency, and hiring context. Afyalink then supports matching, reviewed shortlists, and placement follow-through."
+            points={["Structured staffing needs", "Eligibility-aware matching", "Human-reviewed shortlists", "Placement lifecycle tracking"]}
             visual={getVisualForSlug("matching")}
             cta={{ label: "Explore matching", href: "/matching" }}
           />
         </div>
       </SectionFrame>
 
-      <SectionFrame tone="deep">
+      <SectionFrame tone="ink">
         <div className="wide-container">
-          <FeatureSplit
-            eyebrow="Security posture"
-            title="Private records stay private even when opportunity moves quickly."
-            body="Afyalink uses private object storage, role permissions, watermarked views, consent, privacy requests, and audit trails."
-            points={[
-              "No public raw credential URLs",
-              "Viewer-bound candidate access",
-              "Redacted provider callback data",
-              "ASVS-readiness foundations",
-            ]}
+          <EditorialSplit
+            eyebrow="Secure candidate access"
+            title="Facilities see only what they are allowed to see."
+            body="Private documents stay private. Candidate views are permissioned, watermarked, and audited so access is accountable even after a profile is shared."
+            points={["Private R2/S3-compatible document storage", "Approved facility access only", "Watermarked profile viewing", "Redacted audit and payment metadata"]}
             visual={getVisualForSlug("trust-security")}
             reverse
             cta={{ label: "Trust and security", href: "/trust-security" }}
@@ -148,32 +113,43 @@ export default function HomePage() {
         </div>
       </SectionFrame>
 
-      <SectionFrame tone="warm">
-        <div className="wide-container human-story">
-          <div>
-            <div className="eyebrow">Human placement story</div>
-            <h2>Healthcare staffing is personal. The system still has to be rigorous.</h2>
-            <p>
-              Afyalink gives professionals a fair preparation path, gives facilities accountable access, and gives
-              operations teams the controls to protect trust at scale.
-            </p>
-          </div>
-          <div className="grid-3">
-            <VisualCard title="Professionals" body="Clear readiness, privacy, and placement preferences." />
-            <VisualCard title="Facilities" body="Approved access to published, qualified candidates." />
-            <VisualCard title="Afyalink teams" body="Review, audit, matching, communication, and placement controls." />
+      <SectionFrame tone="cream">
+        <div className="wide-container">
+          <PhotoBand
+            visual={getVisualForSlug("about")}
+            eyebrow="Human placement story"
+            title="Afyalink is the operating layer between professional readiness and facility need."
+            body="The product is intentionally calm: professionals control records, students prepare safely, facilities request talent responsibly, and Afyalink operators keep the final decisions accountable."
+          />
+        </div>
+      </SectionFrame>
+
+      <SectionFrame tone="white">
+        <div className="wide-container">
+          <div className="grid-3 capability-row">
+            <VisualCard title="Verification first" body="Credential review, regulatory cases, interview scoring, and publication remain separate workflow states." />
+            <VisualCard title="Access second" body="Facility marketplace browsing requires approved organization status and active entitlement." />
+            <VisualCard title="Placement with context" body="Matching and shortlists are guided by requisitions, eligibility, and human review." />
           </div>
         </div>
       </SectionFrame>
 
-      <SectionFrame>
+      <SectionFrame tone="ink">
         <div className="wide-container">
-          <LargeCTA
-            eyebrow="Start with the right path"
-            title="Move from interest to a secure Afyalink workspace."
-            body="Choose the route that matches your role. The portal will show exactly what is ready, blocked, or awaiting review."
+          <TrustPanel
+            items={[
+              { title: "Private credentials", body: "No public raw document links." },
+              { title: "Waiting-license safety", body: "Students are never published as licensed." },
+              { title: "Audited viewing", body: "Candidate access leaves a trail." },
+              { title: "Human review", body: "Matching does not auto-reject people." },
+            ]}
+          />
+          <CTASection
+            eyebrow="Start with the right Afyalink path"
+            title="Create the account that matches your role."
+            body="Afyalink keeps professional, student, facility, and admin workflows separate so sensitive decisions stay controlled."
             primary={{ label: "Apply as a professional", href: "/auth/register/professional" }}
-            secondary={{ label: "Join as a facility", href: "/auth/register/facility" }}
+            secondary={{ label: "Register as a student", href: "/auth/register/student" }}
           />
         </div>
       </SectionFrame>

@@ -30,6 +30,7 @@ The current implementation documents executable account lifecycle, operational n
 - [FHIR and SMART Readiness](integrations/fhir-smart-readiness.md)
 - [Admin Command Center](operations/admin-command-center.md)
 - [Benchmark Synthesis](frontend/benchmark-synthesis.md)
+- [Frontend Rebuild Design Direction](frontend/frontend-rebuild-design-direction.md)
 - [Visual Rejection Audit](frontend/visual-rejection-audit.md)
 - [Visual Route Audit](frontend/visual-route-audit.md)
 - [Photo Asset Plan](frontend/photo-asset-plan.md)

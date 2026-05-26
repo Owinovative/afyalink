@@ -1,24 +1,26 @@
 # Afyalink Frontend Design System
 
-The Next.js frontend uses a Milestone 6 photo-led healthcare trust design system. The system is classic and restrained: deep navy/teal, natural green, warm gold, ivory/stone surfaces, subtle borders, compact metrics, strong editorial splits, and disciplined spacing.
+The Next.js frontend now uses a clean-rebuild healthcare trust design system. The system is classic and restrained: deep clinical green, teal, warm gold, ivory paper, white surfaces, subtle borders, human photography, and disciplined editorial spacing.
 
 ## Layout Principles
 
 - Public pages use wide desktop compositions through `--wide-max` and `--hero-max`, but avoid loose dead space.
-- The homepage now uses a full first-view photo mosaic, short executive copy, compact proof signals, and an immediate three-audience story.
-- Non-home public pages use moderate photo panels instead of oversized billboard images.
-- Public content should avoid repeated generic cards. Prefer photo mosaics, compact trust bands, audience cards, feature splits, process bands, and strong CTA bands.
-- Portal surfaces stay dense enough for repeated operations, with count-aware metric grids, shorter page headers, and a darker sidebar shell.
+- The homepage now uses a full first-view photo hero, short executive copy, and immediate role entry points.
+- Non-home public pages use route-specific photo heroes and editorial splits.
+- Public content should avoid repeated generic cards. Prefer photo heroes, audience tiles, process rails, trust panels, photo bands, and focused CTA sections.
+- Portal surfaces stay dense enough for repeated operations, but use calmer panels, clearer tables, softer metric cards, and tighter form rhythm.
 
 ## Core Primitives
 
 - `SectionFrame`: full-width section rhythm with plain, soft, warm, or deep tone.
 - `SectionIntro`: focused eyebrow/title/body grouping.
+- `PhotoHero`: full-width public route hero with large real photography and focused CTAs.
 - `ImagePanel`: local photo or SVG visual frame with stable dimensions and responsive `next/image` rendering.
-- `PhotoMosaic`: premium real-photo composition for heroes and route-specific opening sections.
-- `AudienceCard`: image-led role card for professionals, students, and facilities.
-- `TrustBand`: compact operational proof strip for security, matching, access, and workflow signals.
-- `FeatureSplit`: editorial copy plus visual panel.
+- `AudienceTile`: image-led role entry for professionals, students, and facilities.
+- `EditorialSplit`: mature text/photo composition for workflow explanations.
+- `ProcessSteps`: compact operational sequence.
+- `TrustPanel`: high-signal access/security/workflow proof panel.
+- `PhotoBand`: broad human story band.
 - `ProofStrip`: compact trust/value proof band.
 - `CompactMetricStrip`: tighter proof band for HMS-style section metrics.
 - `ProcessTimeline`: numbered operational steps.
