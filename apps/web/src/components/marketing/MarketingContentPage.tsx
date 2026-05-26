@@ -10,6 +10,7 @@ import {
   VisualCard,
   getVisualForSlug,
 } from "@/components/marketing/VisualSystem";
+import { BreadcrumbStructuredData } from "@/components/seo/StructuredData";
 import { contactAddresses } from "@/lib/contact";
 import type { MarketingPageContent } from "@/lib/content/marketing";
 
@@ -125,9 +126,11 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
   const companion = getVisualForSlug(companionBySlug[page.slug] ?? "home");
   const firstSection = page.sections[0];
   const secondSection = page.sections[1];
+  const path = page.slug === "home" ? "/" : `/${page.slug}`;
 
   return (
     <>
+      <BreadcrumbStructuredData path={path} name={page.eyebrow} />
       <PhotoHero
         eyebrow={page.eyebrow}
         title={page.title}

@@ -209,6 +209,7 @@ Read the deployment guides before changing staging or production settings:
 - [Render Platform Architecture](docs/deployment/render-platform.md)
 - [Render Staging Deployment](docs/deployment/render-staging.md)
 - [Custom Domain and Branded Email](docs/deployment/custom-domain-and-email.md)
+- [Search Engine Indexing](docs/deployment/search-engine-indexing.md)
 
 ### Custom Domain Launch Checklist
 
@@ -242,6 +243,7 @@ Read the deployment guides before changing staging or production settings:
 - [Secure Candidate Viewing](docs/security/secure-candidate-viewing.md)
 - [Render Platform Architecture](docs/deployment/render-platform.md)
 - [Custom Domain and Branded Email](docs/deployment/custom-domain-and-email.md)
+- [Search Engine Indexing](docs/deployment/search-engine-indexing.md)
 - [Frontend Benchmark Synthesis](docs/frontend/benchmark-synthesis.md)
 - [Visual Rejection Audit](docs/frontend/visual-rejection-audit.md)
 - [Privacy Requests and Retention](docs/security/privacy-requests-and-retention.md)

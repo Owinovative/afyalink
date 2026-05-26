@@ -30,6 +30,7 @@ Create a local `.env` from `.env.example`, then set:
 APP_URL=http://localhost:3000
 API_URL=http://localhost:8000
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 NEXT_PUBLIC_AFYA_API_BASE=http://localhost:8000
 AFYALINK_DATASTORE=pgsql
 DATABASE_URL=postgresql://afyalink:afyalink_dev_password@localhost:5432/afyalink
@@ -68,11 +69,11 @@ Afyalink queues notification intents in `notification_outbox` and records delive
 
 ```text
 MAIL_DRIVER=log
-MAIL_FROM_ADDRESS=no-reply@afyalink.com
+MAIL_FROM_ADDRESS=no-reply@afyalinks.org
 MAIL_FROM_NAME=Afyalink
-SUPPORT_EMAIL=support@afyalink.com
-PUBLIC_CONTACT_EMAIL=info@afyalink.com
-ADMIN_EMAIL=admin@afyalink.com
+SUPPORT_EMAIL=support@afyalinks.org
+PUBLIC_CONTACT_EMAIL=info@afyalinks.org
+ADMIN_EMAIL=admin@afyalinks.org
 ```
 
 Milestone 5 recommendation assistance defaults to the local deterministic adapter:
@@ -147,6 +148,7 @@ http://localhost:8000
 To point the browser client elsewhere, set:
 
 ```text
+NEXT_PUBLIC_SITE_URL=https://your-web-staging.onrender.com
 NEXT_PUBLIC_AFYA_API_BASE=https://your-api-staging.onrender.com
 ```
 
@@ -154,7 +156,7 @@ The local route map includes public marketing pages, routed auth pages, and prof
 
 ## Render Staging
 
-Use `render.yaml` from the repository root to create the staging API, web, and notification cron services on Render. The web service is a Node-backed Next.js service and requires `NEXT_PUBLIC_AFYA_API_BASE`. The staging API uses Neon PostgreSQL via `DATABASE_URL` and should use private R2/S3-compatible credential storage:
+Use `render.yaml` from the repository root to create the staging API, web, and notification cron services on Render. The web service is a Node-backed Next.js service and requires `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_AFYA_API_BASE`. The staging API uses Neon PostgreSQL via `DATABASE_URL` and should use private R2/S3-compatible credential storage:
 
 ```text
 AFYALINK_DATASTORE=pgsql
@@ -166,6 +168,7 @@ S3_BUCKET=afyalink-credentials
 S3_ACCESS_KEY_ID=<Render secret>
 S3_SECRET_ACCESS_KEY=<Render secret>
 CORS_ALLOWED_ORIGINS=https://your-web-staging.onrender.com
+NEXT_PUBLIC_SITE_URL=https://your-web-staging.onrender.com
 NEXT_PUBLIC_AFYA_API_BASE=https://your-api-staging.onrender.com
 ```
 

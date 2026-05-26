@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { MarketingContentPage } from "@/components/marketing/MarketingContentPage";
 import { marketingPages } from "@/lib/content/marketing";
+import { metadataForPath } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Pricing & Access",
-  description: "Facility subscription and active access requirements for the Afyalink candidate marketplace.",
-};
+export const metadata: Metadata = metadataForPath("/pricing-access");
 
 export default function Page() {
   return <MarketingContentPage page={marketingPages["pricing-access"]} />;

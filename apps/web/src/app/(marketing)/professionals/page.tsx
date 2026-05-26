@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { MarketingContentPage } from "@/components/marketing/MarketingContentPage";
 import { marketingPages } from "@/lib/content/marketing";
+import { metadataForPath } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Professionals",
-  description: "Professional registration, credential upload, consent, payment reference, verification, interview, and publication visibility.",
-};
+export const metadata: Metadata = metadataForPath("/professionals");
 
 export default function Page() {
   return <MarketingContentPage page={marketingPages.professionals} />;

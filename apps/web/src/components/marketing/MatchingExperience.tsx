@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BreadcrumbStructuredData } from "@/components/seo/StructuredData";
 
 const proofItems = ["Reviewed matches", "Clear reasons", "Human control"];
 
@@ -11,7 +12,8 @@ const steps = [
 
 export function MatchingExperience() {
   return (
-    <main className="matching-experience">
+    <div className="matching-experience">
+      <BreadcrumbStructuredData path="/matching" name="Matching" />
       <section className="matching-hero">
         <Image
           src="/images/marketplace/facility-candidate-review.jpg"
@@ -93,6 +95,6 @@ export function MatchingExperience() {
           sizes="(max-width: 900px) 100vw, 48vw"
         />
       </section>
-    </main>
+    </div>
   );
 }

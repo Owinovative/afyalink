@@ -7,7 +7,7 @@ namespace Afyalink\Core\Application\Integrations;
 final readonly class FhirMappingService
 {
     public function __construct(
-        private string $publicBaseUrl = 'https://www.afyalink.com',
+        private string $publicBaseUrl = 'https://www.afyalinks.org',
     ) {}
 
     /**
