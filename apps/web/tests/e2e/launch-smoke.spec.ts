@@ -72,6 +72,20 @@ test("homepage slider controls and 15 second progress are wired", async ({ page 
   await expect(page.locator(".home-dots button[aria-label='Show Afyalink']")).toHaveAttribute("aria-selected", "true");
 });
 
+test("mobile navigation opens without layout overflow", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 900 });
+  await page.goto("/");
+
+  await page.getByRole("button", { name: "Toggle navigation" }).click();
+  await expect(page.getByRole("navigation", { name: "Mobile public navigation" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Facilities" }).last()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Contact" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sign in" }).last()).toBeVisible();
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+});
+
 test("public contact data uses launch values without placeholder inboxes", async ({ page }) => {
   await page.goto("/contact");
 

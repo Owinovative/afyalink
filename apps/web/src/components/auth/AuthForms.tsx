@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, type CSSProperties } from "react";
 import { Feedback } from "@/components/ui/Feedback";
 import { Field, formValues } from "@/components/ui/Forms";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -55,8 +55,54 @@ function bodyFor(mode: AuthMode) {
   }
 }
 
+const authScenes: Record<AuthMode, { title: string; body: string; image: string; chips: string[] }> = {
+  login: {
+    title: "Secure workspace access.",
+    body: "Role-based portals keep records protected.",
+    image: "/images/security/credential-security-review.jpg",
+    chips: ["Protected", "Audited", "Role gated"],
+  },
+  "professional-register": {
+    title: "Build a verified profile.",
+    body: "Credentials, review, interview, opportunity.",
+    image: "/images/professionals/clinical-professional-consultation.jpg",
+    chips: ["Profile", "Credentials", "Review"],
+  },
+  "student-register": {
+    title: "Start before license.",
+    body: "Prepare early. Publish later.",
+    image: "/images/students/nursing-student-training-lab.jpg",
+    chips: ["Pre-license", "Documents", "Conversion"],
+  },
+  "facility-register": {
+    title: "Open facility access.",
+    body: "Onboard, activate, request, shortlist.",
+    image: "/images/facilities/hospital-facility-team.jpg",
+    chips: ["Onboard", "Access", "Shortlists"],
+  },
+  "verify-email": {
+    title: "Confirm ownership.",
+    body: "Email verification protects every workspace.",
+    image: "/images/verification/admin-verification-desk.jpg",
+    chips: ["Token", "Verify", "Continue"],
+  },
+  forgot: {
+    title: "Recover access safely.",
+    body: "Reset instructions stay account-bound.",
+    image: "/images/contact/clinic-director-conversation.jpg",
+    chips: ["Request", "Email", "Reset"],
+  },
+  reset: {
+    title: "Set a new password.",
+    body: "Use your reset token to continue.",
+    image: "/images/trust/hospital-corridor-care-team.jpg",
+    chips: ["Token", "Password", "Sign in"],
+  },
+};
+
 export function AuthForm({ mode }: { mode: AuthMode }) {
   const router = useRouter();
+  const scene = authScenes[mode];
   const [role, setRole] = useState<ApiRole>("professional");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -144,10 +190,15 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   return (
     <main className="auth-wrap">
       <div className="auth-shell">
-        <aside className="auth-aside">
+        <aside className="auth-aside" style={{ "--auth-image": `url("${scene.image}")` } as CSSProperties}>
           <div className="eyebrow">Secure access</div>
-          <h1>Choose the right workspace.</h1>
-          <p>Separate paths keep permissions clear.</p>
+          <h1>{scene.title}</h1>
+          <p>{scene.body}</p>
+          <div className="auth-pill-row" aria-label="Account flow">
+            {scene.chips.map((chip) => (
+              <span key={chip}>{chip}</span>
+            ))}
+          </div>
           <div className="table-lite">
             <div>
               <span>Licensed professionals</span>

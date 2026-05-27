@@ -182,6 +182,19 @@ function AdminDashboard() {
   return (
     <div className="data-list">
       {error ? <Feedback message={error} tone="error" /> : null}
+      <section className="admin-command-hero">
+        <div>
+          <span className="eyebrow">Command center</span>
+          <h2>Launch operations at a glance.</h2>
+          <p>Queues, access, matching, notifications.</p>
+        </div>
+        <div className="portal-step-strip" aria-label="Admin launch queues">
+          <span>Applications</span>
+          <span>Facilities</span>
+          <span>Matching</span>
+          <span>Privacy</span>
+        </div>
+      </section>
       <MetricGrid
         metrics={[
           { label: "Applications", value: asRecord(data.applications).total },

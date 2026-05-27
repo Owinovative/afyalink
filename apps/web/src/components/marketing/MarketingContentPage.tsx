@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   CTASection,
   EditorialSplit,
+  ImagePanel,
   PageIntro,
   PhotoBand,
   PhotoHero,
@@ -147,7 +148,8 @@ export function MarketingContentPage({ page }: { page: MarketingPageContent }) {
       />
 
       <SectionFrame tone="white" className="compact-public-section">
-        <div className="wide-container page-opening">
+        <div className="wide-container page-opening public-signal-grid">
+          <ImagePanel visual={companion} variant="wide" caption={page.eyebrow} />
           <TrustPanel
             items={page.highlights.slice(0, 4).map((highlight) => ({
               title: highlight.title,

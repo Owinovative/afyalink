@@ -15,6 +15,8 @@
 - `/contact`
 - `/faq`
 
+Public routes are indexable, photo-led, and copy-reduced. Each route uses a short hero line, local healthcare imagery, compact CTAs, and the shared mobile navigation.
+
 ## Auth
 
 - `/auth/login`
@@ -24,6 +26,8 @@
 - `/auth/verify-email`
 - `/auth/forgot-password`
 - `/auth/reset-password`
+
+Auth routes use the premium form shell with mode-specific image panels. They remain public entry points but do not expose portal data.
 
 ## Professional Portal
 
@@ -41,6 +45,8 @@
 - `/portal/professional/availability`
 - `/portal/professional/opportunities`
 - `/portal/professional/opportunities/[id]`
+
+Logged-out professional routes render only the protected sign-in state. Logged-in pages use compact status cards, guided readiness panels, and short helper text.
 
 ## Facility Portal
 
@@ -60,6 +66,8 @@
 - `/portal/facility/placements`
 - `/portal/facility/placements/[id]`
 - `/portal/facility/team`
+
+Logged-out facility routes render only the protected sign-in state. Requisitions, dashboard, candidates, shortlists, placements, and team pages share the refined premium workspace styling.
 
 ## Admin Portal
 
@@ -93,3 +101,5 @@
 - `/portal/admin/security`
 - `/portal/admin/audit`
 - `/portal/admin/pre-licensure`
+
+Logged-out admin routes render only the protected sign-in state. Logged-in admin pages remain operational and dense, with command-center metrics, queue cards, and concise status badges.

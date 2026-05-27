@@ -14,7 +14,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     slug: "how-it-works",
     eyebrow: "Pathway",
     title: "Apply. Verify. Place.",
-    description: "A short, controlled path from intake to trusted placement.",
+    description: "One controlled path from intake to placement.",
     primaryCta: { label: "Apply now", href: "/auth/register/professional" },
     secondaryCta: { label: "Facility access", href: "/auth/register/facility" },
     highlights: [
@@ -25,7 +25,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     sections: [
       {
         title: "Clear next steps.",
-        body: "Each role sees only the next safe action.",
+        body: "Each role sees the next safe action.",
         points: ["Profile", "Credentials", "Review", "Access"],
       },
       {
@@ -39,7 +39,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     slug: "matching",
     eyebrow: "Matching",
     title: "Matches explained before sharing.",
-    description: "Facilities get reviewed shortlists, not blind candidate dumps.",
+    description: "Reviewed shortlists, not blind candidate dumps.",
     primaryCta: { label: "Open requisitions", href: "/portal/facility/requisitions" },
     secondaryCta: { label: "Set availability", href: "/portal/professional/placement-preferences" },
     highlights: [
@@ -64,7 +64,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     slug: "professionals",
     eyebrow: "Professionals",
     title: "Get verified. Become match-ready.",
-    description: "Build a private record, complete review, and prepare for opportunities.",
+    description: "Build a private record and become opportunity-ready.",
     primaryCta: { label: "Start application", href: "/auth/register/professional" },
     secondaryCta: { label: "Sign in", href: "/auth/login" },
     highlights: [
@@ -114,7 +114,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     slug: "facilities",
     eyebrow: "Facilities",
     title: "Hire through approved access.",
-    description: "Submit staffing needs, review shortlists, and place with confidence.",
+    description: "Request reviewed candidates and place with confidence.",
     primaryCta: { label: "Join facility", href: "/auth/register/facility" },
     secondaryCta: { label: "Access model", href: "/pricing-access" },
     highlights: [
@@ -125,7 +125,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     sections: [
       {
         title: "Browse responsibly.",
-        body: "Only published candidates appear.",
+        body: "Only eligible candidates appear.",
         points: ["Verified profiles", "Read-only views", "Watermarks", "Audit"],
       },
       {
@@ -139,7 +139,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     slug: "trust-security",
     eyebrow: "Trust",
     title: "Private records. Audited access.",
-    description: "Credentials stay protected while candidate views remain accountable.",
+    description: "Protected credentials. Controlled views. Clear audit trails.",
     primaryCta: { label: "Verification", href: "/verification" },
     secondaryCta: { label: "Contact", href: "/contact" },
     highlights: [
@@ -154,8 +154,8 @@ export const marketingPages: Record<string, MarketingPageContent> = {
         points: ["Roles", "Consent", "Watermark", "Redaction"],
       },
       {
-        title: "Screenshots need deterrence.",
-        body: "Watermarks and audit trails reduce misuse.",
+        title: "Views stay accountable.",
+        body: "Watermarks and audit trails deter misuse.",
         points: ["Viewer", "Time", "Facility", "Purpose"],
       },
     ],
@@ -164,7 +164,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     slug: "verification",
     eyebrow: "Verification",
     title: "Review before publication.",
-    description: "Credentials, regulatory checks, and interviews stay separate.",
+    description: "Credentials, checks, and interviews stay traceable.",
     primaryCta: { label: "Apply now", href: "/auth/register/professional" },
     secondaryCta: { label: "How it works", href: "/how-it-works" },
     highlights: [
@@ -174,8 +174,8 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     ],
     sections: [
       {
-        title: "Rules stay backend-owned.",
-        body: "The frontend only shows status.",
+        title: "Status stays clear.",
+        body: "Applicants see the right next step.",
         points: ["Submit", "Verify", "Interview", "Qualify"],
       },
       {
@@ -188,8 +188,8 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   "pricing-access": {
     slug: "pricing-access",
     eyebrow: "Access",
-    title: "Simple access. No fake pricing.",
-    description: "Afyalink confirms commercial access directly with approved facilities.",
+    title: "Simple approved access.",
+    description: "Facility access is confirmed directly during rollout.",
     primaryCta: { label: "Join facility", href: "/auth/register/facility" },
     secondaryCta: { label: "Talk to us", href: "/contact" },
     highlights: [
@@ -214,7 +214,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     slug: "about",
     eyebrow: "About",
     title: "Built for safer staffing.",
-    description: "Afyalink helps healthcare teams trust who they review, share, and place.",
+    description: "A trust layer for healthcare review, sharing, and placement.",
     primaryCta: { label: "How it works", href: "/how-it-works" },
     secondaryCta: { label: "Contact", href: "/contact" },
     highlights: [
@@ -239,7 +239,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     slug: "contact",
     eyebrow: "Contact",
     title: "Talk to Afyalink.",
-    description: "Use portals for records. Use contact for access, support, and partnerships.",
+    description: "For access, support, partnerships, and security questions.",
     primaryCta: { label: "Join facility", href: "/auth/register/facility" },
     secondaryCta: { label: "Apply now", href: "/auth/register/professional" },
     highlights: [
@@ -255,7 +255,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
       },
       {
         title: "Keep records private.",
-        body: "Do not send documents by form.",
+        body: "Private documents stay inside portals.",
         points: ["Uploads", "Consent", "Review", "Audit"],
       },
     ],
@@ -264,7 +264,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     slug: "faq",
     eyebrow: "FAQ",
     title: "Short answers by role.",
-    description: "Quick answers for professionals, students, facilities, and security teams.",
+    description: "Short answers for each Afyalink role.",
     primaryCta: { label: "Professional portal", href: "/portal/professional" },
     secondaryCta: { label: "Facility portal", href: "/portal/facility" },
     highlights: [
@@ -279,7 +279,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     sections: [
       {
         title: "Professional questions",
-        body: "Use your portal for readiness, credentials, consent, payment, and status.",
+        body: "Use your portal for readiness and status.",
         points: ["Email", "Credentials", "Application", "Publication"],
       },
       {

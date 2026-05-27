@@ -1,0 +1,373 @@
+{
+  "generated_at": "2026-05-27T03:25:08.468Z",
+  "base_url": "http://127.0.0.1:3102",
+  "screenshots": [
+    {
+      "name": "home-desktop",
+      "route": "/",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/home-desktop-1440.png"
+    },
+    {
+      "name": "home-mobile",
+      "route": "/",
+      "width": 375,
+      "height": 900,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/home-mobile-375.png"
+    },
+    {
+      "name": "matching-page",
+      "route": "/matching",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/matching-page-1440.png"
+    },
+    {
+      "name": "professionals-page",
+      "route": "/professionals",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/professionals-page-1440.png"
+    },
+    {
+      "name": "students-page",
+      "route": "/students",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/students-page-1440.png"
+    },
+    {
+      "name": "facilities-page",
+      "route": "/facilities",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/facilities-page-1440.png"
+    },
+    {
+      "name": "contact-page",
+      "route": "/contact",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/contact-page-1440.png"
+    },
+    {
+      "name": "login-page",
+      "route": "/auth/login",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/login-page-1440.png"
+    },
+    {
+      "name": "facility-requisitions-logged-out",
+      "route": "/portal/facility/requisitions",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/facility-requisitions-logged-out-1440.png"
+    },
+    {
+      "name": "facility-dashboard-logged-out",
+      "route": "/portal/facility/dashboard",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/facility-dashboard-logged-out-1440.png"
+    },
+    {
+      "name": "professional-dashboard-logged-out",
+      "route": "/portal/professional/dashboard",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/professional-dashboard-logged-out-1440.png"
+    },
+    {
+      "name": "admin-dashboard-logged-out",
+      "route": "/portal/admin/dashboard",
+      "width": 1440,
+      "height": 1000,
+      "path": "docs/frontend/visual-qa/ten-hour-polish/admin-dashboard-logged-out-1440.png"
+    }
+  ],
+  "overflow_checks": [
+    {
+      "route": "/",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/professionals",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/students",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/facilities",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/matching",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/trust-security",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/verification",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/contact",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/auth/login",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/auth/register/student",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/professional/dashboard",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/facility/dashboard",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/facility/requisitions",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/admin/dashboard",
+      "width": 375,
+      "overflow": 0
+    },
+    {
+      "route": "/",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/professionals",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/students",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/facilities",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/matching",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/trust-security",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/verification",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/contact",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/auth/login",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/auth/register/student",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/professional/dashboard",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/facility/dashboard",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/facility/requisitions",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/admin/dashboard",
+      "width": 768,
+      "overflow": 0
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/professionals",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/students",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/facilities",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/matching",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/trust-security",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/verification",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/contact",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/auth/login",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/auth/register/student",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/professional/dashboard",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/facility/dashboard",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/facility/requisitions",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/admin/dashboard",
+      "width": 1440,
+      "overflow": 0
+    },
+    {
+      "route": "/",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/professionals",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/students",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/facilities",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/matching",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/trust-security",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/verification",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/contact",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/auth/login",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/auth/register/student",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/professional/dashboard",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/facility/dashboard",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/facility/requisitions",
+      "width": 1920,
+      "overflow": 0
+    },
+    {
+      "route": "/portal/admin/dashboard",
+      "width": 1920,
+      "overflow": 0
+    }
+  ],
+  "failures": []
+}
