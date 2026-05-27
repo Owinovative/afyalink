@@ -731,6 +731,7 @@ function FacilityRequisitionForm({ token }: { token: string }) {
             <Field label="County" name="county" required />
             <Field label="Facility site" name="facility_site" />
             <Field label="Required start date" name="required_start_date" type="date" />
+            <Field label="End date" name="end_date" type="date" />
             <Field label="Minimum years experience" name="minimum_experience_years" type="number" />
             <label>
               Urgency
@@ -742,7 +743,10 @@ function FacilityRequisitionForm({ token }: { token: string }) {
               </select>
             </label>
             <Field label="Shift pattern" name="shift_pattern" />
+            <Field label="Required credentials" name="required_credentials" placeholder="License, BLS, ACLS" />
             <Field label="Preferred skills" name="preferred_skills" placeholder="ICU, triage, EMR" />
+            <Field label="Language preferences" name="language_preferences" placeholder="English, Kiswahili" />
+            <Field label="Salary or rate range" name="salary_or_rate_range" placeholder="KES range or negotiable" />
             <TextArea label="Notes" name="notes" />
             <button className="button full" type="submit" disabled={!token}>
               Submit requisition

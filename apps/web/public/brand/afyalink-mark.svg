@@ -1,0 +1,21 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Afyalink mark</title>
+  <desc id="desc">A teal and gold healthcare shield mark for Afyalink.</desc>
+  <defs>
+    <linearGradient id="shield" x1="18" y1="12" x2="78" y2="86" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#063C37"/>
+      <stop offset="0.62" stop-color="#0D756D"/>
+      <stop offset="1" stop-color="#C79A42"/>
+    </linearGradient>
+    <linearGradient id="cross" x1="24" y1="24" x2="74" y2="72" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F4A8A"/>
+      <stop offset="0.58" stop-color="#0D756D"/>
+      <stop offset="1" stop-color="#11A7A1"/>
+    </linearGradient>
+  </defs>
+  <path d="M48 7 80 19v25c0 20.7-12.6 36.4-32 45C28.6 80.4 16 64.7 16 44V19L48 7Z" fill="white"/>
+  <path d="M48 7 80 19v25c0 20.7-12.6 36.4-32 45C28.6 80.4 16 64.7 16 44V19L48 7Zm0 9.3-23 8.6V44c0 15.6 8.2 27.4 23 35.1 14.8-7.7 23-19.5 23-35.1V24.9l-23-8.6Z" fill="url(#shield)"/>
+  <path d="M41 25h14a5 5 0 0 1 5 5v10h10a5 5 0 0 1 5 5v14a5 5 0 0 1-5 5H60v10a5 5 0 0 1-5 5H41a5 5 0 0 1-5-5V64H26a5 5 0 0 1-5-5V45a5 5 0 0 1 5-5h10V30a5 5 0 0 1 5-5Z" fill="url(#cross)"/>
+  <path d="M28 71 68 31" stroke="#FFFDF8" stroke-width="8" stroke-linecap="round"/>
+  <path d="M32 62c7-2.8 5.7-14.5 14.3-16.2 6.1-1.2 10 3.5 9.7 9.2-.3 5.8-5 10.6-10.6 10.1" stroke="#FFFDF8" stroke-width="6" stroke-linecap="round"/>
+</svg>

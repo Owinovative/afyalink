@@ -22,6 +22,12 @@ export function Field({
   required = false,
   placeholder,
   defaultValue,
+  autoComplete,
+  inputMode,
+  min,
+  minLength,
+  pattern,
+  title,
 }: {
   label: string;
   name: string;
@@ -29,11 +35,29 @@ export function Field({
   required?: boolean;
   placeholder?: string;
   defaultValue?: string;
+  autoComplete?: string;
+  inputMode?: "none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search";
+  min?: string;
+  minLength?: number;
+  pattern?: string;
+  title?: string;
 }) {
   return (
     <label>
       {label}
-      <input name={name} type={type} required={required} placeholder={placeholder} defaultValue={defaultValue} />
+      <input
+        name={name}
+        type={type}
+        required={required}
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
+        min={min}
+        minLength={minLength}
+        pattern={pattern}
+        title={title}
+      />
     </label>
   );
 }

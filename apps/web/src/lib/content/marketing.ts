@@ -63,8 +63,8 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   professionals: {
     slug: "professionals",
     eyebrow: "Professionals",
-    title: "Get verified. Become match-ready.",
-    description: "Build a private record and become opportunity-ready.",
+    title: "Ready for trusted placement.",
+    description: "Private profile, verified records, placement-ready status.",
     primaryCta: { label: "Start application", href: "/auth/register/professional" },
     secondaryCta: { label: "Sign in", href: "/auth/login" },
     highlights: [
@@ -113,8 +113,8 @@ export const marketingPages: Record<string, MarketingPageContent> = {
   facilities: {
     slug: "facilities",
     eyebrow: "Facilities",
-    title: "Hire through approved access.",
-    description: "Request reviewed candidates and place with confidence.",
+    title: "Staffing needs, reviewed.",
+    description: "Request needs, receive shortlists, track placements.",
     primaryCta: { label: "Join facility", href: "/auth/register/facility" },
     secondaryCta: { label: "Access model", href: "/pricing-access" },
     highlights: [
@@ -139,7 +139,7 @@ export const marketingPages: Record<string, MarketingPageContent> = {
     slug: "trust-security",
     eyebrow: "Trust",
     title: "Private records. Audited access.",
-    description: "Protected credentials. Controlled views. Clear audit trails.",
+    description: "Consent-aware workflows, watermarks, audit trails.",
     primaryCta: { label: "Verification", href: "/verification" },
     secondaryCta: { label: "Contact", href: "/contact" },
     highlights: [

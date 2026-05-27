@@ -159,6 +159,7 @@ export function PhotoHero({
   primary,
   secondary,
   actions,
+  backgroundOnly = false,
 }: {
   eyebrow: string;
   title: string;
@@ -166,6 +167,7 @@ export function PhotoHero({
   primary: VisualAsset;
   secondary?: VisualAsset;
   actions: Array<{ label: string; href: string; kind?: "primary" | "secondary" }>;
+  backgroundOnly?: boolean;
 }) {
   return (
     <section className="hero photo-hero image-led-hero">
@@ -192,14 +194,16 @@ export function PhotoHero({
             ))}
           </div>
         </div>
-        <div className="hero-photo-stack" aria-hidden="true">
-          <ImagePanel visual={secondary ?? primary} variant="wide" />
-          <div className="hero-proof-pills">
-            <span>Verified</span>
-            <span>Reviewed</span>
-            <span>Private</span>
+        {!backgroundOnly ? (
+          <div className="hero-photo-stack" aria-hidden="true">
+            <ImagePanel visual={secondary ?? primary} variant="wide" />
+            <div className="hero-proof-pills">
+              <span>Verified</span>
+              <span>Reviewed</span>
+              <span>Private</span>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </section>
   );

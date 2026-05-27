@@ -101,6 +101,67 @@ test("public contact data uses launch values without placeholder inboxes", async
   expect(bodyText).not.toContain("support@afyalinks.org");
 });
 
+test("Afyalink logo appears in public, auth, footer, and protected states", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator(".marketing-nav .brand-mark img").first()).toHaveAttribute("src", /afyalink-mark/);
+  await expect(page.locator("footer .brand-logo-image").first()).toBeVisible();
+
+  await page.goto("/auth/login");
+  await expect(page.locator(".auth-brand .brand-logo-image").first()).toBeVisible();
+  await expect(page.locator(".auth-card-brand .brand-mark img").first()).toHaveAttribute("src", /afyalink-mark/);
+
+  await page.goto("/portal/facility/dashboard");
+  await expect(page.locator(".portal-gate-brand .brand-mark img").first()).toHaveAttribute("src", /afyalink-mark/);
+});
+
+test("registration forms expose backend-required contract fields", async ({ page }) => {
+  await page.goto("/auth/register/professional");
+  for (const name of ["name", "phone", "email", "password", "applicant_track"]) {
+    await expect(page.locator(`[name='${name}']`).first()).toBeAttached();
+  }
+  await expect(page.locator("[name='applicant_track']")).toHaveValue("licensed_professional");
+  await assertRequiredFieldsBlockSubmit(page, "**/api/auth/register");
+
+  await page.goto("/auth/register/student");
+  for (const name of [
+    "name",
+    "phone",
+    "student_status",
+    "target_profession",
+    "institution_name",
+    "programme_or_course",
+    "county",
+    "placement_type",
+    "notes",
+    "email",
+    "password",
+    "applicant_track",
+  ]) {
+    await expect(page.locator(`[name='${name}']`).first()).toBeAttached();
+  }
+  await expect(page.locator("[name='applicant_track']")).toHaveValue("student_awaiting_license");
+  await assertRequiredFieldsBlockSubmit(page, "**/api/auth/register/student");
+
+  await page.goto("/auth/register/facility");
+  for (const name of [
+    "name",
+    "phone",
+    "legal_name",
+    "display_name",
+    "facility_type",
+    "county",
+    "contact_person",
+    "email",
+    "password",
+    "registration_number",
+    "location",
+    "physical_address",
+  ]) {
+    await expect(page.locator(`[name='${name}']`).first()).toBeAttached();
+  }
+  await assertRequiredFieldsBlockSubmit(page, "**/api/facility/auth/register");
+});
+
 async function assertPublicRoute(page: import("@playwright/test").Page, route: string, width: number) {
   await page.goto(route, { waitUntil: "domcontentloaded" });
   await expect(page.locator("body")).toBeVisible();
@@ -113,4 +174,18 @@ async function assertPublicRoute(page: import("@playwright/test").Page, route: s
 
   const ctaCount = await page.locator("a[href^='/auth'], a[href='/matching'], a[href='/professionals'], a[href='/facilities'], a[href='/contact']").count();
   expect(ctaCount, `${route} should expose a CTA link`).toBeGreaterThan(0);
+}
+
+async function assertRequiredFieldsBlockSubmit(page: import("@playwright/test").Page, routePattern: string) {
+  let requestCount = 0;
+  await page.route(routePattern, async (route) => {
+    requestCount += 1;
+    await route.fulfill({ status: 500, body: "frontend validation should block this request" });
+  });
+
+  await page.getByRole("button", { name: "Continue" }).click();
+  const invalidCount = await page.locator("input:invalid, select:invalid, textarea:invalid").count();
+  expect(invalidCount).toBeGreaterThan(0);
+  expect(requestCount).toBe(0);
+  await page.unroute(routePattern);
 }

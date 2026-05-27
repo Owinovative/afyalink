@@ -294,11 +294,27 @@ function PlacementPreferences() {
           </label>
           <Field label="Available from" name="available_from" type="date" defaultValue={String(preferences.available_from ?? "")} />
           <Field label="Preferred counties" name="preferred_counties" defaultValue={asArray(preferences.preferred_counties).join(", ")} />
+          <Field label="Preferred facility types" name="preferred_facility_types" defaultValue={asArray(preferences.preferred_facility_types).join(", ")} />
           <Field label="Employment types" name="employment_types" defaultValue={asArray(preferences.employment_types).join(", ")} />
           <Field label="Shift preferences" name="shift_preferences" defaultValue={asArray(preferences.shift_preferences).join(", ")} />
           <Field label="Desired roles" name="desired_roles" defaultValue={asArray(preferences.desired_roles).join(", ")} />
           <Field label="Minimum rate or salary" name="minimum_rate_or_salary" defaultValue={String(preferences.minimum_rate_or_salary ?? "")} />
           <Field label="Relocation willingness" name="relocation_willingness" defaultValue={String(preferences.relocation_willingness ?? "")} />
+          <label>
+            Remote or telehealth interest
+            <select name="remote_or_telehealth_interest" defaultValue={String(preferences.remote_or_telehealth_interest ?? "false")}>
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </label>
+          <Field label="Available after license" name="available_after_license" defaultValue={String(preferences.available_after_license ?? "")} />
+          <label>
+            Internship or attachment interest
+            <select name="internship_or_attachment_interest" defaultValue={String(preferences.internship_or_attachment_interest ?? "false")}>
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </label>
           <TextArea label="Notes" name="notes" defaultValue={String(preferences.notes ?? "")} />
           <button className="button full" type="submit" disabled={!resource.token}>
             Save preferences
@@ -400,7 +416,7 @@ function ProfileForm({
     <section className="form-card">
       <h2>Profile details</h2>
       <form className="form-grid" key={String(profile.updated_at ?? profile.id ?? "new")} onSubmit={submit}>
-        {isStudent ? <input type="hidden" name="applicant_track" value="student_awaiting_license" /> : null}
+        <input type="hidden" name="applicant_track" value={isStudent ? "student_awaiting_license" : "licensed_professional"} />
         <Field label="Full name" name="name" required defaultValue={String(profile.name ?? "")} />
         <Field label="Phone" name="phone" required defaultValue={String(profile.phone ?? "")} />
         {isStudent ? (
@@ -422,6 +438,9 @@ function ProfileForm({
             <Field label="License number once issued" name="license_number" defaultValue={String(profile.license_number ?? "")} />
             <Field label="Regulatory body once issued" name="regulatory_body" defaultValue={String(profile.regulatory_body ?? "")} />
             <Field label="Availability after licensure" name="availability_after_licensure" defaultValue={String(profile.availability ?? "")} />
+            <Field label="Preferred counties" name="preferred_counties" defaultValue={String(profile.preferred_counties ?? "")} />
+            <Field label="Placement type after license" name="placement_type" defaultValue={String(profile.placement_type ?? "")} />
+            <TextArea label="Student review note" name="notes" defaultValue={String(profile.notes ?? "")} />
           </>
         ) : (
           <>
@@ -429,10 +448,11 @@ function ProfileForm({
             <Field label="Regulatory body" name="regulatory_body" required defaultValue={String(profile.regulatory_body ?? "")} />
             <Field label="License number" name="license_number" required defaultValue={String(profile.license_number ?? "")} />
             <Field label="County" name="county" required defaultValue={String(profile.county ?? "")} />
-            <Field label="Years experience" name="years_experience" type="number" defaultValue={String(profile.years_experience ?? "0")} />
+            <Field label="Years experience" name="years_experience" type="number" min="0" defaultValue={String(profile.years_experience ?? "0")} />
             <Field label="Availability" name="availability" defaultValue={String(profile.availability ?? "")} />
             <Field label="Preferred counties" name="preferred_counties" defaultValue={String(profile.preferred_counties ?? "")} />
             <Field label="Placement type" name="placement_type" defaultValue={String(profile.placement_type ?? "")} />
+            <TextArea label="Work preferences" name="work_preferences" defaultValue={String(profile.work_preferences ?? "")} />
           </>
         )}
         <div className="form-actions full">
