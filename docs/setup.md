@@ -190,7 +190,25 @@ cd apps/api
 php scripts/create-admin.php "Afyalink Admin" admin@example.com 0799999999 AdminPass123
 ```
 
-You can also set `AFYALINK_ADMIN_NAME`, `AFYALINK_ADMIN_EMAIL`, `AFYALINK_ADMIN_PHONE`, and `AFYALINK_ADMIN_PASSWORD`. Do not hardcode admin credentials into the repository.
+You can also set `AFYALINK_ADMIN_NAME`, `AFYALINK_ADMIN_EMAIL`, `AFYALINK_ADMIN_PHONE`, and `AFYALINK_ADMIN_PASSWORD`. The script validates email/password input, refuses non-admin duplicate accounts, and never prints the password. Do not hardcode admin credentials into the repository.
+
+After the first admin exists, create additional admins from:
+
+```text
+/portal/admin/users
+```
+
+Only authenticated admin users can open that page or call `POST /api/admin/users`.
+
+## Role-Safe Portal Routing
+
+Login redirects use the backend role list returned by `/api/auth/login`:
+
+- admin or super admin -> `/portal/admin/dashboard`
+- facility admin/viewer -> `/portal/facility/dashboard`
+- professional or student awaiting license -> `/portal/professional/dashboard`
+
+Portal layouts verify the stored token through `/api/me` before rendering navigation or dashboard content. Wrong-role sessions show an access-denied state instead of the wrong workspace.
 
 ## Troubleshooting
 

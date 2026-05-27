@@ -1,0 +1,102 @@
+{
+  "generated_at": "2026-05-27T10:42:24.289Z",
+  "base_url": "http://127.0.0.1:3100",
+  "screenshots": [
+    {
+      "path": "/auth/login",
+      "filename": "login-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "path": "/portal/admin/dashboard",
+      "filename": "admin-dashboard-sign-in-required-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "path": "/portal/facility/dashboard",
+      "filename": "facility-dashboard-sign-in-required-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "path": "/portal/professional/dashboard",
+      "filename": "professional-dashboard-sign-in-required-375.png",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      }
+    },
+    {
+      "path": "/portal/facility/requisitions",
+      "filename": "facility-requisitions-sign-in-required-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "path": "/portal/admin/dashboard",
+      "filename": "admin-dashboard-wrong-role-facility-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "path": "/portal/admin/dashboard",
+      "filename": "admin-dashboard-authorized-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "path": "/portal/admin/users",
+      "filename": "admin-users-authorized-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "path": "/portal/professional/dashboard",
+      "filename": "professional-dashboard-authorized-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "path": "/portal/professional/waiting-license",
+      "filename": "student-waiting-license-authorized-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "path": "/portal/facility/dashboard",
+      "filename": "facility-dashboard-authorized-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "path": "/portal/facility/requisitions",
+      "filename": "facility-requisitions-authorized-1440.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    }
+  ]
+}

@@ -59,6 +59,7 @@ export const adminLinks = [
   { href: "/portal/admin/appointments", label: "Appointments" },
   { href: "/portal/admin/recommendations", label: "Recommendations" },
   { href: "/portal/admin/reports", label: "Reports" },
+  { href: "/portal/admin/users", label: "Users" },
   { href: "/portal/admin/notifications", label: "Notifications" },
   { href: "/portal/admin/privacy", label: "Privacy" },
   { href: "/portal/admin/integrations", label: "Integrations" },

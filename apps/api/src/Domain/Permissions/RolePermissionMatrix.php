@@ -66,6 +66,7 @@ final class RolePermissionMatrix
             Permission::ReportsRead,
             Permission::PrivacyRequestManage,
             Permission::AuditRead,
+            Permission::UserManage,
         ],
         'super_admin' => [
             Permission::ProfileOwnWrite,

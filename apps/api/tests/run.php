@@ -215,6 +215,167 @@ $tests = [
         expectFalse($matrix->allows(UserRole::FacilityViewer, Permission::CredentialRawView), 'facility viewer cannot see raw credential');
         expectTrue($matrix->allows(UserRole::SuperAdmin, Permission::SystemManage), 'super admin can manage system');
     },
+    'api role boundaries block wrong workspace and admin access' => function (): void {
+        $root = sys_get_temp_dir() . '/afyalink-role-boundary-' . bin2hex(random_bytes(4));
+        mkdir($root . '/storage/private/credentials', 0770, true);
+        $store = new JsonDataStore($root . '/storage/runtime/database.json');
+        $kernel = new ApiKernel($store, new LocalPrivateCredentialStorage($root . '/storage/private/credentials'));
+
+        $api = static function (string $method, string $path, array $body = [], ?string $token = null, array $query = []) use ($kernel): JsonResponse {
+            $headers = $token === null ? [] : ['authorization' => "Bearer {$token}"];
+
+            return $kernel->handle(new Request($method, $path, $headers, $body, $query, ipAddress: '127.0.0.1', userAgent: 'role-boundary-test'));
+        };
+
+        $loggedOutAdmin = $api('GET', '/api/admin/applications');
+        expectTrue($loggedOutAdmin->status === 401, 'logged-out admin endpoint should return 401');
+
+        $professional = $api('POST', '/api/auth/register', [
+            'name' => 'Role Boundary Pro',
+            'email' => 'role.pro@example.com',
+            'phone' => '0701000001',
+            'password' => 'StrongPass123',
+        ]);
+        expectTrue($professional->status === 200, 'professional should register');
+        $professionalToken = (string) $professional->payload['data']['token'];
+
+        $kernel->auth()->createUser('Role Boundary Admin', 'role.admin@example.com', '0701000002', 'StrongPass123', [UserRole::Admin]);
+        $kernel->auth()->createUser('Role Boundary Facility A', 'role.facility.a@example.com', '0701000003', 'StrongPass123', [UserRole::FacilityAdmin]);
+        $kernel->auth()->createUser('Role Boundary Facility B', 'role.facility.b@example.com', '0701000004', 'StrongPass123', [UserRole::FacilityAdmin]);
+
+        $adminLogin = $api('POST', '/api/auth/login', ['email' => 'role.admin@example.com', 'password' => 'StrongPass123']);
+        $facilityLoginA = $api('POST', '/api/auth/login', ['email' => 'role.facility.a@example.com', 'password' => 'StrongPass123']);
+        $facilityLoginB = $api('POST', '/api/auth/login', ['email' => 'role.facility.b@example.com', 'password' => 'StrongPass123']);
+        expectTrue($adminLogin->status === 200, 'admin should login');
+        expectTrue($facilityLoginA->status === 200, 'facility A should login');
+        expectTrue($facilityLoginB->status === 200, 'facility B should login');
+        $adminToken = (string) $adminLogin->payload['data']['token'];
+        $facilityTokenA = (string) $facilityLoginA->payload['data']['token'];
+        $facilityTokenB = (string) $facilityLoginB->payload['data']['token'];
+        $facilityUserA = $store->first('users', static fn (array $row): bool => ($row['email'] ?? '') === 'role.facility.a@example.com');
+        $facilityUserB = $store->first('users', static fn (array $row): bool => ($row['email'] ?? '') === 'role.facility.b@example.com');
+        expectTrue($facilityUserA !== null && $facilityUserB !== null, 'facility users should exist');
+
+        $now = gmdate(DATE_ATOM);
+        $facilityA = $store->insert('facilities', [
+            'legal_name' => 'Role Boundary Facility A Ltd',
+            'display_name' => 'Role Boundary Facility A',
+            'facility_type' => 'clinic',
+            'registration_number' => 'RB-A',
+            'county' => 'Nairobi',
+            'location' => 'Hardy',
+            'email' => 'role.facility.a@example.com',
+            'phone' => '0701000003',
+            'physical_address' => 'Hardy',
+            'contact_person' => 'Facility A',
+            'operational_status' => 'active',
+            'review_status' => FacilityReviewStatus::Approved->value,
+            'created_by' => (int) $facilityUserA['id'],
+            'reviewed_by' => 1,
+            'review_note' => null,
+            'submitted_at' => $now,
+            'reviewed_at' => $now,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $facilityB = $store->insert('facilities', [
+            'legal_name' => 'Role Boundary Facility B Ltd',
+            'display_name' => 'Role Boundary Facility B',
+            'facility_type' => 'clinic',
+            'registration_number' => 'RB-B',
+            'county' => 'Nairobi',
+            'location' => 'Karen',
+            'email' => 'role.facility.b@example.com',
+            'phone' => '0701000004',
+            'physical_address' => 'Karen',
+            'contact_person' => 'Facility B',
+            'operational_status' => 'active',
+            'review_status' => FacilityReviewStatus::Approved->value,
+            'created_by' => (int) $facilityUserB['id'],
+            'reviewed_by' => 1,
+            'review_note' => null,
+            'submitted_at' => $now,
+            'reviewed_at' => $now,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        foreach ([[$facilityA, $facilityUserA], [$facilityB, $facilityUserB]] as [$facility, $user]) {
+            $store->insert('facility_memberships', [
+                'facility_id' => (int) $facility['id'],
+                'user_id' => (int) $user['id'],
+                'role' => UserRole::FacilityAdmin->value,
+                'status' => 'active',
+                'invited_by' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+            $store->insert('facility_access_subscriptions', [
+                'facility_id' => (int) $facility['id'],
+                'plan_code' => 'facility_marketplace',
+                'status' => FacilityAccessStatus::Active->value,
+                'payment_reference' => 'RB-' . $facility['id'],
+                'idempotency_key' => 'role-boundary-' . $facility['id'],
+                'amount_cents' => 500000,
+                'currency' => 'KES',
+                'method' => 'manual_reference',
+                'provider' => 'manual',
+                'provider_reference' => null,
+                'checkout_request_id' => null,
+                'merchant_request_id' => null,
+                'phone_number' => null,
+                'paid_at' => $now,
+                'external_reference' => null,
+                'starts_at' => $now,
+                'ends_at' => (new DateTimeImmutable('+30 days'))->format(DATE_ATOM),
+                'admin_override' => true,
+                'note' => null,
+                'created_by' => (int) $user['id'],
+                'reviewed_by' => 1,
+                'reviewed_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+
+        expectTrue($api('GET', '/api/admin/facility-requests', [], $facilityTokenA)->status === 403, 'facility user must not access admin facility request queue');
+        expectTrue($api('GET', '/api/admin/applications', [], $facilityTokenA)->status === 403, 'facility user must not access admin applications');
+        expectTrue($api('GET', '/api/professional/dashboard', [], $facilityTokenA)->status === 403, 'facility user must not access professional dashboard');
+        expectTrue($api('GET', '/api/facility/dashboard', [], $professionalToken)->status === 403, 'professional must not access facility dashboard');
+        expectTrue($api('GET', '/api/facility/dashboard', [], $adminToken)->status === 403, 'admin must not access facility dashboard without impersonation');
+        expectTrue($api('GET', '/api/professional/dashboard', [], $adminToken)->status === 403, 'admin must not access professional dashboard without impersonation');
+
+        $requisition = $api('POST', '/api/facility/requisitions', [
+            'title' => 'Role boundary nurse cover',
+            'profession_required' => 'Registered Nurse',
+            'employment_type' => 'locum',
+            'county' => 'Nairobi',
+        ], $facilityTokenA);
+        expectTrue($requisition->status === 200, 'facility A can create own requisition');
+        $requisitionId = (int) $requisition->payload['data']['requisition']['id'];
+        expectTrue($api('GET', "/api/facility/requisitions/{$requisitionId}", [], $facilityTokenB)->status === 404, 'facility B cannot view facility A requisition');
+
+        $users = $api('GET', '/api/admin/users', [], $adminToken);
+        expectTrue($users->status === 200, 'admin can list admin users');
+        expectFalse(array_key_exists('password_hash', $users->payload['data']['users'][0] ?? []), 'admin user list must not expose password hashes');
+
+        $created = $api('POST', '/api/admin/users', [
+            'name' => 'Second Admin',
+            'email' => 'second.admin@example.com',
+            'phone' => '0701000005',
+            'password' => 'StrongPass123',
+        ], $adminToken);
+        expectTrue($created->status === 200, 'admin can create another admin');
+        expectFalse(array_key_exists('password_hash', $created->payload['data']['user']), 'created admin response must not expose password hash');
+
+        $duplicate = $api('POST', '/api/admin/users', [
+            'name' => 'Second Admin Duplicate',
+            'email' => 'second.admin@example.com',
+            'phone' => '0701000006',
+            'password' => 'StrongPass123',
+        ], $adminToken);
+        expectTrue($duplicate->status === 422, 'duplicate admin creation should fail cleanly');
+    },
     'private document URLs are signed and expiring' => function (): void {
         $factory = new PrivateDocumentUrlFactory(str_repeat('s', 40));
         $expires = (new DateTimeImmutable())->modify('+15 minutes');
