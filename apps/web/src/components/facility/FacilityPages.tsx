@@ -361,9 +361,14 @@ function CandidateMarketplace({ token }: { token: string }) {
   }
 
   return (
-    <section className="card">
-      <h2>Candidate marketplace</h2>
-        <p>Active access required.</p>
+    <section className="card workspace-panel">
+      <div className="workspace-panel-header">
+        <div>
+          <span className="eyebrow">Marketplace</span>
+          <h2>Candidate marketplace</h2>
+        </div>
+        <span className="badge gold">Active access</span>
+      </div>
       <form className="form-grid" onSubmit={search} style={{ marginTop: 18 }}>
         <Field label="Search profession, county, or summary" name="search" defaultValue={query} />
         <label>
@@ -624,6 +629,8 @@ function SharedPackages({ packages }: { packages: Record<string, unknown>[] }) {
 function FacilityRequisitions({ token }: { token: string }) {
   const resource = useApiResource<Record<string, unknown>>("facility", "/api/facility/requisitions");
   const requisitions = asArray<Record<string, unknown>>(asRecord(resource.data).requisitions);
+  const submittedCount = requisitions.filter((row) => String(row.status ?? "").toLowerCase().includes("submit")).length;
+  const activeCount = requisitions.filter((row) => !String(row.status ?? "").toLowerCase().includes("closed")).length;
 
   return (
     <section className="facility-requisition-board">
@@ -639,6 +646,14 @@ function FacilityRequisitions({ token }: { token: string }) {
       </div>
       {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
       {resource.loading ? <div className="notice">Loading requisitions...</div> : null}
+      <MetricGrid
+        metrics={[
+          { label: "Total needs", value: requisitions.length },
+          { label: "Submitted", value: submittedCount },
+          { label: "Active board", value: activeCount },
+          { label: "Review model", value: "Human" },
+        ]}
+      />
       <div className="facility-requisition-list">
         {requisitions.length ? requisitions.map((row) => (
           <article className="facility-requisition-card" key={String(row.id)}>
@@ -798,7 +813,7 @@ function FacilityShortlists({ token }: { token: string }) {
   const shortlists = asArray<Record<string, unknown>>(asRecord(resource.data).shortlists);
 
   return (
-    <section className="card">
+    <section className="card workspace-panel">
       <h2>Afyalink-reviewed shortlists</h2>
       {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
       <div className="data-list">
@@ -813,7 +828,7 @@ function FacilityPlacements({ token }: { token: string }) {
   const placements = asArray<Record<string, unknown>>(asRecord(resource.data).placements);
 
   return (
-    <section className="card">
+    <section className="card workspace-panel">
       <h2>Placement pipeline</h2>
       {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
       <div className="data-list">
@@ -840,7 +855,7 @@ function FacilityTeam({ token }: { token: string }) {
   }
 
   return (
-    <section className="form-card">
+    <section className="form-card workspace-panel">
       <h2>Invite a team member</h2>
       <form className="form-grid" onSubmit={invite}>
         <Field label="Email" name="email" type="email" required />

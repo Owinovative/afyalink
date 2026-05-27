@@ -162,6 +162,19 @@ function DashboardSummary({
 
   return (
     <div className="data-list">
+      <section className="professional-portal-hero">
+        <div>
+          <span className="eyebrow">Readiness</span>
+          <h2>{display(profile.name ?? account.email, "Your Afyalink profile")}</h2>
+          <p>Status, credentials, review, publication.</p>
+        </div>
+        <div className="portal-step-strip" aria-label="Professional pathway">
+          <span className={account.email_verified ? "complete" : ""}>Email</span>
+          <span className={profile.id ? "complete" : ""}>Profile</span>
+          <span className={credentials.length ? "complete" : ""}>Credentials</span>
+          <span className={readiness.ready ? "complete" : ""}>Ready</span>
+        </div>
+      </section>
       <MetricGrid
         metrics={[
           { label: "Email", value: account.email_verified ? "Verified" : "Needs verification" },
@@ -464,6 +477,12 @@ function WaitingLicensePanel({
         <div className="eyebrow">Pre-licensure pathway</div>
         <h2>Waiting for license.</h2>
         <p>Prepare now. Apply after conversion.</p>
+        <div className="portal-step-strip student-track-strip" aria-label="Student pathway">
+          <span className="complete">Early profile</span>
+          <span className={credentials.length ? "complete" : ""}>Documents</span>
+          <span>License pending</span>
+          <span>Conversion later</span>
+        </div>
         <MetaGrid
           items={[
             { label: "Target profession", value: profile.target_profession ?? profile.profession },

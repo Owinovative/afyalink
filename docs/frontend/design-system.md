@@ -1,14 +1,24 @@
 # Afyalink Frontend Design System
 
-The Next.js frontend now uses a clean-rebuild healthcare trust design system. The system is classic and restrained: deep clinical green, teal, warm gold, ivory paper, white surfaces, subtle borders, human photography, and disciplined editorial spacing.
+The Next.js frontend uses a premium healthcare trust design system. The visual direction is restrained and photo-led: deep clinical green, teal, warm gold, ivory paper, white surfaces, subtle borders, human photography, and disciplined editorial spacing.
+
+## Ten-Hour Polish Refinements
+
+- Header text and buttons are intentionally smaller, with compact active states and a real mobile menu.
+- Public hero typography is controlled; large text is reserved for photo-led first impressions only.
+- Public routes now pair hero photos with a route-specific signal deck so pages feel less templated.
+- Auth pages use mode-specific healthcare photography and short account-path badges.
+- Portal pages use calmer command bands, compact metrics, refined rows, and branded empty states.
+- Facility requisitions use a stronger board treatment with status metrics, image-led headers, and cleaner cards.
 
 ## Layout Principles
 
 - Public pages use wide desktop compositions through `--wide-max` and `--hero-max`, but avoid loose dead space.
-- The homepage now uses a full first-view photo hero, short executive copy, and immediate role entry points.
+- The homepage uses a full first-view photo slider, short executive copy, immediate role entry points, manual controls, dots, and a 15-second progress bar.
 - Non-home public pages use route-specific photo heroes and editorial splits.
 - Public content should avoid repeated generic cards. Prefer photo heroes, audience tiles, process rails, trust panels, photo bands, and focused CTA sections.
 - Portal surfaces stay dense enough for repeated operations, but use calmer panels, clearer tables, softer metric cards, and tighter form rhythm.
+- Public and portal mobile layouts must avoid horizontal overflow at 375, 768, 1440, and 1920 px.
 
 ## Core Primitives
 
@@ -20,6 +30,7 @@ The Next.js frontend now uses a clean-rebuild healthcare trust design system. Th
 - `EditorialSplit`: mature text/photo composition for workflow explanations.
 - `ProcessSteps`: compact operational sequence.
 - `TrustPanel`: high-signal access/security/workflow proof panel.
+- `public-signal-grid`: route-specific photo plus short signal cells for public pages.
 - `PhotoBand`: broad human story band.
 - `ProofStrip`: compact trust/value proof band.
 - `CompactMetricStrip`: tighter proof band for HMS-style section metrics.
@@ -28,6 +39,7 @@ The Next.js frontend now uses a clean-rebuild healthcare trust design system. Th
 - `LargeCTA`: full-width conversion band.
 - `EditorialPhoto`: wide human healthcare photography panel with a short overlay caption.
 - `BrandLockup`: lightweight CSS/text brand mark used in runtime headers and footers so the oversized full logo PNG is not loaded for navigation.
+- `ProtectedPortalGate`: photo-led, minimal locked state that hides all workspace content when logged out.
 
 ## Image Strategy
 
@@ -55,7 +67,7 @@ SVGs remain available for structured workflow support where diagrams are useful:
 - `recommendations/recommendation-package.svg`
 - `backgrounds/clinical-grid.svg`
 
-No external hotlinked stock assets are used at runtime. Source photos are kept below 250 KB each, and non-home pages lazy-load image panels. Commissioned Afyalink photography should replace the royalty-free placeholders when available.
+No external hotlinked stock assets are used at runtime. Source photos are kept below 250 KB each where possible, and non-home pages lazy-load image panels. Commissioned Afyalink photography should replace the royalty-free placeholders when available.
 
 ## Accessibility
 
@@ -64,3 +76,5 @@ No external hotlinked stock assets are used at runtime. Source photos are kept b
 - Focus states remain visible through `:focus-visible`.
 - Form labels remain explicit.
 - Text should not be embedded in critical SVG visuals where it would become inaccessible.
+- Mobile navigation exposes the same public routes that disappear from the desktop nav row.
+- Reduced-motion users keep manual homepage controls without forced auto movement.

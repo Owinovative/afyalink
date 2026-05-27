@@ -11,13 +11,10 @@ The Afyalink public page positions the platform as healthcare verification infra
 
 ## Page Structure
 
-- Hero: large photo-led healthcare trust platform positioning with short headline and two clear CTAs.
-- Three-audience story: licensed professionals, students awaiting license, and approved facilities.
-- Trust workflow: apply, verify, interview, publish, match, and place.
-- Facility demand: requisitions, matching, reviewed shortlists, and placement lifecycle.
-- Security section: private storage, RBAC, consent, watermarking, audit.
-- Human placement story: Afyalink as the link between verified professionals and accountable facility hiring.
-- CTA and footer.
+- Hero slider: six photo-led slides with short role messages, manual controls, dots, and 15-second auto advance.
+- Public route signal deck: route-specific photo plus short trust, workflow, or access signals.
+- Editorial split: one concise workflow explanation with a supporting photo.
+- CTA band and footer: short, role-based entry points.
 
 ## Design Principles
 
@@ -29,6 +26,9 @@ The Afyalink public page positions the platform as healthcare verification infra
 - Use local photo assets and only supporting illustrations; do not rely on external stock hotlinks at runtime.
 - Keep source photos under 250 KB where possible and avoid loading the oversized full logo PNG in runtime navigation.
 - Public pages should feel individually art-directed rather than copies of one card grid.
+- Public hero bodies should stay under 22 words.
+- Card bodies should stay under 18 words unless the page is FAQ, legal, or contact.
+- Contact shows Hardy, Karen, +254 711 776 391, and www.afyalinks.org. Email remains hidden unless configured.
 
 ## Clean Rebuild Photo Direction
 
