@@ -36,10 +36,18 @@ MPESA_CONSUMER_KEY=
 MPESA_CONSUMER_SECRET=
 MPESA_SHORTCODE=
 MPESA_PASSKEY=
-MPESA_CALLBACK_URL=
+MPESA_CALLBACK_URL=https://api.afyalinks.org/api/payments/mpesa/callback
 ```
 
 No production success is faked. Live STK push initiation still requires a provider adapter and credential configuration.
+
+Use `MPESA_ENV=sandbox` until Daraja sandbox credentials, callback reachability, and admin reconciliation are verified. Production callbacks must use the public API domain because Safaricom must reach the endpoint:
+
+```text
+https://api.afyalinks.org/api/payments/mpesa/callback
+```
+
+If an STK push initiation route is added later, it must keep payment records in `awaiting_provider` until the provider callback confirms or fails the payment. Do not mark a payment as confirmed from client-side completion alone.
 
 ## Manual Review
 

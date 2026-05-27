@@ -44,6 +44,10 @@ Set these on the Render frontend service:
 ```env
 NEXT_PUBLIC_SITE_URL=https://www.afyalinks.org
 NEXT_PUBLIC_AFYA_API_BASE=https://api.afyalinks.org
+PUBLIC_CONTACT_PHONE=+254711776391
+PUBLIC_LOCATION=Hardy, Karen
+PUBLIC_CONTACT_EMAIL=
+SUPPORT_EMAIL=
 ```
 
 Set these on the Render backend service:
@@ -52,6 +56,8 @@ Set these on the Render backend service:
 APP_URL=https://www.afyalinks.org
 API_URL=https://api.afyalinks.org
 CORS_ALLOWED_ORIGINS=https://www.afyalinks.org
+PUBLIC_CONTACT_EMAIL=
+SUPPORT_EMAIL=
 ```
 
 ## Google Search Console

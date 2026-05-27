@@ -27,9 +27,16 @@ final readonly class AppConfig
         public string $mailDriver,
         public string $mailFromAddress,
         public string $mailFromName,
+        public ?string $smtpHost,
+        public int $smtpPort,
+        public ?string $smtpUsername,
+        public ?string $smtpPassword,
+        public string $smtpEncryption,
         public string $supportEmail,
         public string $publicContactEmail,
         public string $adminEmail,
+        public string $publicContactPhone,
+        public string $publicLocation,
     ) {}
 
     /**
@@ -58,9 +65,27 @@ final readonly class AppConfig
             mailDriver: strtolower($env['MAIL_DRIVER'] ?? 'log'),
             mailFromAddress: $env['MAIL_FROM_ADDRESS'] ?? 'no-reply@afyalinks.org',
             mailFromName: $env['MAIL_FROM_NAME'] ?? 'Afyalink',
-            supportEmail: $env['SUPPORT_EMAIL'] ?? 'support@afyalinks.org',
-            publicContactEmail: $env['PUBLIC_CONTACT_EMAIL'] ?? 'info@afyalinks.org',
-            adminEmail: $env['ADMIN_EMAIL'] ?? 'admin@afyalinks.org',
+            smtpHost: self::optional($env['SMTP_HOST'] ?? null),
+            smtpPort: (int) ($env['SMTP_PORT'] ?? 587),
+            smtpUsername: self::optional($env['SMTP_USERNAME'] ?? null),
+            smtpPassword: self::optional($env['SMTP_PASSWORD'] ?? null),
+            smtpEncryption: strtolower($env['SMTP_ENCRYPTION'] ?? 'tls'),
+            supportEmail: self::optional($env['SUPPORT_EMAIL'] ?? null) ?? '',
+            publicContactEmail: self::optional($env['PUBLIC_CONTACT_EMAIL'] ?? null) ?? '',
+            adminEmail: self::optional($env['ADMIN_EMAIL'] ?? null) ?? '',
+            publicContactPhone: $env['PUBLIC_CONTACT_PHONE'] ?? '+254711776391',
+            publicLocation: $env['PUBLIC_LOCATION'] ?? 'Hardy, Karen',
         );
+    }
+
+    private static function optional(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        return $value === '' ? null : $value;
     }
 }

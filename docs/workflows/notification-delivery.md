@@ -17,7 +17,7 @@ Supported delivery states:
 
 Current production-shaped channels:
 
-- Email: implemented through a provider interface with safe `log`/`null` staging behavior.
+- Email: implemented through a provider interface with safe `log`/`null` staging behavior and SMTP launch support.
 - SMS-ready: represented by channel/status design, not live provider delivery yet.
 - WhatsApp-ready: represented by channel/status design, not live provider delivery yet.
 
@@ -50,12 +50,43 @@ SMTP_PORT=587
 SMTP_USERNAME=
 SMTP_PASSWORD=
 SMTP_ENCRYPTION=tls
-SUPPORT_EMAIL=support@afyalinks.org
-PUBLIC_CONTACT_EMAIL=info@afyalinks.org
-ADMIN_EMAIL=admin@afyalinks.org
+PUBLIC_CONTACT_PHONE=+254711776391
+PUBLIC_LOCATION=Hardy, Karen
+SUPPORT_EMAIL=
+PUBLIC_CONTACT_EMAIL=
+ADMIN_EMAIL=
 ```
 
-`MAIL_DRIVER=log` is safe for staging because it does not require live provider credentials. Production should add a real provider adapter such as Postmark, SendGrid, Mailgun, or SMTP-backed delivery before turning on real email.
+`MAIL_DRIVER=log` is safe for staging because it does not require live provider credentials. Use `MAIL_DRIVER=null` only when delivery should be swallowed. Use `MAIL_DRIVER=smtp` after Zoho Mail, Google Workspace, or another SMTP provider is verified.
+
+## Render Cron Job
+
+Recommended setup:
+
+```text
+Name: afyalink-notification-worker
+Command: php scripts/process-notifications.php 50
+Schedule: */10 * * * *
+```
+
+Every run is bounded by the command limit. The worker processes only `queued`, `pending`, or due `retry_scheduled` records and does not resend `sent` notifications.
+
+## Local Testing
+
+```bash
+cd apps/api
+MAIL_DRIVER=log php scripts/process-notifications.php 10
+```
+
+Then inspect:
+
+- `notification_outbox.status`
+- `notification_outbox.attempt_count`
+- `notification_outbox.next_attempt_at`
+- `notification_delivery_attempts`
+- `/portal/admin/notifications`
+
+Retry safely by fixing the provider/env issue and rerunning the command after `next_attempt_at`, or by using the admin process action for a bounded manual run.
 
 ## Admin Operations
 

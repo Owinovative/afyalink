@@ -58,12 +58,16 @@ services:
         sync: false
       - key: SMTP_ENCRYPTION
         value: tls
+      - key: PUBLIC_CONTACT_PHONE
+        value: "+254711776391"
+      - key: PUBLIC_LOCATION
+        value: Hardy, Karen
       - key: SUPPORT_EMAIL
-        value: support@afyalinks.org
+        sync: false
       - key: PUBLIC_CONTACT_EMAIL
-        value: info@afyalinks.org
+        sync: false
       - key: ADMIN_EMAIL
-        value: admin@afyalinks.org
+        sync: false
       - key: MPESA_ENV
         value: sandbox
       - key: MPESA_CONSUMER_KEY
@@ -97,6 +101,14 @@ services:
         sync: false
       - key: NEXT_PUBLIC_AFYA_API_BASE
         sync: false
+      - key: PUBLIC_CONTACT_PHONE
+        value: "+254711776391"
+      - key: PUBLIC_LOCATION
+        value: Hardy, Karen
+      - key: PUBLIC_CONTACT_EMAIL
+        sync: false
+      - key: SUPPORT_EMAIL
+        sync: false
 
   - type: cron
     name: afyalink-notifications-staging
@@ -104,7 +116,7 @@ services:
     rootDir: apps/api
     plan: starter
     dockerfilePath: ./Dockerfile
-    schedule: "*/15 * * * *"
+    schedule: "*/10 * * * *"
     dockerCommand: php scripts/process-notifications.php 50
     envVars:
       - key: APP_ENV
@@ -145,10 +157,14 @@ services:
         sync: false
       - key: SMTP_ENCRYPTION
         value: tls
+      - key: PUBLIC_CONTACT_PHONE
+        value: "+254711776391"
+      - key: PUBLIC_LOCATION
+        value: Hardy, Karen
       - key: SUPPORT_EMAIL
-        value: support@afyalinks.org
+        sync: false
       - key: PUBLIC_CONTACT_EMAIL
-        value: info@afyalinks.org
+        sync: false
       - key: ADMIN_EMAIL
-        value: admin@afyalinks.org
+        sync: false
 

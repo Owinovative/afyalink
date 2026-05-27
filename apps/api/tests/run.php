@@ -980,6 +980,9 @@ $tests = [
         expectTrue($result['processed_count'] === 1, 'one notification should be processed');
         expectTrue($outbox['status'] === 'sent', 'notification should be marked sent');
         expectTrue(count($store->all('notification_delivery_attempts')) === 1, 'delivery attempt should be recorded');
+        $secondRun = $delivery->processPending(10);
+        expectTrue($secondRun['processed_count'] === 0, 'sent notification should not be processed twice');
+        expectTrue(count($store->all('notification_delivery_attempts')) === 1, 'second run should not create duplicate attempts');
         expectTrue(in_array('notification.sent', array_map(static fn (array $row): string => (string) $row['action'], $store->all('audit_logs')), true), 'sent notification should be audited');
         @unlink($path);
     },
@@ -1090,6 +1093,55 @@ $tests = [
         $storedEvent = $store->all('payment_provider_events')[0];
         $storedPayload = json_encode($storedEvent['payload_redacted'] ?? [], JSON_UNESCAPED_SLASHES);
         expectFalse(str_contains((string) $storedPayload, '254700000000'), 'callback event payload should mask phone numbers');
+        @unlink($path);
+    },
+    'production launch demo seed is idempotent and keeps students unpublished' => function (): void {
+        $path = sys_get_temp_dir() . '/afyalink-demo-seed-' . bin2hex(random_bytes(4)) . '.json';
+        $script = dirname(__DIR__) . '/scripts/seed-demo-data.php';
+        $env = array_merge(getenv() ?: [], [
+            'APP_ENV' => 'staging',
+            'AFYALINK_DATASTORE' => 'json',
+            'AFYALINK_JSON_DATASTORE' => $path,
+        ]);
+        $runSeed = static function () use ($script, $env): void {
+            $pipes = [];
+            $process = proc_open([PHP_BINARY, $script], [
+                1 => ['pipe', 'w'],
+                2 => ['pipe', 'w'],
+            ], $pipes, dirname(__DIR__), $env);
+            if (!is_resource($process)) {
+                throw new RuntimeException('Could not start demo seed process.');
+            }
+            $stdout = stream_get_contents($pipes[1]);
+            $stderr = stream_get_contents($pipes[2]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            $exitCode = proc_close($process);
+            expectTrue($exitCode === 0, 'demo seed should exit cleanly: ' . $stdout . $stderr);
+        };
+
+        $runSeed();
+        $store = new JsonDataStore($path);
+        $firstCounts = [
+            'users' => count($store->all('users')),
+            'applications' => count($store->all('applications')),
+            'candidate_publications' => count($store->all('candidate_publications')),
+            'facility_requisitions' => count($store->all('facility_requisitions')),
+            'placement_shortlists' => count($store->all('placement_shortlists')),
+            'placements' => count($store->all('placements')),
+            'notification_outbox' => count($store->all('notification_outbox')),
+        ];
+
+        $runSeed();
+        $secondStore = new JsonDataStore($path);
+        foreach ($firstCounts as $table => $count) {
+            expectTrue(count($secondStore->all($table)) === $count, "demo seed should not duplicate {$table}");
+        }
+
+        $student = $secondStore->first('users', static fn (array $row): bool => ($row['email'] ?? '') === 'student@afyalinks.test');
+        expectTrue($student !== null, 'demo student should exist');
+        $studentPublications = $secondStore->where('candidate_publications', static fn (array $row): bool => (int) ($row['professional_user_id'] ?? 0) === (int) $student['id']);
+        expectTrue(count($studentPublications) === 0, 'student awaiting license should not be published as licensed demo talent');
         @unlink($path);
     },
     'milestone 4 privacy request lifecycle is audited and masks subject email' => function (): void {

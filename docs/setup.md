@@ -71,9 +71,16 @@ Afyalink queues notification intents in `notification_outbox` and records delive
 MAIL_DRIVER=log
 MAIL_FROM_ADDRESS=no-reply@afyalinks.org
 MAIL_FROM_NAME=Afyalink
-SUPPORT_EMAIL=support@afyalinks.org
-PUBLIC_CONTACT_EMAIL=info@afyalinks.org
-ADMIN_EMAIL=admin@afyalinks.org
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_ENCRYPTION=tls
+PUBLIC_CONTACT_PHONE=+254711776391
+PUBLIC_LOCATION=Hardy, Karen
+SUPPORT_EMAIL=
+PUBLIC_CONTACT_EMAIL=
+ADMIN_EMAIL=
 ```
 
 Milestone 5 recommendation assistance defaults to the local deterministic adapter:
@@ -106,7 +113,7 @@ MPESA_CONSUMER_KEY=
 MPESA_CONSUMER_SECRET=
 MPESA_SHORTCODE=
 MPESA_PASSKEY=
-MPESA_CALLBACK_URL=https://your-api.example.com/api/payments/mpesa/callback
+MPESA_CALLBACK_URL=https://api.afyalinks.org/api/payments/mpesa/callback
 ```
 
 The callback endpoint stores redacted provider events and updates matched payment/subscription state. It does not fake STK success or hardcode credentials.

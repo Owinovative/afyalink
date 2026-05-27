@@ -18,6 +18,15 @@ final class EmailProviderFactory
                 fromName: $config->mailFromName,
                 writeToErrorLog: $driver === 'log',
             ),
+            'smtp' => new SmtpEmailProvider(
+                host: (string) $config->smtpHost,
+                port: $config->smtpPort,
+                username: $config->smtpUsername,
+                password: $config->smtpPassword,
+                encryption: $config->smtpEncryption,
+                fromAddress: $config->mailFromAddress,
+                fromName: $config->mailFromName,
+            ),
             default => new LogEmailProvider(
                 fromAddress: $config->mailFromAddress,
                 fromName: $config->mailFromName,

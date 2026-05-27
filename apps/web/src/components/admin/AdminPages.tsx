@@ -193,16 +193,23 @@ function AdminDashboard() {
           { label: "Active access", value: asRecord(data.access).active },
           { label: "Waiting-license", value: asRecord(data.prelicensure).total },
           { label: "Payment reviews", value: asRecord(data.workQueues).payment_reviews },
-          { label: "Notification failures", value: asRecord(data.workQueues).notification_failures },
+          { label: "Failed notifications", value: asRecord(data.workQueues).notification_failures },
+          { label: "Requisitions awaiting matching", value: asRecord(data.workQueues).requisitions_submitted },
+          { label: "Shortlists ready", value: asRecord(data.workQueues).shortlists_ready },
+          { label: "Placements in progress", value: asRecord(data.workQueues).active_placements },
+          { label: "Privacy requests", value: asRecord(data.workQueues).privacy_requests },
         ]}
       />
       <div className="grid-3">
         <QuickLink title="Application review" href="/portal/admin/applications" body="Submissions and credentials." />
         <QuickLink title="Facility operations" href="/portal/admin/facilities" body="Approvals and access." />
+        <QuickLink title="Requisitions" href="/portal/admin/requisitions" body="Needs awaiting matching." />
+        <QuickLink title="Placements" href="/portal/admin/placements" body="Active coordination." />
         <QuickLink title="Recommendations" href="/portal/admin/recommendations" body="Curated packages." />
         <QuickLink title="Pre-licensure queue" href="/portal/admin/pre-licensure" body="Waiting-license applicants." />
         <QuickLink title="Reports" href="/portal/admin/reports" body="Funnel and delivery." />
         <QuickLink title="Notifications" href="/portal/admin/notifications" body="Pending and failed." />
+        <QuickLink title="Privacy" href="/portal/admin/privacy" body="Subject rights." />
       </div>
     </div>
   );
