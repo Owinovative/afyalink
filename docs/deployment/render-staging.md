@@ -193,7 +193,7 @@ cd /var/www/afyalink/apps/api
 php scripts/create-admin.php "Afyalink Admin" admin@example.com 0799999999 AdminPass123
 ```
 
-Use a strong staging password and rotate it after first login.
+Use a strong staging password and rotate it after first login. After signing in, use `/portal/admin/users` to create additional admin operators. Do not add a public admin registration route.
 
 ## Demo Seed
 
@@ -219,6 +219,8 @@ After deployment:
 8. Confirm the facility can browse/open the published candidate and that `candidate_profile_views` and `audit_logs` receive view records.
 9. Open `/portal/admin/notifications`, `/portal/admin/reports`, `/portal/admin/privacy`, `/portal/admin/matching`, and `/portal/admin/placements`.
 10. Confirm the notification cron job records delivery attempts without duplicates.
+11. Confirm a facility token cannot open `/portal/admin/dashboard` or `/portal/professional/dashboard`.
+12. Confirm a professional token cannot open `/portal/facility/dashboard` or `/portal/admin/dashboard`.
 
 ## Troubleshooting
 

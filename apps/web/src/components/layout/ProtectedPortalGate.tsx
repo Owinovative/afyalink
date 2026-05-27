@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BrandLockup } from "@/components/layout/BrandLockup";
 import type { ApiRole } from "@/lib/api/client";
+import { portalByRole } from "@/lib/auth/session";
 
 const roleCopy: Record<ApiRole, { label: string; image: string; alt: string }> = {
   professional: {
@@ -41,6 +42,42 @@ export function ProtectedPortalGate({ role, title }: { role: ApiRole; title: str
           </Link>
           <Link className="button secondary" href="/">
             Public site
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+export function PortalAccessDenied({
+  requestedRole,
+  actualRole,
+  title,
+}: {
+  requestedRole: ApiRole;
+  actualRole: ApiRole | null;
+  title: string;
+}) {
+  const copy = roleCopy[requestedRole];
+  const dashboard = actualRole ? portalByRole[actualRole] : "/auth/login";
+
+  return (
+    <main className="portal-locked">
+      <Image src={copy.image} alt={copy.alt} fill priority sizes="100vw" className="portal-locked-image" />
+      <div className="portal-locked-overlay" />
+      <section className="portal-gate-card" aria-label={`${title} access denied`}>
+        <div className="portal-gate-brand">
+          <BrandLockup kicker={title} />
+        </div>
+        <span className="eyebrow">Access denied</span>
+        <h1>Wrong workspace.</h1>
+        <p>This workspace belongs to {requestedRole} users.</p>
+        <div className="action-row">
+          <Link className="button" href={dashboard}>
+            Go to your dashboard
+          </Link>
+          <Link className="button secondary" href="/auth/login">
+            Switch account
           </Link>
         </div>
       </section>

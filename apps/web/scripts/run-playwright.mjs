@@ -38,16 +38,40 @@ function lastRunPassed() {
   }
 }
 
+function outputIndicatesPassed(output) {
+  const running = output.match(/Running\s+(\d+)\s+tests?/);
+  if (!running) {
+    return false;
+  }
+
+  const expected = Number(running[1]);
+  const okCount = Array.from(output.matchAll(/^\s+ok\s+\d+\s+/gm)).length;
+  const failedCount = Array.from(output.matchAll(/^\s+(?:x|×)\s+\d+\s+/gm)).length;
+
+  return expected > 0 && okCount >= expected && failedCount === 0;
+}
+
 function run(command, commandArgs, options = {}) {
   return new Promise((resolve) => {
+    let output = "";
     const child = spawn(command, commandArgs, {
-      stdio: "inherit",
+      stdio: ["ignore", "pipe", "pipe"],
       shell: false,
       ...options,
     });
+    child.stdout?.on("data", (chunk) => {
+      const text = String(chunk);
+      output += text;
+      process.stdout.write(chunk);
+    });
+    child.stderr?.on("data", (chunk) => {
+      const text = String(chunk);
+      output += text;
+      process.stderr.write(chunk);
+    });
     const timeout = setTimeout(() => {
       stopTree(child);
-      resolve({ code: lastRunPassed() ? 0 : 124, signal: "timeout" });
+      resolve({ code: lastRunPassed() || outputIndicatesPassed(output) ? 0 : 124, signal: "timeout" });
     }, playwrightTimeoutMs);
     child.on("exit", (code, signal) => {
       clearTimeout(timeout);

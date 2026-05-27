@@ -29,7 +29,6 @@ use Afyalink\Core\Application\Professionals\ProfessionalProfileService;
 use Afyalink\Core\Application\Professionals\StudentPrelicensureService;
 use Afyalink\Core\Application\Verification\VerificationService;
 use Afyalink\Core\Domain\Permissions\Permission;
-use Afyalink\Core\Domain\Enums\UserRole;
 use Afyalink\Core\Domain\Security\FileUploadPolicy;
 use Afyalink\Core\Http\Controllers\AdminFacilityController;
 use Afyalink\Core\Http\Controllers\AdminController;
@@ -47,6 +46,7 @@ use Afyalink\Core\Infrastructure\Notifications\LogEmailProvider;
 use Afyalink\Core\Infrastructure\Persistence\DataStore;
 use Afyalink\Core\Infrastructure\Storage\CredentialStorage;
 use Afyalink\Core\Support\Exceptions\AuthorizationException;
+use Afyalink\Core\Support\Exceptions\AuthenticationException;
 use Afyalink\Core\Support\Exceptions\NotFoundException;
 use Afyalink\Core\Support\Exceptions\ValidationException;
 use DomainException;
@@ -104,7 +104,7 @@ final class ApiKernel
         $consentController = new ConsentController($consents);
         $paymentController = new PaymentController($payments);
         $applicationController = new ApplicationController($workflow);
-        $adminController = new AdminController($workflow, $credentials, $payments, $this->store, $verifications, $interviews, $prelicensure);
+        $adminController = new AdminController($this->auth, $workflow, $credentials, $payments, $this->store, $verifications, $interviews, $prelicensure);
         $facilityController = new FacilityController($this->auth, $facilities, $facilityAccess, $candidatePublications, $facilityEngagements);
         $adminFacilityController = new AdminFacilityController($facilities, $facilityAccess, $candidatePublications, $facilityEngagements);
         $placementController = new PlacementController($placements);
@@ -146,6 +146,11 @@ final class ApiKernel
                 'message' => $exception->getMessage(),
                 'errors' => $exception->errors,
             ], 422);
+        } catch (AuthenticationException $exception) {
+            return new JsonResponse([
+                'ok' => false,
+                'message' => $exception->getMessage(),
+            ], 401);
         } catch (AuthorizationException $exception) {
             return new JsonResponse([
                 'ok' => false,
@@ -225,58 +230,60 @@ final class ApiKernel
         $this->router->add('POST', '/api/facility/recommendation-requests', $this->facilityUser([$facility, 'requestRecommendation'], Permission::FacilityRequestManage));
         $this->router->add('GET', '/api/facility/recommendation-packages', $this->facilityUser([$facility, 'recommendationPackages'], Permission::FacilityCandidateView));
 
-        $this->router->add('GET', '/api/admin/applications', $this->protected([$admin, 'applications'], Permission::ApplicationReview));
-        $this->router->add('GET', '/api/admin/applications/{id}', $this->protected([$admin, 'application'], Permission::ApplicationReview));
-        $this->router->add('PATCH', '/api/admin/applications/{id}/action', $this->protected([$admin, 'action'], Permission::ApplicationReview));
-        $this->router->add('PATCH', '/api/admin/credentials/{id}/review', $this->protected([$admin, 'reviewCredential'], Permission::CredentialReview));
-        $this->router->add('PATCH', '/api/admin/payments/{id}/status', $this->protected([$admin, 'updatePayment'], Permission::PaymentManage));
-        $this->router->add('GET', '/api/admin/regulatory-bodies', $this->protected([$admin, 'regulatoryBodies'], Permission::VerificationManage));
-        $this->router->add('GET', '/api/admin/verifications', $this->protected([$admin, 'verificationCases'], Permission::VerificationManage));
-        $this->router->add('POST', '/api/admin/verifications', $this->protected([$admin, 'createVerificationCase'], Permission::VerificationManage));
-        $this->router->add('GET', '/api/admin/verifications/{id}', $this->protected([$admin, 'verificationCase'], Permission::VerificationManage));
-        $this->router->add('PATCH', '/api/admin/verifications/{id}/status', $this->protected([$admin, 'updateVerificationStatus'], Permission::VerificationManage));
-        $this->router->add('GET', '/api/admin/interviews', $this->protected([$admin, 'interviews'], Permission::InterviewManage));
-        $this->router->add('POST', '/api/admin/interviews', $this->protected([$admin, 'scheduleInterview'], Permission::InterviewManage));
-        $this->router->add('GET', '/api/admin/interviews/{id}', $this->protected([$admin, 'interview'], Permission::InterviewManage));
-        $this->router->add('PATCH', '/api/admin/interviews/{id}/complete', $this->protected([$admin, 'completeInterview'], Permission::InterviewScoreSubmit));
-        $this->router->add('GET', '/api/admin/facility-operations/overview', $this->protected([$adminFacility, 'overview'], Permission::FacilityReview));
-        $this->router->add('GET', '/api/admin/facilities', $this->protected([$adminFacility, 'facilities'], Permission::FacilityReview));
-        $this->router->add('GET', '/api/admin/facilities/{id}', $this->protected([$adminFacility, 'facility'], Permission::FacilityReview));
-        $this->router->add('PATCH', '/api/admin/facilities/{id}/review', $this->protected([$adminFacility, 'reviewFacility'], Permission::FacilityReview));
-        $this->router->add('PATCH', '/api/admin/facilities/{id}/subscription', $this->protected([$adminFacility, 'updateSubscription'], Permission::FacilitySubscriptionManage));
-        $this->router->add('GET', '/api/admin/candidate-publications', $this->protected([$adminFacility, 'publications'], Permission::CandidatePublicationManage));
-        $this->router->add('POST', '/api/admin/candidate-publications', $this->protected([$adminFacility, 'publishCandidate'], Permission::CandidatePublicationManage));
-        $this->router->add('PATCH', '/api/admin/candidate-publications/{id}', $this->protected([$adminFacility, 'updatePublication'], Permission::CandidatePublicationManage));
-        $this->router->add('GET', '/api/admin/facility-requests', $this->protected([$adminFacility, 'facilityRequests'], Permission::FacilityRequestManage));
-        $this->router->add('PATCH', '/api/admin/facility-requests/{id}', $this->protected([$adminFacility, 'updateFacilityRequest'], Permission::FacilityRequestManage));
-        $this->router->add('POST', '/api/admin/facility-requests/{id}/appointments', $this->protected([$adminFacility, 'scheduleAppointment'], Permission::FacilityRequestManage));
-        $this->router->add('GET', '/api/admin/recommendation-requests', $this->protected([$adminFacility, 'recommendationRequests'], Permission::RecommendationPackageManage));
-        $this->router->add('PATCH', '/api/admin/recommendation-requests/{id}', $this->protected([$adminFacility, 'updateRecommendationRequest'], Permission::RecommendationPackageManage));
-        $this->router->add('GET', '/api/admin/recommendation-packages', $this->protected([$adminFacility, 'recommendationPackages'], Permission::RecommendationPackageManage));
-        $this->router->add('POST', '/api/admin/recommendation-packages', $this->protected([$adminFacility, 'createRecommendationPackage'], Permission::RecommendationPackageManage));
-        $this->router->add('PATCH', '/api/admin/recommendation-packages/{id}', $this->protected([$adminFacility, 'updateRecommendationPackage'], Permission::RecommendationPackageManage));
-        $this->router->add('GET', '/api/admin/requisitions', $this->protected([$placements, 'adminRequisitions'], Permission::MatchingManage));
-        $this->router->add('GET', '/api/admin/requisitions/{id}', $this->protected([$placements, 'adminRequisition'], Permission::MatchingManage));
-        $this->router->add('PATCH', '/api/admin/requisitions/{id}', $this->protected([$placements, 'updateRequisition'], Permission::MatchingManage));
-        $this->router->add('POST', '/api/admin/requisitions/{id}/matching-runs', $this->protected([$placements, 'runMatching'], Permission::MatchingManage));
-        $this->router->add('POST', '/api/admin/matches/{id}/ai-draft', $this->protected([$placements, 'draftAiRationale'], Permission::MatchingManage));
-        $this->router->add('POST', '/api/admin/placement-shortlists', $this->protected([$placements, 'createShortlist'], Permission::MatchingManage));
-        $this->router->add('GET', '/api/admin/placements', $this->protected([$placements, 'adminPlacements'], Permission::PlacementManage));
-        $this->router->add('POST', '/api/admin/placements', $this->protected([$placements, 'createPlacement'], Permission::PlacementManage));
-        $this->router->add('PATCH', '/api/admin/placements/{id}', $this->protected([$placements, 'updatePlacement'], Permission::PlacementManage));
-        $this->router->add('GET', '/api/admin/communications', $this->protected([$placements, 'adminThreads'], Permission::CommunicationManage));
-        $this->router->add('POST', '/api/admin/communications', $this->protected([$placements, 'createThread'], Permission::CommunicationManage));
-        $this->router->add('GET', '/api/admin/integrations', $this->protected([$placements, 'integrations'], Permission::IntegrationManage));
-        $this->router->add('GET', '/api/admin/security/asvs-readiness', $this->protected([$placements, 'security'], Permission::OperationsRead));
-        $this->router->add('GET', '/api/admin/audit-logs', $this->protected([$admin, 'auditLogs'], Permission::AuditRead));
-        $this->router->add('GET', '/api/admin/pre-licensure', $this->protected([$admin, 'prelicensureApplicants'], Permission::PrelicensureManage));
-        $this->router->add('PATCH', '/api/admin/pre-licensure/{id}/convert', $this->protected([$admin, 'convertPrelicensureApplicant'], Permission::PrelicensureManage));
-        $this->router->add('GET', '/api/admin/operations/dashboard', $this->protected([$operations, 'dashboard'], Permission::OperationsRead));
-        $this->router->add('GET', '/api/admin/reports', $this->protected([$operations, 'reports'], Permission::ReportsRead));
-        $this->router->add('GET', '/api/admin/notifications', $this->protected([$operations, 'notifications'], Permission::NotificationManage));
-        $this->router->add('POST', '/api/admin/notifications/process', $this->protected([$operations, 'processNotifications'], Permission::NotificationManage));
-        $this->router->add('GET', '/api/admin/privacy-requests', $this->protected([$operations, 'privacyRequests'], Permission::PrivacyRequestManage));
-        $this->router->add('PATCH', '/api/admin/privacy-requests/{id}', $this->protected([$operations, 'updatePrivacyRequest'], Permission::PrivacyRequestManage));
+        $this->router->add('GET', '/api/admin/users', $this->admin([$admin, 'users'], Permission::UserManage));
+        $this->router->add('POST', '/api/admin/users', $this->admin([$admin, 'createAdminUser'], Permission::UserManage));
+        $this->router->add('GET', '/api/admin/applications', $this->admin([$admin, 'applications'], Permission::ApplicationReview));
+        $this->router->add('GET', '/api/admin/applications/{id}', $this->admin([$admin, 'application'], Permission::ApplicationReview));
+        $this->router->add('PATCH', '/api/admin/applications/{id}/action', $this->admin([$admin, 'action'], Permission::ApplicationReview));
+        $this->router->add('PATCH', '/api/admin/credentials/{id}/review', $this->admin([$admin, 'reviewCredential'], Permission::CredentialReview));
+        $this->router->add('PATCH', '/api/admin/payments/{id}/status', $this->admin([$admin, 'updatePayment'], Permission::PaymentManage));
+        $this->router->add('GET', '/api/admin/regulatory-bodies', $this->admin([$admin, 'regulatoryBodies'], Permission::VerificationManage));
+        $this->router->add('GET', '/api/admin/verifications', $this->admin([$admin, 'verificationCases'], Permission::VerificationManage));
+        $this->router->add('POST', '/api/admin/verifications', $this->admin([$admin, 'createVerificationCase'], Permission::VerificationManage));
+        $this->router->add('GET', '/api/admin/verifications/{id}', $this->admin([$admin, 'verificationCase'], Permission::VerificationManage));
+        $this->router->add('PATCH', '/api/admin/verifications/{id}/status', $this->admin([$admin, 'updateVerificationStatus'], Permission::VerificationManage));
+        $this->router->add('GET', '/api/admin/interviews', $this->admin([$admin, 'interviews'], Permission::InterviewManage));
+        $this->router->add('POST', '/api/admin/interviews', $this->admin([$admin, 'scheduleInterview'], Permission::InterviewManage));
+        $this->router->add('GET', '/api/admin/interviews/{id}', $this->admin([$admin, 'interview'], Permission::InterviewManage));
+        $this->router->add('PATCH', '/api/admin/interviews/{id}/complete', $this->admin([$admin, 'completeInterview'], Permission::InterviewScoreSubmit));
+        $this->router->add('GET', '/api/admin/facility-operations/overview', $this->admin([$adminFacility, 'overview'], Permission::FacilityReview));
+        $this->router->add('GET', '/api/admin/facilities', $this->admin([$adminFacility, 'facilities'], Permission::FacilityReview));
+        $this->router->add('GET', '/api/admin/facilities/{id}', $this->admin([$adminFacility, 'facility'], Permission::FacilityReview));
+        $this->router->add('PATCH', '/api/admin/facilities/{id}/review', $this->admin([$adminFacility, 'reviewFacility'], Permission::FacilityReview));
+        $this->router->add('PATCH', '/api/admin/facilities/{id}/subscription', $this->admin([$adminFacility, 'updateSubscription'], Permission::FacilitySubscriptionManage));
+        $this->router->add('GET', '/api/admin/candidate-publications', $this->admin([$adminFacility, 'publications'], Permission::CandidatePublicationManage));
+        $this->router->add('POST', '/api/admin/candidate-publications', $this->admin([$adminFacility, 'publishCandidate'], Permission::CandidatePublicationManage));
+        $this->router->add('PATCH', '/api/admin/candidate-publications/{id}', $this->admin([$adminFacility, 'updatePublication'], Permission::CandidatePublicationManage));
+        $this->router->add('GET', '/api/admin/facility-requests', $this->admin([$adminFacility, 'facilityRequests'], Permission::FacilityRequestManage));
+        $this->router->add('PATCH', '/api/admin/facility-requests/{id}', $this->admin([$adminFacility, 'updateFacilityRequest'], Permission::FacilityRequestManage));
+        $this->router->add('POST', '/api/admin/facility-requests/{id}/appointments', $this->admin([$adminFacility, 'scheduleAppointment'], Permission::FacilityRequestManage));
+        $this->router->add('GET', '/api/admin/recommendation-requests', $this->admin([$adminFacility, 'recommendationRequests'], Permission::RecommendationPackageManage));
+        $this->router->add('PATCH', '/api/admin/recommendation-requests/{id}', $this->admin([$adminFacility, 'updateRecommendationRequest'], Permission::RecommendationPackageManage));
+        $this->router->add('GET', '/api/admin/recommendation-packages', $this->admin([$adminFacility, 'recommendationPackages'], Permission::RecommendationPackageManage));
+        $this->router->add('POST', '/api/admin/recommendation-packages', $this->admin([$adminFacility, 'createRecommendationPackage'], Permission::RecommendationPackageManage));
+        $this->router->add('PATCH', '/api/admin/recommendation-packages/{id}', $this->admin([$adminFacility, 'updateRecommendationPackage'], Permission::RecommendationPackageManage));
+        $this->router->add('GET', '/api/admin/requisitions', $this->admin([$placements, 'adminRequisitions'], Permission::MatchingManage));
+        $this->router->add('GET', '/api/admin/requisitions/{id}', $this->admin([$placements, 'adminRequisition'], Permission::MatchingManage));
+        $this->router->add('PATCH', '/api/admin/requisitions/{id}', $this->admin([$placements, 'updateRequisition'], Permission::MatchingManage));
+        $this->router->add('POST', '/api/admin/requisitions/{id}/matching-runs', $this->admin([$placements, 'runMatching'], Permission::MatchingManage));
+        $this->router->add('POST', '/api/admin/matches/{id}/ai-draft', $this->admin([$placements, 'draftAiRationale'], Permission::MatchingManage));
+        $this->router->add('POST', '/api/admin/placement-shortlists', $this->admin([$placements, 'createShortlist'], Permission::MatchingManage));
+        $this->router->add('GET', '/api/admin/placements', $this->admin([$placements, 'adminPlacements'], Permission::PlacementManage));
+        $this->router->add('POST', '/api/admin/placements', $this->admin([$placements, 'createPlacement'], Permission::PlacementManage));
+        $this->router->add('PATCH', '/api/admin/placements/{id}', $this->admin([$placements, 'updatePlacement'], Permission::PlacementManage));
+        $this->router->add('GET', '/api/admin/communications', $this->admin([$placements, 'adminThreads'], Permission::CommunicationManage));
+        $this->router->add('POST', '/api/admin/communications', $this->admin([$placements, 'createThread'], Permission::CommunicationManage));
+        $this->router->add('GET', '/api/admin/integrations', $this->admin([$placements, 'integrations'], Permission::IntegrationManage));
+        $this->router->add('GET', '/api/admin/security/asvs-readiness', $this->admin([$placements, 'security'], Permission::OperationsRead));
+        $this->router->add('GET', '/api/admin/audit-logs', $this->admin([$admin, 'auditLogs'], Permission::AuditRead));
+        $this->router->add('GET', '/api/admin/pre-licensure', $this->admin([$admin, 'prelicensureApplicants'], Permission::PrelicensureManage));
+        $this->router->add('PATCH', '/api/admin/pre-licensure/{id}/convert', $this->admin([$admin, 'convertPrelicensureApplicant'], Permission::PrelicensureManage));
+        $this->router->add('GET', '/api/admin/operations/dashboard', $this->admin([$operations, 'dashboard'], Permission::OperationsRead));
+        $this->router->add('GET', '/api/admin/reports', $this->admin([$operations, 'reports'], Permission::ReportsRead));
+        $this->router->add('GET', '/api/admin/notifications', $this->admin([$operations, 'notifications'], Permission::NotificationManage));
+        $this->router->add('POST', '/api/admin/notifications/process', $this->admin([$operations, 'processNotifications'], Permission::NotificationManage));
+        $this->router->add('GET', '/api/admin/privacy-requests', $this->admin([$operations, 'privacyRequests'], Permission::PrivacyRequestManage));
+        $this->router->add('PATCH', '/api/admin/privacy-requests/{id}', $this->admin([$operations, 'updatePrivacyRequest'], Permission::PrivacyRequestManage));
     }
 
     /**
@@ -287,7 +294,7 @@ final class ApiKernel
     {
         return function (Request $request) use ($handler, $permission): array {
             if ($request->user === null) {
-                throw new AuthorizationException('Authentication required.');
+                throw new AuthenticationException();
             }
 
             if ($permission !== null) {
@@ -305,8 +312,23 @@ final class ApiKernel
     private function professional(callable $handler, ?Permission $permission = null): callable
     {
         return $this->protected(function (Request $request) use ($handler): array {
-            if ($request->user === null || !$request->user->hasRole(UserRole::Professional)) {
+            if ($request->user === null || !$request->user->isProfessionalWorkspaceUser()) {
                 throw new AuthorizationException('Professional account required.');
+            }
+
+            return $handler($request);
+        }, $permission);
+    }
+
+    /**
+     * @param callable(Request): array<string, mixed> $handler
+     * @return callable(Request): array<string, mixed>
+     */
+    private function admin(callable $handler, ?Permission $permission = null): callable
+    {
+        return $this->protected(function (Request $request) use ($handler): array {
+            if ($request->user === null || !$request->user->isAdminWorkspaceUser()) {
+                throw new AuthorizationException('Admin account required.');
             }
 
             return $handler($request);
@@ -320,7 +342,7 @@ final class ApiKernel
     private function facilityUser(callable $handler, ?Permission $permission = null): callable
     {
         return $this->protected(function (Request $request) use ($handler): array {
-            if ($request->user === null || (!$request->user->hasRole(UserRole::FacilityAdmin) && !$request->user->hasRole(UserRole::FacilityViewer))) {
+            if ($request->user === null || !$request->user->isFacilityWorkspaceUser()) {
                 throw new AuthorizationException('Facility account required.');
             }
 

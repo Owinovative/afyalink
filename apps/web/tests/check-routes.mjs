@@ -75,6 +75,7 @@ const requiredRoutes = [
   "src/app/portal/admin/placements/[id]/page.tsx",
   "src/app/portal/admin/communications/page.tsx",
   "src/app/portal/admin/reports/page.tsx",
+  "src/app/portal/admin/users/page.tsx",
   "src/app/portal/admin/notifications/page.tsx",
   "src/app/portal/admin/privacy/page.tsx",
   "src/app/portal/admin/integrations/page.tsx",

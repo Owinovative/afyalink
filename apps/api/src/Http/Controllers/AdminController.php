@@ -6,10 +6,12 @@ namespace Afyalink\Core\Http\Controllers;
 
 use Afyalink\Core\Application\Applications\ApplicationWorkflowService;
 use Afyalink\Core\Application\Auth\AuthenticatedUser;
+use Afyalink\Core\Application\Auth\AuthService;
 use Afyalink\Core\Application\Credentials\CredentialService;
 use Afyalink\Core\Application\Interviews\InterviewService;
 use Afyalink\Core\Application\Payments\PaymentService;
 use Afyalink\Core\Application\Professionals\StudentPrelicensureService;
+use Afyalink\Core\Domain\Enums\UserRole;
 use Afyalink\Core\Application\Verification\VerificationService;
 use Afyalink\Core\Domain\Enums\CredentialReviewStatus;
 use Afyalink\Core\Domain\Enums\InterviewRecommendation;
@@ -22,6 +24,7 @@ use Afyalink\Core\Support\Validator;
 final readonly class AdminController
 {
     public function __construct(
+        private AuthService $auth,
         private ApplicationWorkflowService $workflow,
         private CredentialService $credentials,
         private PaymentService $payments,
@@ -30,6 +33,42 @@ final readonly class AdminController
         private ?InterviewService $interviews = null,
         private ?StudentPrelicensureService $prelicensure = null,
     ) {}
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function users(): array
+    {
+        return [
+            'users' => array_values(array_map(
+                fn (array $user): array => $this->sanitizeUser($user),
+                array_filter($this->store->all('users'), fn (array $user): bool => $this->isAdminUserRow($user)),
+            )),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function createAdminUser(Request $request): array
+    {
+        Validator::requireFields($request->body, ['name', 'email', 'phone', 'password']);
+        Validator::email('email', $request->body['email']);
+        /** @var AuthenticatedUser $admin */
+        $admin = $request->user;
+
+        return [
+            'user' => $this->sanitizeUser($this->auth->createAdminUser(
+                actor: $admin,
+                name: (string) $request->body['name'],
+                email: (string) $request->body['email'],
+                phone: (string) $request->body['phone'],
+                password: (string) $request->body['password'],
+                ipAddress: $request->ipAddress,
+                userAgent: $request->userAgent,
+            )),
+        ];
+    }
 
     /**
      * @return array<string, mixed>
@@ -321,5 +360,27 @@ final readonly class AdminController
         }
 
         return $this->prelicensure;
+    }
+
+    /**
+     * @param array<string, mixed> $user
+     * @return array<string, mixed>
+     */
+    private function sanitizeUser(array $user): array
+    {
+        unset($user['password_hash']);
+
+        return $user;
+    }
+
+    /**
+     * @param array<string, mixed> $user
+     */
+    private function isAdminUserRow(array $user): bool
+    {
+        $roles = array_map(static fn (mixed $role): string => (string) $role, $user['roles'] ?? []);
+
+        return in_array(UserRole::Admin->value, $roles, true)
+            || in_array(UserRole::SuperAdmin->value, $roles, true);
     }
 }

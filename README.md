@@ -115,6 +115,7 @@ This repository now includes an executable Milestone 1 vertical slice. The backe
 - Milestone 4 operations engine with notification delivery attempts, log/null email provider adapter, notification worker script, M-PESA callback event persistence, redacted payment callback handling, facility subscription payment linkage, admin command center, reporting summaries, privacy request lifecycle, and new admin routes for notifications, reports, and privacy work.
 - Milestone 5 intelligent placement engine with facility requisitions, professional availability/preferences, deterministic matching, AI-assisted draft rationale governance, placement shortlists, placement lifecycle events, controlled communication threads, facility team invitation foundation, FHIR/SMART-readiness mappings, ASVS-readiness checklist, and placement-focused portal routes.
 - Production launch readiness foundations for `www.afyalinks.org`, optional branded inboxes, SMTP notification delivery, idempotent staging demo seed data, browser smoke tests, and launch QA checklists.
+- Role-safe workflow correction with admin-only API namespaces, verified portal sessions, role-aware login redirects, secure admin-user creation, and wrong-workspace screens.
 
 ## Run Locally
 
@@ -197,6 +198,7 @@ The current tests verify:
 - the staging demo seed is idempotent and keeps students awaiting license out of licensed publication;
 - privacy requests can be submitted, reviewed, updated, and audited.
 - Milestone 5 matching blocks student-awaiting-license applicants from normal matching, scores eligible published professionals transparently, records AI draft usage, creates shortlists/placements, hashes facility invitation tokens, and maps safe FHIR metadata without exposing private document storage keys.
+- logged-out protected API calls return `401`, wrong-role portal/API access returns `403`, and facility/professional/admin dashboards remain separate.
 
 ## Render Deployment
 
@@ -257,6 +259,8 @@ Read the deployment guides before changing staging or production settings:
 - [Visual Rejection Audit](docs/frontend/visual-rejection-audit.md)
 - [Privacy Requests and Retention](docs/security/privacy-requests-and-retention.md)
 - [ASVS Readiness Checklist](docs/security/asvs-readiness-checklist.md)
+- [Role Access Matrix](docs/security/role-access-matrix.md)
+- [Workflow Auth Dashboard Audit](docs/workflows/workflow-auth-dashboard-audit.md)
 - [AI-Assisted Recommendations Governance](docs/ai/ai-assisted-recommendations-governance.md)
 - [Notification Delivery](docs/workflows/notification-delivery.md)
 - [M-PESA Payment Operations](docs/workflows/mpesa-payment-operations.md)

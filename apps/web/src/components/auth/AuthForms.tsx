@@ -8,15 +8,9 @@ import { Feedback } from "@/components/ui/Feedback";
 import { Field, formValues, TextArea } from "@/components/ui/Forms";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { apiRequest, asRecord, type ApiRole } from "@/lib/api/client";
-import { setToken } from "@/lib/auth/session";
+import { clearAllTokens, portalByRole, resolveRoleGroup, setToken } from "@/lib/auth/session";
 
 type AuthMode = "login" | "professional-register" | "student-register" | "facility-register" | "verify-email" | "forgot" | "reset";
-
-const portalByRole: Record<ApiRole, string> = {
-  professional: "/portal/professional/dashboard",
-  facility: "/portal/facility/dashboard",
-  admin: "/portal/admin/dashboard",
-};
 
 function titleFor(mode: AuthMode) {
   switch (mode) {
@@ -130,11 +124,12 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         const data = asRecord(await apiRequest("/api/auth/login", { method: "POST", body: values }));
         const token = String(data.token ?? "");
         const user = asRecord(data.user);
-        const inferredRole = (user.role === "Admin" ? "admin" : user.role === "FacilityOwner" ? "facility" : role) as ApiRole;
-        const targetRole = role === "admin" || role === "facility" || role === "professional" ? role : inferredRole;
+        const targetRole = resolveRoleGroup(user);
 
         if (!token) throw new Error("The API did not return a session token.");
-        setToken(targetRole, token);
+        if (!targetRole) throw new Error("No portal role is assigned to this account.");
+        clearAllTokens();
+        setToken(targetRole, token, user);
         setMessage("Signed in. Redirecting to your portal.");
         router.push(portalByRole[targetRole]);
         return;
@@ -143,7 +138,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       if (mode === "professional-register") {
         const data = asRecord(await apiRequest("/api/auth/register", { method: "POST", body: values }));
         const token = String(data.token ?? "");
-        if (token) setToken("professional", token);
+        if (token) {
+          clearAllTokens();
+          setToken("professional", token, asRecord(data.user));
+        }
         setMessage("Professional account created. Check the email verification instructions and continue your profile.");
         router.push("/portal/professional/dashboard");
         return;
@@ -152,7 +150,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       if (mode === "student-register") {
         const data = asRecord(await apiRequest("/api/auth/register/student", { method: "POST", body: values }));
         const token = String(data.token ?? "");
-        if (token) setToken("professional", token);
+        if (token) {
+          clearAllTokens();
+          setToken("professional", token, asRecord(data.user));
+        }
         setMessage("Student awaiting-license account created. Continue your pre-licensure checklist.");
         router.push("/portal/professional/waiting-license");
         return;
@@ -161,7 +162,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       if (mode === "facility-register") {
         const data = asRecord(await apiRequest("/api/facility/auth/register", { method: "POST", body: values }));
         const token = String(data.token ?? "");
-        if (token) setToken("facility", token);
+        if (token) {
+          clearAllTokens();
+          setToken("facility", token, asRecord(data.user));
+        }
         setMessage("Facility account created. Continue onboarding from the facility dashboard.");
         router.push("/portal/facility/dashboard");
         return;

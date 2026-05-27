@@ -186,6 +186,38 @@ final readonly class AuthService
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function createAdminUser(
+        AuthenticatedUser $actor,
+        string $name,
+        string $email,
+        string $phone,
+        string $password,
+        ?string $ipAddress = null,
+        ?string $userAgent = null,
+    ): array {
+        $this->assertPassword($password);
+        $email = strtolower(trim($email));
+        $phone = trim($phone);
+
+        if ($this->store->first('users', static fn (array $row): bool => strtolower((string) $row['email']) === $email) !== null) {
+            throw new ValidationException(['email' => ['An account already exists for this email.']]);
+        }
+        if ($this->store->first('users', static fn (array $row): bool => (string) $row['phone'] === $phone) !== null) {
+            throw new ValidationException(['phone' => ['An account already exists for this phone number.']]);
+        }
+
+        $user = $this->insertUser(trim($name), $email, $phone, $password, [UserRole::Admin], gmdate(DATE_ATOM));
+        $this->audit->record($actor->id, 'admin_user.created', 'User', (string) $user['id'], [
+            'email' => $email,
+            'roles' => $user['roles'],
+        ], $ipAddress, $userAgent);
+
+        return $user;
+    }
+
+    /**
      * @return array{token: string, user: AuthenticatedUser}
      */
     public function login(

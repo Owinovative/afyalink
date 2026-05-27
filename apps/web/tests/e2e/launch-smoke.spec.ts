@@ -20,6 +20,7 @@ const protectedRoutes = [
   "/portal/facility/dashboard",
   "/portal/facility/requisitions",
   "/portal/admin/dashboard",
+  "/portal/admin/users",
 ];
 
 const widths = [375, 768, 1440, 1920];
@@ -54,6 +55,97 @@ test("protected portal routes hide internal content when logged out", async ({ p
     expect(bodyText).not.toContain("Recent audit events");
     expect(bodyText).not.toContain("Requisitions awaiting matching");
   }
+});
+
+test("wrong-role portal sessions render access denied before dashboard content", async ({ page }) => {
+  await page.route("**/api/me", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        data: {
+          user: {
+            id: 42,
+            name: "Facility Owner",
+            email: "facility@example.com",
+            roles: ["facility_admin"],
+          },
+        },
+      }),
+    });
+  });
+
+  await page.addInitScript(() => {
+    window.localStorage.setItem("afyalink.adminToken", "facility-token-stored-in-wrong-bucket");
+  });
+
+  await page.goto("/portal/admin/dashboard");
+  await expect(page.getByRole("heading", { name: "Wrong workspace." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Go to your dashboard" })).toHaveAttribute("href", "/portal/facility/dashboard");
+  expect(await page.locator(".portal-shell").count()).toBe(0);
+
+  const bodyText = await page.locator("body").innerText();
+  expect(bodyText).not.toContain("Command center");
+  expect(bodyText).not.toContain("Applications");
+});
+
+test("login redirects by authenticated backend role instead of selected portal", async ({ page }) => {
+  await page.route("**/api/auth/login", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        data: {
+          token: "facility-login-token",
+          user: {
+            id: 77,
+            name: "Facility Owner",
+            email: "facility@example.com",
+            roles: ["facility_admin"],
+          },
+        },
+      }),
+    });
+  });
+  await page.route("**/api/me", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        data: {
+          user: {
+            id: 77,
+            name: "Facility Owner",
+            email: "facility@example.com",
+            roles: ["facility_admin"],
+          },
+        },
+      }),
+    });
+  });
+  await page.route("**/api/facility/dashboard", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        data: {
+          facility: { display_name: "Facility Demo", review_status: "approved" },
+          membership: { role: "facility_admin" },
+          access: { active: false, active_subscription: null },
+          requests: [],
+          recommendation_requests: [],
+          recommendation_packages: [],
+        },
+      }),
+    });
+  });
+
+  await page.goto("/auth/login");
+  await page.locator("select").first().selectOption("admin");
+  await page.locator("[name='email']").fill("facility@example.com");
+  await page.locator("[name='password']").fill("Password123!");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/\/portal\/facility\/dashboard/);
 });
 
 test("homepage slider controls and 15 second progress are wired", async ({ page }) => {

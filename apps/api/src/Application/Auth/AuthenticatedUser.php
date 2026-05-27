@@ -32,6 +32,23 @@ final readonly class AuthenticatedUser
             || $this->hasRole(UserRole::VerificationOfficer);
     }
 
+    public function isAdminWorkspaceUser(): bool
+    {
+        return $this->hasRole(UserRole::Admin)
+            || $this->hasRole(UserRole::SuperAdmin);
+    }
+
+    public function isFacilityWorkspaceUser(): bool
+    {
+        return $this->hasRole(UserRole::FacilityAdmin)
+            || $this->hasRole(UserRole::FacilityViewer);
+    }
+
+    public function isProfessionalWorkspaceUser(): bool
+    {
+        return $this->hasRole(UserRole::Professional);
+    }
+
     /**
      * @return array<string, mixed>
      */

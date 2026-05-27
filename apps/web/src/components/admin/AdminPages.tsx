@@ -38,6 +38,7 @@ type AdminSection =
   | "integrations"
   | "security"
   | "reports"
+  | "users"
   | "notifications"
   | "privacy"
   | "audit";
@@ -68,6 +69,7 @@ const adminSectionTitles: Record<AdminSection, string> = {
   integrations: "Integrations",
   security: "Security",
   reports: "Reports",
+  users: "Admin users",
   notifications: "Notifications",
   privacy: "Privacy requests",
   audit: "Audit",
@@ -99,6 +101,7 @@ const adminSectionBodies: Record<AdminSection, string> = {
   integrations: "Integration readiness.",
   security: "Security readiness.",
   reports: "Operational reports.",
+  users: "Admin-only access.",
   notifications: "Delivery state.",
   privacy: "Privacy requests.",
   audit: "Sensitive activity.",
@@ -134,6 +137,7 @@ export function AdminPage({ section, id }: { section: AdminSection; id?: string 
       {section === "integrations" ? <IntegrationReadiness /> : null}
       {section === "security" ? <SecurityReadiness /> : null}
       {section === "reports" ? <ReportsDashboard /> : null}
+      {section === "users" ? <AdminUsers /> : null}
       {section === "notifications" ? <NotificationOperations /> : null}
       {section === "privacy" ? <PrivacyRequests /> : null}
       {section === "audit" ? <AuditLog /> : null}
@@ -221,6 +225,7 @@ function AdminDashboard() {
         <QuickLink title="Recommendations" href="/portal/admin/recommendations" body="Curated packages." />
         <QuickLink title="Pre-licensure queue" href="/portal/admin/pre-licensure" body="Waiting-license applicants." />
         <QuickLink title="Reports" href="/portal/admin/reports" body="Funnel and delivery." />
+        <QuickLink title="Admin users" href="/portal/admin/users" body="Create secure admins." />
         <QuickLink title="Notifications" href="/portal/admin/notifications" body="Pending and failed." />
         <QuickLink title="Privacy" href="/portal/admin/privacy" body="Subject rights." />
       </div>
@@ -239,6 +244,75 @@ function QuickLink({ title, href, body }: { title: string; href: string; body: s
         </Link>
       </div>
     </article>
+  );
+}
+
+function AdminUsers() {
+  const resource = useApiResource<Record<string, unknown>>("admin", "/api/admin/users");
+  const users = asArray<Record<string, unknown>>(asRecord(resource.data).users);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function create(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    setError("");
+    try {
+      await apiRequest("/api/admin/users", {
+        method: "POST",
+        token: resource.token,
+        body: formValues(event),
+      });
+      setMessage("Admin user created.");
+      event.currentTarget.reset();
+      await resource.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not create admin user.");
+    }
+  }
+
+  return (
+    <div className="grid-2">
+      <section className="form-card">
+        <h2>Create admin</h2>
+        <form className="form-grid" onSubmit={create}>
+          <Field label="Full name" name="name" required />
+          <Field label="Email" name="email" type="email" required />
+          <Field label="Phone" name="phone" required />
+          <Field label="Temporary password" name="password" type="password" required minLength={10} />
+          <button className="button full" type="submit" disabled={!resource.token}>
+            Create admin
+          </button>
+        </form>
+        <div className="data-list" style={{ marginTop: 18 }}>
+          {message ? <Feedback message={message} /> : null}
+          {error ? <Feedback message={error} tone="error" /> : null}
+        </div>
+      </section>
+      <section className="card">
+        <h2>Admin accounts</h2>
+        {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+        <div className="data-list">
+          {users.length ? (
+            users.map((user) => (
+              <DataRow
+                key={String(user.id)}
+                title={display(user.name)}
+                status={asArray<string>(user.roles).join(", ")}
+                meta={[
+                  { label: "Email", value: user.email },
+                  { label: "Phone", value: user.phone },
+                  { label: "Active", value: user.is_active },
+                  { label: "Last login", value: user.last_login_at },
+                ]}
+              />
+            ))
+          ) : (
+            <EmptyState title="No admins loaded" body="Admin users appear here." />
+          )}
+        </div>
+      </section>
+    </div>
   );
 }
 
