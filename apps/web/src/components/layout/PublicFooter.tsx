@@ -8,7 +8,7 @@ export function PublicFooter() {
       <div className="footer-grid">
         <div>
           <Link className="brand" href="/">
-            <BrandLockup />
+            <BrandLockup variant="full" />
           </Link>
           <p style={{ marginTop: 16 }}>Verified talent. Controlled access.</p>
         </div>

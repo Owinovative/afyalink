@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState, type CSSProperties } from "react";
+import { BrandLockup } from "@/components/layout/BrandLockup";
 import { Feedback } from "@/components/ui/Feedback";
-import { Field, formValues } from "@/components/ui/Forms";
+import { Field, formValues, TextArea } from "@/components/ui/Forms";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { apiRequest, asRecord, type ApiRole } from "@/lib/api/client";
 import { setToken } from "@/lib/auth/session";
@@ -100,6 +101,9 @@ const authScenes: Record<AuthMode, { title: string; body: string; image: string;
   },
 };
 
+const passwordPattern = "(?=.*[A-Za-z])(?=.*\\d).{10,}";
+const passwordTitle = "Use at least 10 characters with letters and numbers.";
+
 export function AuthForm({ mode }: { mode: AuthMode }) {
   const router = useRouter();
   const scene = authScenes[mode];
@@ -191,6 +195,9 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     <main className="auth-wrap">
       <div className="auth-shell">
         <aside className="auth-aside" style={{ "--auth-image": `url("${scene.image}")` } as CSSProperties}>
+          <div className="auth-brand">
+            <BrandLockup variant="full" />
+          </div>
           <div className="eyebrow">Secure access</div>
           <h1>{scene.title}</h1>
           <p>{scene.body}</p>
@@ -215,6 +222,9 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           </div>
         </aside>
         <section className="auth-card form-card">
+        <div className="auth-card-brand">
+          <BrandLockup kicker="Secure account" />
+        </div>
         <PageHeader
           eyebrow="Afyalink account"
           title={titleFor(mode)}
@@ -233,12 +243,19 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           ) : null}
           {mode === "professional-register" || mode === "student-register" || mode === "facility-register" ? (
             <>
-              <Field label="Full name" name="name" required />
-              <Field label="Phone" name="phone" required />
+              <Field label={mode === "facility-register" ? "Owner full name" : "Full name"} name="name" required autoComplete="name" />
+              <Field label={mode === "facility-register" ? "Owner/facility phone" : "Phone"} name="phone" required autoComplete="tel" inputMode="tel" />
+            </>
+          ) : null}
+          {mode === "professional-register" ? (
+            <>
+              <input type="hidden" name="applicant_track" value="licensed_professional" />
+              <p className="form-note full">Licensed profile fields continue after account creation.</p>
             </>
           ) : null}
           {mode === "student-register" ? (
             <>
+              <input type="hidden" name="applicant_track" value="student_awaiting_license" />
               <label>
                 Student or graduate status
                 <select name="student_status" required defaultValue="completed_training_waiting_license">
@@ -253,14 +270,69 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               <Field label="Graduation/completion date" name="graduation_or_completion_date" type="date" />
               <Field label="Expected regulatory body" name="expected_regulatory_body" />
               <Field label="County or location" name="county" required />
+              <label>
+                Placement type after license
+                <select name="placement_type" defaultValue="">
+                  <option value="">Choose later</option>
+                  <option value="full_time">Full time</option>
+                  <option value="part_time">Part time</option>
+                  <option value="locum">Locum</option>
+                  <option value="contract">Contract</option>
+                  <option value="internship">Internship</option>
+                  <option value="attachment">Attachment</option>
+                </select>
+              </label>
               <Field label="Availability after licensure" name="availability_after_licensure" />
+              <TextArea label="Short note" name="notes" placeholder="Optional context for review." />
+              <p className="form-note full">Students are not shown as licensed candidates until license conversion is reviewed.</p>
+            </>
+          ) : null}
+          {mode === "facility-register" ? (
+            <>
+              <Field label="Facility legal name" name="legal_name" required autoComplete="organization" />
+              <Field label="Display name" name="display_name" required />
+              <label>
+                Facility type
+                <select name="facility_type" required defaultValue="">
+                  <option value="" disabled>Select type</option>
+                  <option value="hospital">Hospital</option>
+                  <option value="clinic">Clinic</option>
+                  <option value="medical_center">Medical center</option>
+                  <option value="laboratory">Laboratory</option>
+                  <option value="pharmacy">Pharmacy</option>
+                  <option value="homecare">Home care</option>
+                  <option value="training_institution">Training institution</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+              <Field label="Registration or license number" name="registration_number" />
+              <Field label="County" name="county" required />
+              <Field label="City or town" name="location" />
+              <Field label="Contact person" name="contact_person" required />
+              <TextArea label="Physical address" name="physical_address" placeholder="Building, road, area." />
+              <p className="form-note full">The email and phone below are used for the owner account and facility profile.</p>
             </>
           ) : null}
           {mode === "login" || mode === "professional-register" || mode === "student-register" || mode === "facility-register" || mode === "forgot" ? (
-            <Field label="Email" name="email" type="email" required />
+            <Field
+              label={mode === "facility-register" ? "Official email" : "Email"}
+              name="email"
+              type="email"
+              required
+              autoComplete={mode === "login" || mode === "forgot" ? "email" : "email"}
+            />
           ) : null}
           {mode === "login" || mode === "professional-register" || mode === "student-register" || mode === "facility-register" || mode === "reset" ? (
-            <Field label="Password" name="password" type="password" required />
+            <Field
+              label="Password"
+              name="password"
+              type="password"
+              required
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              minLength={mode === "login" ? undefined : 10}
+              pattern={mode === "login" ? undefined : passwordPattern}
+              title={mode === "login" ? undefined : passwordTitle}
+            />
           ) : null}
           {mode === "verify-email" || mode === "reset" ? (
             <Field label="Token" name="token" required defaultValue={tokenFromQuery} />

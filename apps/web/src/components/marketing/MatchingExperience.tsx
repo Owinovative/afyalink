@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { BreadcrumbStructuredData } from "@/components/seo/StructuredData";
 
@@ -6,7 +5,7 @@ const proofItems = ["Reviewed matches", "Clear reasons", "Human control"];
 
 const steps = [
   { title: "Score", body: "Fit signals" },
-  { title: "Review", body: "Human check" },
+  { title: "Review", body: "Human review" },
   { title: "Share", body: "Reasoned shortlist" },
 ];
 
@@ -15,14 +14,6 @@ export function MatchingExperience() {
     <div className="matching-experience">
       <BreadcrumbStructuredData path="/matching" name="Matching" />
       <section className="matching-hero">
-        <Image
-          src="/images/marketplace/facility-candidate-review.jpg"
-          alt="Healthcare facility team reviewing candidate information."
-          fill
-          priority
-          sizes="100vw"
-          className="matching-hero-image"
-        />
         <div className="matching-hero-overlay" />
         <div className="matching-hero-content">
           <span className="eyebrow">Matching</span>
@@ -42,17 +33,6 @@ export function MatchingExperience() {
             </Link>
           </div>
         </div>
-        <div className="matching-photo-strip" aria-hidden="true">
-          <figure>
-            <Image src="/images/facilities/hospital-facility-team.jpg" alt="" width={320} height={220} />
-          </figure>
-          <figure>
-            <Image src="/images/verification/admin-verification-desk.jpg" alt="" width={320} height={220} />
-          </figure>
-          <figure>
-            <Image src="/images/professionals/clinical-professional-consultation.jpg" alt="" width={320} height={220} />
-          </figure>
-        </div>
       </section>
 
       <section className="matching-process">
@@ -71,7 +51,21 @@ export function MatchingExperience() {
         </ol>
       </section>
 
-      <section className="matching-split">
+      <section className="matching-review-panel review-bg" aria-label="Secure healthcare record review before candidate sharing.">
+        <div className="matching-review-copy">
+          <span className="eyebrow">Human review</span>
+          <h2>Fit is explained.</h2>
+          <p>Candidates are reviewed before a shortlist reaches a facility.</p>
+          <div className="matching-reason-grid">
+            <span>Role</span>
+            <span>County</span>
+            <span>Credentials</span>
+            <span>Availability</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="matching-split trust-bg" aria-label="Healthcare team discussing placement decisions.">
         <div>
           <span className="eyebrow">Control</span>
           <h2>No blind dumps.</h2>
@@ -87,13 +81,6 @@ export function MatchingExperience() {
             </Link>
           </div>
         </div>
-        <Image
-          src="/images/trust/hospital-corridor-care-team.jpg"
-          alt="Healthcare team discussing placement decisions."
-          width={760}
-          height={520}
-          sizes="(max-width: 900px) 100vw, 48vw"
-        />
       </section>
     </div>
   );

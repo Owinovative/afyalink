@@ -14,7 +14,8 @@
     "check": "node tests/check-routes.mjs",
     "typecheck": "tsc --noEmit",
     "test:e2e": "node scripts/run-playwright.mjs",
-    "visual:polish": "node scripts/capture-polish-screenshots.mjs"
+    "visual:polish": "node scripts/capture-polish-screenshots.mjs",
+    "visual:form-logo": "node scripts/capture-form-logo-redesign-screenshots.mjs"
   },
   "dependencies": {
     "next": "^16.1.6",

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BrandLockup } from "@/components/layout/BrandLockup";
 import type { ApiRole } from "@/lib/api/client";
 
 const roleCopy: Record<ApiRole, { label: string; image: string; alt: string }> = {
@@ -28,6 +29,9 @@ export function ProtectedPortalGate({ role, title }: { role: ApiRole; title: str
       <Image src={copy.image} alt={copy.alt} fill priority sizes="100vw" className="portal-locked-image" />
       <div className="portal-locked-overlay" />
       <section className="portal-gate-card" aria-label={`${title} protected sign-in state`}>
+        <div className="portal-gate-brand">
+          <BrandLockup kicker={title} />
+        </div>
         <span className="eyebrow">{title}</span>
         <h1>Sign in to continue.</h1>
         <p>{copy.label}</p>
