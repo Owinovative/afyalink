@@ -1,87 +1,103 @@
+"use client";
+
 import Link from "next/link";
-import { BreadcrumbStructuredData } from "@/components/seo/StructuredData";
-
-const proofItems = ["Reviewed matches", "Clear reasons", "Human control"];
-
-const steps = [
-  { title: "Score", body: "Fit signals" },
-  { title: "Review", body: "Human review" },
-  { title: "Share", body: "Reasoned shortlist" },
-];
 
 export function MatchingExperience() {
   return (
-    <div className="matching-experience">
-      <BreadcrumbStructuredData path="/matching" name="Matching" />
+    <main className="matching-experience">
+      
+      {/* 1. Cinematic Hero */}
       <section className="matching-hero">
-        <div className="matching-hero-overlay" />
         <div className="matching-hero-content">
-          <span className="eyebrow">Matching</span>
-          <h1>Matches explained before sharing.</h1>
-          <p>Reviewed fit. Clear reasons. Human approval.</p>
-          <div className="home-chip-row">
-            {proofItems.map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
-          <div className="hero-actions">
-            <Link className="button" href="/portal/facility/requisitions">
-              Open requisitions
+          <span className="eyebrow" style={{ color: 'var(--teal-soft)', letterSpacing: '0.15em' }}>Intelligent Matching</span>
+          <h1>The right professional.<br/>Exactly when you need them.</h1>
+          <p>
+            Stop sifting through unverified resumes. Afyalink's matching engine connects premium facilities with audited, ready-to-work clinical talent.
+          </p>
+          <div className="hero-actions" style={{ marginTop: "32px" }}>
+            <Link href="/auth/register/facility" className="button">
+              Start Hiring
             </Link>
-            <Link className="button secondary translucent" href="/trust-security">
-              Trust model
+            <Link href="/professionals" className="button translucent">
+              Join as a Professional
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="matching-process">
-        <div>
-          <span className="eyebrow">Process</span>
-          <h2>Score. Review. Share.</h2>
-        </div>
-        <ol>
-          {steps.map((step, index) => (
-            <li key={step.title}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <strong>{step.title}</strong>
-              <p>{step.body}</p>
+      {/* 2. Process Section */}
+      <section className="section-frame section-white">
+        <div className="matching-process">
+          <div>
+            <span className="eyebrow">The Pipeline</span>
+            <h2 style={{ fontSize: "clamp(2rem, 3vw, 2.5rem)", marginTop: "8px", letterSpacing: "-0.02em" }}>
+              From requisition to placement in days.
+            </h2>
+            <p style={{ fontSize: "1.1rem", color: "var(--ink-soft)", marginTop: "16px" }}>
+              We handle the sourcing, the background checks, and the initial availability screening so your HR team can focus on the final interview.
+            </p>
+          </div>
+          <ol>
+            <li>
+              <span>01</span>
+              <strong style={{ display: "block", color: "var(--ink-strong)", fontSize: "1.05rem" }}>Define the Role</strong>
+              <p style={{ color: "var(--ink-soft)" }}>Post a detailed requisition including specialty, shift type, and required experience.</p>
             </li>
-          ))}
-        </ol>
+            <li>
+              <span>02</span>
+              <strong style={{ display: "block", color: "var(--ink-strong)", fontSize: "1.05rem" }}>Network Search</strong>
+              <p style={{ color: "var(--ink-soft)" }}>Our algorithm scans thousands of verified profiles for exact matches in your region.</p>
+            </li>
+            <li>
+              <span>03</span>
+              <strong style={{ display: "block", color: "var(--ink-strong)", fontSize: "1.05rem" }}>Curated Shortlist</strong>
+              <p style={{ color: "var(--ink-soft)" }}>Receive a vetted list of interested, available professionals within 48 hours.</p>
+            </li>
+          </ol>
+        </div>
       </section>
 
-      <section className="matching-review-panel review-bg" aria-label="Secure healthcare record review before candidate sharing.">
-        <div className="matching-review-copy">
-          <span className="eyebrow">Human review</span>
-          <h2>Fit is explained.</h2>
-          <p>Candidates are reviewed before a shortlist reaches a facility.</p>
-          <div className="matching-reason-grid">
-            <span>Role</span>
-            <span>County</span>
-            <span>Credentials</span>
-            <span>Availability</span>
+      {/* 3. Secure Review Panel */}
+      <section className="section-frame section-mist">
+        <div className="container">
+          <div className="matching-review-panel">
+            <div className="matching-review-copy">
+              <span className="eyebrow" style={{ color: "var(--teal-soft)" }}>Secure Review</span>
+              <h2>Evaluate with confidence.</h2>
+              <p>
+                Review watermarked statutory documents, practicing licenses, and verified CPD points before initiating contact.
+              </p>
+              <div className="matching-reason-grid" style={{ marginTop: "24px" }}>
+                <span>Nursing Council Check</span>
+                <span>Identity Verification</span>
+                <span>Education Audit</span>
+                <span>Reference Checks</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="matching-split trust-bg" aria-label="Healthcare team discussing placement decisions.">
-        <div>
-          <span className="eyebrow">Control</span>
-          <h2>No blind dumps.</h2>
-          <p>Fit signals and risk flags stay reviewable before sharing.</p>
-          <div className="home-chip-row">
-            <span>Score</span>
-            <span>Reason</span>
-            <span>Review</span>
-          </div>
-          <div className="hero-actions">
-            <Link className="button secondary" href="/portal/professional/placement-preferences">
-              Set availability
-            </Link>
+      {/* 4. Trust Banner */}
+      <section className="section-frame section-white">
+        <div className="container">
+          <div className="matching-split trust-bg">
+            <div className="matching-review-copy">
+              <span className="eyebrow" style={{ color: "var(--teal-soft)" }}>Built for Trust</span>
+              <h2>Privacy-first candidate discovery.</h2>
+              <p>
+                Professionals control their visibility. Facilities get audited access to sensitive credentials. A perfect balance of opportunity and security.
+              </p>
+              <div className="hero-actions" style={{ marginTop: "24px" }}>
+                <Link href="/trust-security" className="button" style={{ background: "#fff", color: "var(--deep)" }}>
+                  View Security Model
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
-    </div>
+
+    </main>
   );
 }
