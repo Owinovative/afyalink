@@ -44,6 +44,7 @@ export function MarketingNav() {
             <Link href="/facilities" aria-current={pathname.startsWith("/facilities") ? "page" : undefined}>
               Facilities
             </Link>
+            <Link href="/resources" className="nav-link">Resources</Link>
             <Link href="/trust-security" aria-current={pathname.startsWith("/trust") ? "page" : undefined}>
               Trust & Security
             </Link>
