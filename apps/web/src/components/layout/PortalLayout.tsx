@@ -10,12 +10,12 @@ import type { ApiRole } from "@/lib/api/client";
 export function PortalLayout({
   role,
   title,
-  links,
+  navigation,
   children,
 }: {
   role: ApiRole;
   title: string;
-  links: Array<{ href: string; label: string }>;
+  navigation: Array<{ href: string; label: string }>;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -81,8 +81,8 @@ export function PortalLayout({
               <BrandLockup kicker={title} />
             </div>
             <span className="eyebrow">Checking access</span>
-            <h1>Checking workspace.</h1>
-            <p>Verifying role.</p>
+            <h1>Authenticating...</h1>
+            <p>Loading your secure workspace.</p>
           </section>
         </main>
       </div>
@@ -108,10 +108,25 @@ export function PortalLayout({
       </header>
       <div className="portal-shell">
         <aside className="portal-side">
-          <nav aria-label={`${title} navigation`}>
-            {links.map((link) => (
-              <Link href={link.href} key={link.href} aria-current={pathname === link.href ? "page" : undefined}>
-                {link.label}
+          <nav aria-label="Portal navigation">
+            {navigation.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={pathname === item.href ? "page" : undefined}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "10px 14px",
+                  borderRadius: "var(--radius-sm)",
+                  color: pathname === item.href ? "var(--ink-strong)" : "var(--ink-soft)",
+                  background: pathname === item.href ? "var(--mist)" : "transparent",
+                  fontWeight: pathname === item.href ? 700 : 500,
+                  transition: "all 0.2s ease",
+                  marginBottom: "4px"
+                }}
+              >
+                {item.label}
               </Link>
             ))}
           </nav>
