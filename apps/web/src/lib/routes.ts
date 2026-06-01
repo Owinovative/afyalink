@@ -65,4 +65,5 @@ export const adminLinks = [
   { href: "/portal/admin/integrations", label: "Integrations" },
   { href: "/portal/admin/security", label: "Security" },
   { href: "/portal/admin/audit", label: "Audit" },
+  { href: "/portal/admin/resources", label: "Content Manager" },
 ];
