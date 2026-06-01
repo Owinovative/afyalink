@@ -139,29 +139,48 @@ export function HomeExperience() {
               }} 
             />
             
-            <div className="home-slide-content" style={{
-              transform: index === active ? 'translateY(0)' : 'translateY(20px)',
-              transition: 'transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s',
-            }}>
-              <span className="eyebrow" style={{ color: 'var(--teal-soft)', letterSpacing: '0.15em', fontSize: '0.85rem' }}>{slide.eyebrow}</span>
-              <h1 style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>{slide.title}</h1>
-              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1.15rem', maxWidth: '600px', lineHeight: 1.6 }}>{slide.body}</p>
-              
-              <div className="home-chip-row" style={{ marginTop: '8px', marginBottom: '24px' }}>
-                {slide.chips.map((chip) => (
-                  <span key={chip} style={{
-                    background: 'rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    padding: '8px 16px',
-                    borderRadius: '999px',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    color: '#fff',
-                    letterSpacing: '0.05em',
-                    textTransform: 'uppercase'
-                  }}>{chip}</span>
-                ))}
+          <div className="home-slide-content" style={{
+                transform: index === active ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s',
+                display: 'flex',              // Added for centering
+                flexDirection: 'column',      // Added for centering
+                alignItems: 'center',         // Added for centering
+                textAlign: 'center',          // Added for centering
+                margin: '0 auto',             // Added for centering
+              }}>
+                <span className="eyebrow" style={{ color: 'var(--teal-soft)', letterSpacing: '0.15em', fontSize: '0.85rem' }}>{slide.eyebrow}</span>
+                <h1 style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>{slide.title}</h1>
+                <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1.15rem', maxWidth: '600px', lineHeight: 1.6 }}>{slide.body}</p>
+                
+                {/* Add justifyContent: 'center' to the chips */}
+                <div className="home-chip-row" style={{ marginTop: '8px', marginBottom: '24px', justifyContent: 'center' }}>
+                  {slide.chips.map((chip) => (
+                    <span key={chip} style={{
+                      background: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      padding: '8px 16px',
+                      borderRadius: '999px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      color: '#fff',
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase'
+                    }}>{chip}</span>
+                  ))}
+                </div>
+                
+                {/* Add justifyContent: 'center' to the buttons */}
+                <div className="hero-actions" style={{ justifyContent: 'center' }}>
+                  <Link className="button" href={slide.primary.href} style={{ padding: '14px 32px', fontSize: '1rem' }}>
+                    {slide.primary.label}
+                  </Link>
+                  {slide.secondary && (
+                    <Link className="button translucent" href={slide.secondary.href} style={{ padding: '14px 32px', fontSize: '1rem' }}>
+                      {slide.secondary.label}
+                    </Link>
+                  )}
+                </div>
               </div>
               
               <div className="hero-actions">
