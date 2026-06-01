@@ -13,24 +13,27 @@ type AuthMode = "professional" | "student" | "facility";
 
 function titleFor(mode: AuthMode) {
   switch (mode) {
-    case "professional":
-      return "Professional application";
-    case "student":
-      return "Student early registration";
-    case "facility":
-      return "Facility onboarding";
+    case "professional": return "Professional application";
+    case "student": return "Student early registration";
+    case "facility": return "Facility onboarding";
   }
 }
 
 function bodyFor(mode: AuthMode) {
   switch (mode) {
-    case "professional":
-      return "Create an account and continue your profile.";
-    case "student":
-      return "Start early. Publication waits for license conversion.";
-    case "facility":
-      return "Create owner access. Approval unlocks browsing.";
+    case "professional": return "Create an account and continue your profile.";
+    case "student": return "Start early. Publication waits for license conversion.";
+    case "facility": return "Create owner access. Approval unlocks browsing.";
   }
+}
+
+// Helper to determine step number
+function getStepNumber(status: string) {
+  if (status === "draft") return 1;
+  if (status === "payment_pending") return 2;
+  if (status === "payment_verified") return 3;
+  if (status === "password_created" || status === "email_verification_pending") return 4;
+  return 5; // Complete
 }
 
 export function RegistrationFlow({ mode }: { mode: AuthMode }) {
@@ -42,14 +45,16 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"stk" | "paybill">("stk");
+
+  const currentStep = getStepNumber(status);
+  const priceDetails = pricing ? asRecord(pricing[mode]) : null;
 
   useEffect(() => {
     apiRequest("/api/registration/pricing", { method: "GET" })
       .then((res) => setPricing(asRecord(asRecord(res).data).pricing as Record<string, unknown>))
       .catch(() => {});
   }, []);
-
-  const priceDetails = pricing ? asRecord(pricing[mode]) : null;
 
   async function refreshStatus() {
     if (!reference) return;
@@ -83,7 +88,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
       setRegistration(reg);
       setReference(String(reg.registration_reference));
       setStatus(String(reg.status));
-      setMessage("Details saved. Proceed to payment.");
+      window.scrollTo(0, 0);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not start registration.");
     } finally {
@@ -98,7 +103,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
     setMessage("");
     const values = formValues(event);
     try {
-      if (values.payment_method === "stk") {
+      if (paymentMethod === "stk") {
         await apiRequest(`/api/registration/${reference}/stk`, {
           method: "POST",
           body: { phone_number: values.phone_number },
@@ -134,7 +139,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
       const reg = asRecord(data.registration);
       setRegistration(reg);
       setStatus(String(reg.status));
-      setMessage("Password created. Check your email for the verification code.");
+      window.scrollTo(0, 0);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not save password.");
     } finally {
@@ -157,7 +162,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
       const reg = asRecord(data.registration);
       setRegistration(reg);
       setStatus(String(reg.status));
-      setMessage("Email verified successfully.");
+      window.scrollTo(0, 0);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not verify code.");
     } finally {
@@ -180,25 +185,70 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
   }
 
   return (
-    <section className="auth-card form-card">
+    <section className="auth-card form-card" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div className="auth-card-brand">
         <BrandLockup kicker="Secure account" />
       </div>
-      <PageHeader eyebrow="Registration" title={titleFor(mode)} body={bodyFor(mode)} />
 
-      {error ? (
-        <div style={{ marginBottom: 18 }}>
-          <Feedback message={error} tone="error" />
-        </div>
-      ) : null}
-      {message ? (
-        <div style={{ marginBottom: 18 }}>
-          <Feedback message={message} tone="success" />
-        </div>
-      ) : null}
+      {/* Premium Step Tracker */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+        {[
+          { num: 1, label: "Details" },
+          { num: 2, label: "Payment" },
+          { num: 3, label: "Secure" },
+          { num: 4, label: "Verify" }
+        ].map((step, i) => (
+          <div key={step.num} style={{ display: "flex", alignItems: "center", flex: 1 }}>
+            <div style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
+              opacity: currentStep >= step.num ? 1 : 0.4,
+              transition: "all 0.3s ease"
+            }}>
+              <div style={{
+                width: "28px", height: "28px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                background: currentStep >= step.num ? "var(--teal)" : "var(--line)",
+                color: currentStep >= step.num ? "#fff" : "var(--ink)",
+                fontSize: "0.8rem", fontWeight: 700,
+                boxShadow: currentStep === step.num ? "0 0 0 4px var(--teal-soft)" : "none"
+              }}>
+                {currentStep > step.num ? "✓" : step.num}
+              </div>
+              <span style={{ fontSize: "0.7rem", fontWeight: 600, color: currentStep >= step.num ? "var(--ink-strong)" : "var(--ink-soft)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                {step.label}
+              </span>
+            </div>
+            {i < 3 && (
+              <div style={{
+                height: "2px", flex: 1, margin: "0 12px", borderRadius: "2px", alignSelf: "flex-start", marginTop: "13px",
+                background: currentStep > step.num ? "var(--teal)" : "var(--line)",
+                transition: "all 0.3s ease"
+              }} />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Dynamic Header based on Step */}
+      <div>
+        <h2 style={{ fontSize: "1.75rem", marginBottom: "8px", letterSpacing: "-0.02em" }}>
+          {currentStep === 1 ? titleFor(mode) : 
+           currentStep === 2 ? "Registration Payment" : 
+           currentStep === 3 ? "Secure Your Account" : 
+           currentStep === 4 ? "Verify Your Email" : "Registration Complete"}
+        </h2>
+        <p style={{ color: "var(--ink-soft)", margin: 0, fontSize: "0.95rem" }}>
+          {currentStep === 1 ? bodyFor(mode) : 
+           currentStep === 2 ? "Complete the one-time fee to proceed." : 
+           currentStep === 3 ? "Create a strong password for your workspace." : 
+           currentStep === 4 ? "Enter the 6-digit code sent to your email." : "Your account is ready."}
+        </p>
+      </div>
+
+      {error ? <Feedback message={error} tone="error" /> : null}
+      {message ? <Feedback message={message} tone="success" /> : null}
 
       {/* STEP 1: DRAFT (Details) */}
-      {status === "draft" && (
+      {currentStep === 1 && (
         <form className="form-grid" onSubmit={handleStart}>
           <Field label={mode === "facility" ? "Owner full name" : "Full name"} name="name" required autoComplete="name" />
           <Field label="Email" name="email" type="email" required autoComplete="email" />
@@ -217,7 +267,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
                   <option value="completed_training_waiting_license">Completed, waiting for license</option>
                 </select>
               </label>
-              <Field label="Target profession" name="target_profession" required placeholder="Registered Nurse, Clinical Officer..." />
+              <Field label="Target profession" name="target_profession" required placeholder="Registered Nurse..." />
               <Field label="Institution name" name="institution_name" required />
               <Field label="Programme or course" name="programme_or_course" required />
               <Field label="Graduation/completion date" name="graduation_or_completion_date" type="date" />
@@ -228,10 +278,8 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
                 <select name="placement_type" defaultValue="">
                   <option value="">Choose later</option>
                   <option value="full_time">Full time</option>
-                  <option value="part_time">Part time</option>
                   <option value="locum">Locum</option>
                   <option value="internship">Internship</option>
-                  <option value="attachment">Attachment</option>
                 </select>
               </label>
               <Field label="Availability after licensure" name="availability_after_licensure" />
@@ -250,9 +298,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
                   <option value="" disabled>Select type</option>
                   <option value="hospital">Hospital</option>
                   <option value="clinic">Clinic</option>
-                  <option value="medical_center">Medical center</option>
                   <option value="pharmacy">Pharmacy</option>
-                  <option value="training_institution">Training institution</option>
                   <option value="other">Other</option>
                 </select>
               </label>
@@ -264,102 +310,142 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
             </>
           )}
 
-          <button className="button full" type="submit" disabled={busy}>
-            {busy ? "Saving..." : "Continue to Payment"}
-          </button>
+          <div className="form-actions full" style={{ marginTop: "12px" }}>
+            <button className="button full" type="submit" disabled={busy}>
+              {busy ? "Saving..." : "Continue to Payment"}
+            </button>
+          </div>
         </form>
       )}
 
       {/* STEP 2: PAYMENT PENDING */}
-      {status === "payment_pending" && (
+      {currentStep === 2 && (
         <form className="form-grid" onSubmit={handlePayment}>
-          <div className="full notice">
-            <strong>Registration Fee: </strong>
-            {priceDetails ? `${priceDetails.currency} ${Number(priceDetails.amount_cents) / 100}` : "Loading..."}
+          <div className="full" style={{ background: "var(--mist)", padding: "20px", borderRadius: "var(--radius-md)", textAlign: "center", border: "1px solid var(--line)" }}>
+            <span style={{ fontSize: "0.85rem", color: "var(--ink-soft)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>Amount Due</span>
+            <div style={{ fontSize: "2.5rem", fontWeight: 800, color: "var(--ink-strong)", lineHeight: 1 }}>
+              {priceDetails ? `${priceDetails.currency} ${Number(priceDetails.amount_cents) / 100}` : "..."}
+            </div>
           </div>
 
-          <label className="full">
-            Payment Method
-            <select name="payment_method" defaultValue="stk">
-              <option value="stk">M-PESA Prompt (STK Push)</option>
-              <option value="paybill">I already paid via Paybill</option>
-            </select>
-          </label>
-
-          <Field label="M-PESA Phone Number (For Prompt)" name="phone_number" inputMode="tel" defaultValue={String(registration?.phone ?? "")} />
-          
-          <div className="full" style={{ borderTop: "1px solid var(--line)", margin: "10px 0", paddingTop: "10px" }}>
-            <p style={{ fontSize: "0.88rem", color: "var(--ink-soft)" }}>If you paid manually, enter the details below:</p>
+          <div className="full" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div 
+              onClick={() => setPaymentMethod("stk")}
+              style={{ padding: "16px", borderRadius: "var(--radius-sm)", border: paymentMethod === "stk" ? "2px solid var(--teal)" : "1px solid var(--line-strong)", background: paymentMethod === "stk" ? "var(--teal-soft)" : "#fff", cursor: "pointer", transition: "all 0.2s ease" }}>
+              <strong style={{ display: "block", color: "var(--ink-strong)", marginBottom: "4px" }}>M-PESA Prompt</strong>
+              <span style={{ fontSize: "0.8rem", color: "var(--ink-soft)" }}>Send a prompt to your phone.</span>
+            </div>
+            <div 
+              onClick={() => setPaymentMethod("paybill")}
+              style={{ padding: "16px", borderRadius: "var(--radius-sm)", border: paymentMethod === "paybill" ? "2px solid var(--teal)" : "1px solid var(--line-strong)", background: paymentMethod === "paybill" ? "var(--teal-soft)" : "#fff", cursor: "pointer", transition: "all 0.2s ease" }}>
+              <strong style={{ display: "block", color: "var(--ink-strong)", marginBottom: "4px" }}>Manual Paybill</strong>
+              <span style={{ fontSize: "0.8rem", color: "var(--ink-soft)" }}>I already have a receipt code.</span>
+            </div>
           </div>
-          <Field label="M-PESA Receipt/Transaction Code" name="paybill_reference" />
-          <Field label="Phone number used to pay" name="payer_phone" />
 
-          <button className="button full" type="submit" disabled={busy}>
-            {busy ? "Processing..." : "Submit Payment"}
-          </button>
-          
-          <button className="button secondary full" type="button" onClick={refreshStatus} disabled={busy}>
-            Check Payment Status
-          </button>
+          {paymentMethod === "stk" ? (
+            <Field label="M-PESA Phone Number" name="phone_number" inputMode="tel" defaultValue={String(registration?.phone ?? "")} />
+          ) : (
+            <>
+              <Field label="M-PESA Receipt/Transaction Code" name="paybill_reference" />
+              <Field label="Phone number used to pay" name="payer_phone" />
+            </>
+          )}
+
+          <div className="form-actions full" style={{ marginTop: "12px", display: "grid", gap: "12px" }}>
+            <button className="button full" type="submit" disabled={busy}>
+              {busy ? "Processing..." : paymentMethod === "stk" ? "Send M-PESA Prompt" : "Submit Receipt"}
+            </button>
+            <button className="button secondary full" type="button" onClick={refreshStatus} disabled={busy}>
+              Refresh Payment Status
+            </button>
+          </div>
         </form>
       )}
 
       {/* STEP 3: PASSWORD CREATION */}
-      {status === "payment_verified" && (
+      {currentStep === 3 && (
         <form className="form-grid" onSubmit={handlePassword}>
-          <div className="full notice success">
-            Payment verified successfully. Please secure your account.
+          <div className="full notice success" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "1.2rem" }}>✅</span> Payment verified successfully.
           </div>
-          <Field
-            label="Password"
-            name="password"
-            type="password"
-            required
-            autoComplete="new-password"
-            minLength={10}
-            pattern="(?=.*[A-Za-z])(?=.*\d).{10,}"
-            title="Use at least 10 characters with letters and numbers."
-          />
-          <Field
-            label="Confirm Password"
-            name="password_confirmation"
-            type="password"
-            required
-            autoComplete="new-password"
-            minLength={10}
-          />
-          <button className="button full" type="submit" disabled={busy}>
-            {busy ? "Saving..." : "Create Password"}
-          </button>
+          <div className="full">
+             <Field
+              label="Secure Password"
+              name="password"
+              type="password"
+              required
+              autoComplete="new-password"
+              minLength={10}
+              pattern="(?=.*[A-Za-z])(?=.*\d).{10,}"
+              title="Use at least 10 characters with letters and numbers."
+            />
+          </div>
+          <div className="full">
+             <Field
+              label="Confirm Password"
+              name="password_confirmation"
+              type="password"
+              required
+              autoComplete="new-password"
+              minLength={10}
+            />
+          </div>
+          <div className="form-actions full" style={{ marginTop: "12px" }}>
+            <button className="button full" type="submit" disabled={busy}>
+              {busy ? "Saving..." : "Secure Account"}
+            </button>
+          </div>
         </form>
       )}
 
       {/* STEP 4: OTP VERIFICATION */}
-      {(status === "password_created" || status === "email_verification_pending") && (
+      {currentStep === 4 && (
         <form className="form-grid" onSubmit={handleOtp}>
-          <div className="full notice">
-            We sent a 6-digit verification code to {String(registration?.email ?? "your email")}.
+          <div className="full" style={{ textAlign: "center", padding: "20px 0" }}>
+             <label style={{ fontSize: "1rem", color: "var(--ink-strong)", marginBottom: "16px", display: "block" }}>
+                Enter the 6-digit code sent to<br/><strong>{String(registration?.email ?? "your email")}</strong>
+             </label>
+             <input 
+                name="code" 
+                required 
+                inputMode="numeric" 
+                pattern="\d{6}" 
+                title="Enter the 6-digit code"
+                placeholder="• • • • • •"
+                style={{ 
+                  fontSize: "2rem", letterSpacing: "0.5em", textAlign: "center", 
+                  padding: "16px", fontWeight: 700, width: "100%", maxWidth: "300px", margin: "0 auto", display: "block" 
+                }} 
+             />
           </div>
-          <Field label="6-Digit Code" name="code" required inputMode="numeric" pattern="\d{6}" title="Enter the 6-digit code" />
-          <button className="button full" type="submit" disabled={busy}>
-            {busy ? "Verifying..." : "Verify Email"}
-          </button>
-          <button className="button ghost full" type="button" onClick={handleResendOtp} disabled={busy}>
-            Resend Code
-          </button>
+          
+          <div className="form-actions full" style={{ display: "grid", gap: "12px", maxWidth: "300px", margin: "0 auto", width: "100%" }}>
+            <button className="button full" type="submit" disabled={busy}>
+              {busy ? "Verifying..." : "Verify Email"}
+            </button>
+            <button className="button ghost full" type="button" onClick={handleResendOtp} disabled={busy}>
+              Resend Code
+            </button>
+          </div>
         </form>
       )}
 
       {/* STEP 5: DONE */}
-      {(status === "email_verified" || status === "active" || status === "approval_pending") && (
-        <div className="form-grid">
-          <div className="full notice success">
-            Registration complete!
-            {status === "approval_pending" && " Your facility is now pending admin approval."}
+      {currentStep === 5 && (
+        <div className="form-grid" style={{ textAlign: "center", padding: "40px 0" }}>
+          <div className="full" style={{ fontSize: "3rem", marginBottom: "16px" }}>🎉</div>
+          <h3 className="full" style={{ fontSize: "1.5rem" }}>Registration Complete!</h3>
+          <p className="full">
+            {status === "approval_pending" 
+              ? "Your facility is now pending admin approval. You will receive an email once your workspace is unlocked." 
+              : "Your workspace is ready."}
+          </p>
+          <div className="full" style={{ display: "flex", justifyContent: "center", marginTop: "16px" }}>
+            <Link className="button" href="/auth/login" style={{ minWidth: "200px" }}>
+              Sign In
+            </Link>
           </div>
-          <Link className="button full" href="/auth/login">
-            Sign In to Your Workspace
-          </Link>
         </div>
       )}
     </section>
