@@ -99,7 +99,7 @@ export function PortalLayout({
         </Link>
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
           <span style={{ fontSize: "0.8rem", color: "var(--ink-soft)", fontWeight: 600 }}>
-            {session.user?.email}
+            {String(session.user?.email || "Workspace User")}
           </span>
           <Link className="button secondary" href={loginHref} style={{ minHeight: "32px", padding: "6px 12px", fontSize: "0.8rem" }}>
             Switch
