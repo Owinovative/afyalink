@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 export function MetricGrid({ children }: { children: React.ReactNode }) {
