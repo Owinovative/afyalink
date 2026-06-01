@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState, type CSSProperties } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { BrandLockup } from "@/components/layout/BrandLockup";
 import { Feedback } from "@/components/ui/Feedback";
 import { Field, formValues } from "@/components/ui/Forms";
@@ -143,88 +143,43 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   }
 
   return (
-    <main className="auth-wrap" style={{ 
-      minHeight: "100vh", 
-      display: "flex", 
-      alignItems: "center", 
-      justifyContent: "center",
-      background: "var(--paper)",
-      padding: "clamp(20px, 4vw, 40px)"
-    }}>
-      <div className="auth-shell" style={{
-        display: "grid",
-        gridTemplateColumns: "minmax(300px, 0.8fr) minmax(400px, 1.2fr)",
-        width: "100%",
-        maxWidth: "1200px",
-        minHeight: "720px",
-        background: "#fff",
-        borderRadius: "var(--radius-xl)",
-        boxShadow: "var(--shadow-lift)",
-        overflow: "hidden"
-      }}>
+    <main className="auth-wrap">
+      <div className="auth-shell">
         
-        {/* Left Side: Cinematic Context */}
-        <aside style={{
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          padding: "clamp(32px, 4vw, 48px)",
-          color: "#fff",
-          background: `linear-gradient(180deg, rgba(2, 6, 23, 0.2) 0%, rgba(2, 6, 23, 0.9) 100%), url("${scene.image}") center / cover no-repeat`
-        }}>
-          <div>
+        {/* Left Side: Cinematic Context (Handled by CSS for mobile) */}
+        <aside 
+          className="auth-aside" 
+          style={{ backgroundImage: `linear-gradient(180deg, rgba(7, 31, 28, 0.4), rgba(7, 31, 28, 0.9)), url("${scene.image}")` }}
+        >
+          <div className="auth-brand">
             <Link href="/">
               <BrandLockup variant="full" />
             </Link>
           </div>
           
-          <div style={{ position: "relative", zIndex: 2, marginTop: "auto" }}>
-            <span style={{ color: "var(--teal-soft)", fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "12px", display: "block" }}>
-              Secure Access
-            </span>
-            <h1 style={{ color: "#fff", fontSize: "clamp(2rem, 3vw, 2.75rem)", lineHeight: 1.1, marginBottom: "12px" }}>
-              {scene.title}
-            </h1>
-            <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "1.05rem", lineHeight: 1.6, maxWidth: "400px", marginBottom: "24px" }}>
-              {scene.body}
-            </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          <div>
+            <span className="eyebrow" style={{ color: "var(--teal-soft)", marginBottom: "8px" }}>Secure Access</span>
+            <h1>{scene.title}</h1>
+            <p>{scene.body}</p>
+            <div className="auth-pill-row" style={{ marginTop: "16px" }}>
               {scene.chips.map((chip) => (
-                <span key={chip} style={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  backdropFilter: "blur(12px)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  padding: "6px 12px",
-                  borderRadius: "999px",
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase"
-                }}>{chip}</span>
+                <span key={chip}>{chip}</span>
               ))}
             </div>
           </div>
         </aside>
 
         {/* Right Side: Authentication Router */}
-        <section style={{ 
-          padding: "clamp(32px, 5vw, 64px)", 
-          display: "flex", 
-          flexDirection: "column", 
-          justifyContent: "center",
-          background: "#fff" 
-        }}>
-          
+        <section className="auth-card">
           {mode === "professional-register" || mode === "student-register" || mode === "facility-register" ? (
             <RegistrationFlow mode={mode === "professional-register" ? "professional" : mode === "student-register" ? "student" : "facility"} />
           ) : (
-            <div style={{ maxWidth: "440px", width: "100%", margin: "0 auto" }}>
-              <div style={{ marginBottom: "32px" }}>
-                <h2 style={{ fontSize: "2rem", color: "var(--ink-strong)", letterSpacing: "-0.02em", marginBottom: "8px" }}>
+            <div style={{ maxWidth: "400px", width: "100%", margin: "0 auto" }}>
+              <div style={{ marginBottom: "24px" }}>
+                <h2 style={{ fontSize: "1.75rem", color: "var(--ink-strong)", letterSpacing: "-0.02em", marginBottom: "8px" }}>
                   {titleFor(mode)}
                 </h2>
-                <p style={{ color: "var(--ink-soft)", fontSize: "1rem", margin: 0 }}>
+                <p style={{ color: "var(--ink-soft)", fontSize: "0.95rem", margin: 0 }}>
                   {bodyFor(mode)}
                 </p>
               </div>
@@ -232,7 +187,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               {error ? <Feedback message={error} tone="error" /> : null}
               {message ? <Feedback message={message} tone="success" /> : null}
 
-              <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "24px" }}>
+              <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "20px" }}>
                 {mode === "login" ? (
                   <label>
                     Select Workspace
@@ -275,11 +230,11 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                   <Field label="Security Token" name="token" required defaultValue={tokenFromQuery} />
                 ) : null}
 
-                <div style={{ marginTop: "12px", display: "flex", gap: "12px", flexDirection: "column" }}>
-                  <button className="button full" type="submit" disabled={busy} style={{ minHeight: "48px", fontSize: "1rem" }}>
+                <div className="form-actions" style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <button className="button full" type="submit" disabled={busy}>
                     {busy ? "Working..." : mode === "login" ? "Sign In" : "Continue"}
                   </button>
-                  <Link className="button ghost full" href="/" style={{ minHeight: "48px" }}>
+                  <Link className="button ghost full" href="/">
                     Return to website
                   </Link>
                 </div>
@@ -287,11 +242,11 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
               {/* Seamless Bottom Navigation for specific modes */}
               {mode === "login" && (
-                <div style={{ marginTop: "40px", paddingTop: "24px", borderTop: "1px solid var(--line)", textAlign: "center" }}>
-                  <p style={{ fontSize: "0.9rem", color: "var(--ink-soft)", margin: 0 }}>
+                <div style={{ marginTop: "32px", paddingTop: "24px", borderTop: "1px solid var(--line)", textAlign: "center" }}>
+                  <p style={{ fontSize: "0.85rem", color: "var(--ink-soft)", margin: 0 }}>
                     Don't have an account?
                   </p>
-                  <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "16px", marginTop: "12px" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "12px", marginTop: "12px" }}>
                     <Link href="/auth/register/professional" style={{ fontSize: "0.85rem", color: "var(--teal)", fontWeight: 600 }}>Professional</Link>
                     <span style={{ color: "var(--line-strong)" }}>|</span>
                     <Link href="/auth/register/student" style={{ fontSize: "0.85rem", color: "var(--teal)", fontWeight: 600 }}>Student</Link>
