@@ -3,7 +3,7 @@ import { adminLinks } from "@/lib/routes";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <PortalLayout role="admin" title="Admin Portal" links={adminLinks}>
+    <PortalLayout role="admin" title="Admin Portal" navigation={adminLinks}>
       {children}
     </PortalLayout>
   );
