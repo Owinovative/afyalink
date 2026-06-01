@@ -16,6 +16,7 @@ type AdminSection =
   | "dashboard"
   | "applications"
   | "pre-licensure"
+  | "registrations"
   | "application-detail"
   | "credentials"
   | "payments"
@@ -47,6 +48,7 @@ const adminSectionTitles: Record<AdminSection, string> = {
   dashboard: "Admin dashboard",
   applications: "Applications",
   "pre-licensure": "Pre-licensure",
+  registrations: "Registration queue",
   "application-detail": "Application detail",
   credentials: "Credentials",
   payments: "Payments",
@@ -79,6 +81,7 @@ const adminSectionBodies: Record<AdminSection, string> = {
   dashboard: "Queues and counters.",
   applications: "Submitted applications.",
   "pre-licensure": "Waiting-license applicants.",
+  registrations: "Payments, OTPs, and Approvals.",
   "application-detail": "One application.",
   credentials: "Credential review.",
   payments: "Payment references.",
@@ -117,6 +120,7 @@ export function AdminPage({ section, id }: { section: AdminSection; id?: string 
       />
       {section === "dashboard" ? <AdminDashboard /> : null}
       {section === "pre-licensure" ? <PrelicensureQueue /> : null}
+      {section === "registrations" ? <RegistrationQueue /> : null}
       {section === "applications" || section === "credentials" || section === "payments" ? (
         <ApplicationList mode={section} />
       ) : null}
@@ -219,6 +223,7 @@ function AdminDashboard() {
       />
       <div className="grid-3">
         <QuickLink title="Application review" href="/portal/admin/applications" body="Submissions and credentials." />
+        <QuickLink title="Registrations" href="/portal/admin/registrations" body="Payments and Approvals." />
         <QuickLink title="Facility operations" href="/portal/admin/facilities" body="Approvals and access." />
         <QuickLink title="Requisitions" href="/portal/admin/requisitions" body="Needs awaiting matching." />
         <QuickLink title="Placements" href="/portal/admin/placements" body="Active coordination." />
@@ -1651,6 +1656,137 @@ function DetailWithStatus({
         />
       </section>
       <section className="form-card">{form}</section>
+    </div>
+  );
+}
+function RegistrationQueue() {
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const query = new URLSearchParams();
+  if (statusFilter) query.set("status", statusFilter);
+  if (debouncedSearch) query.set("search", debouncedSearch);
+
+  const resource = useApiResource<Record<string, unknown>>("admin", `/api/admin/registrations?${query.toString()}`);
+  const overview = asRecord(asRecord(resource.data).overview);
+  const registrations = asArray<Record<string, unknown>>(asRecord(resource.data).registrations);
+
+  async function handlePayment(id: number, action: "verified" | "rejected", note?: string) {
+    if (!confirm(`Are you sure you want to mark this payment as ${action}?`)) return;
+    try {
+      await apiRequest(`/api/admin/registration-payments/${id}`, {
+        method: "PATCH",
+        token: resource.token,
+        body: { status: action, note },
+      });
+      await resource.refresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Action failed");
+    }
+  }
+
+  async function handleFacility(id: number, action: "approve" | "reject" | "request_information", note?: string) {
+    if (!confirm(`Are you sure you want to ${action} this facility?`)) return;
+    try {
+      await apiRequest(`/api/admin/facility-registrations/${id}/review`, {
+        method: "PATCH",
+        token: resource.token,
+        body: { action, note },
+      });
+      await resource.refresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Action failed");
+    }
+  }
+
+  return (
+    <div className="data-list">
+      {resource.error ? <Feedback message={resource.error} tone="error" /> : null}
+      
+      <MetricGrid
+        metrics={[
+          { label: "Total", value: overview.total ?? 0 },
+          { label: "Pending Payments", value: overview.pending_payments ?? 0 },
+          { label: "Pending Approvals", value: overview.pending_facility_reviews ?? 0 },
+          { label: "OTP/Verification Queue", value: overview.verification_queue ?? 0 },
+          { label: "Rejected", value: overview.rejected_registrations ?? 0 },
+        ]}
+      />
+
+      <section className="card">
+        <div className="action-row" style={{ justifyContent: "space-between", marginBottom: 18 }}>
+          <div style={{ display: "flex", gap: "10px", width: "100%" }}>
+            <input 
+              type="search" 
+              placeholder="Search by email, phone, or reference..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ flex: 1 }}
+            />
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="">All Statuses</option>
+              <option value="payment_pending">Payment Pending</option>
+              <option value="approval_pending">Facility Approval Pending</option>
+              <option value="email_verification_pending">OTP Verification Pending</option>
+              <option value="active">Active</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="data-list">
+          {registrations.length ? (
+            registrations.map((reg) => {
+              const latestPayment = reg.latest_payment ? asRecord(reg.latest_payment) : null;
+              return (
+                <DataRow
+                  key={String(reg.id)}
+                  title={display(reg.name, "Unnamed")}
+                  status={String(reg.status)}
+                  meta={[
+                    { label: "Type", value: reg.account_type },
+                    { label: "Email", value: reg.email },
+                    { label: "Phone", value: reg.phone },
+                    { label: "Ref", value: reg.registration_reference },
+                  ]}
+                >
+                  <div style={{ display: "flex", gap: "8px", flexDirection: "column", alignItems: "flex-end" }}>
+                    {/* Payment Approval Actions */}
+                    {reg.status === "payment_pending" && latestPayment && latestPayment.status === "pending" && (
+                      <div className="action-row">
+                        <span style={{ fontSize: "0.8rem", color: "var(--ink-soft)" }}>
+                          {latestPayment.payment_type === "paybill_reference" 
+                            ? `Paybill Ref: ${latestPayment.reference}` 
+                            : `STK Push`}
+                        </span>
+                        <button className="button" onClick={() => handlePayment(Number(latestPayment.id), "verified")}>Verify Payment</button>
+                        <button className="button secondary" onClick={() => handlePayment(Number(latestPayment.id), "rejected", prompt("Rejection note:") || "Invalid payment")}>Reject</button>
+                      </div>
+                    )}
+                    
+                    {/* Facility Approval Actions */}
+                    {reg.status === "approval_pending" && reg.account_type === "facility" && (
+                      <div className="action-row">
+                        <button className="button" onClick={() => handleFacility(Number(reg.id), "approve")}>Approve Facility</button>
+                        <button className="button secondary" onClick={() => handleFacility(Number(reg.id), "request_information", prompt("Info needed:") || "Need more info")}>Request Info</button>
+                        <button className="button ghost" onClick={() => handleFacility(Number(reg.id), "reject", prompt("Rejection reason:") || "Rejected")}>Reject</button>
+                      </div>
+                    )}
+                  </div>
+                </DataRow>
+              );
+            })
+          ) : (
+            <EmptyState title="No registrations found" body="Try adjusting your filters or search query." />
+          )}
+        </div>
+      </section>
     </div>
   );
 }
