@@ -29,8 +29,9 @@ export function PortalLayout({
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  // Extract user initial for the avatar
-  const userInitial = session.user?.email ? session.user.email.charAt(0).toUpperCase() : "U";
+   // Extract user initial safely for TypeScript
+  const userEmailString = String(session.user?.email || "");
+  const userInitial = userEmailString.length > 0 ? userEmailString.charAt(0).toUpperCase() : "U";
 
   // 1. Loading State
   if (session.status === "loading") {
