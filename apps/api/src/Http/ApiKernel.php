@@ -101,7 +101,7 @@ final class ApiKernel
         $placements = new PlacementService($this->store, $facilities, $facilityAccess, $candidatePublications, $audit, $notifications, new LocalRecommendationAssistant());
 
         // Initialize the new Registration Engine
-        $registrationWorkflow = new RegistrationWorkflowService($this->store, $this->audit, $this->notifications);
+        $registrationWorkflow = new RegistrationWorkflowService($this->store, new AuditLogger($this->store), new NotificationService($this->store));
         $registrationController = new RegistrationController($registrationWorkflow);
         $authController = new AuthController($this->auth, $accounts);
         $professionalController = new ProfessionalController($profiles, $workflow, $verifications, $interviews, $candidatePublications);
