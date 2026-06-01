@@ -1,0 +1,8 @@
+import { neon } from '@neondatabase/serverless';
+
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is missing in environment variables");
+}
+
+// This creates a secure, serverless connection to your Neon database
+export const sql = neon(process.env.DATABASE_URL);
