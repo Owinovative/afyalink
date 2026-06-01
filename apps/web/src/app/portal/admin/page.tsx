@@ -1,3 +1,5 @@
+"use client";
+
 import { MetricGrid, MetricCard } from "@/components/ui/Metrics";
 
 export default function AdminDashboard() {
