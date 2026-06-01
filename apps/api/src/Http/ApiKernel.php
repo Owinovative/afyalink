@@ -40,6 +40,8 @@ use Afyalink\Core\Http\Controllers\FacilityController;
 use Afyalink\Core\Http\Controllers\OperationsController;
 use Afyalink\Core\Http\Controllers\PaymentController;
 use Afyalink\Core\Http\Controllers\PlacementController;
+use Afyalink\Core\Http\Controllers\RegistrationController;
+use Afyalink\Core\Application\Registration\RegistrationWorkflowService;
 use Afyalink\Core\Http\Controllers\ProfessionalController;
 use Afyalink\Core\Infrastructure\Notifications\EmailProvider;
 use Afyalink\Core\Infrastructure\Notifications\LogEmailProvider;
@@ -98,6 +100,9 @@ final class ApiKernel
         $facilityEngagements = new FacilityEngagementService($this->store, $facilities, $facilityAccess, $candidatePublications, $audit, $notifications);
         $placements = new PlacementService($this->store, $facilities, $facilityAccess, $candidatePublications, $audit, $notifications, new LocalRecommendationAssistant());
 
+        // Initialize the new Registration Engine
+        $registrationWorkflow = new RegistrationWorkflowService($this->store, $this->audit, $this->notifications);
+        $registrationController = new RegistrationController($registrationWorkflow);
         $authController = new AuthController($this->auth, $accounts);
         $professionalController = new ProfessionalController($profiles, $workflow, $verifications, $interviews, $candidatePublications);
         $credentialController = new CredentialController($credentials);
@@ -188,8 +193,7 @@ final class ApiKernel
         OperationsController $operations,
     ): void {
         $this->router->add('GET', '/api/health', static fn (): array => ['status' => 'ok']);
-        $this->router->add('POST', '/api/auth/register', [$auth, 'register']);
-        $this->router->add('POST', '/api/auth/register/student', [$auth, 'registerStudent']);
+        
         $this->router->add('POST', '/api/auth/login', [$auth, 'login']);
         $this->router->add('POST', '/api/auth/email/verify', [$auth, 'verifyEmail']);
         $this->router->add('POST', '/api/auth/password/forgot', [$auth, 'forgotPassword']);

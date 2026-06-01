@@ -5,21 +5,16 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState, type CSSProperties } from "react";
 import { BrandLockup } from "@/components/layout/BrandLockup";
 import { Feedback } from "@/components/ui/Feedback";
-import { Field, formValues, TextArea } from "@/components/ui/Forms";
+import { Field, formValues } from "@/components/ui/Forms";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { apiRequest, asRecord, type ApiRole } from "@/lib/api/client";
 import { clearAllTokens, portalByRole, resolveRoleGroup, setToken } from "@/lib/auth/session";
+import { RegistrationFlow } from "@/components/auth/RegistrationFlow";
 
 type AuthMode = "login" | "professional-register" | "student-register" | "facility-register" | "verify-email" | "forgot" | "reset";
 
 function titleFor(mode: AuthMode) {
   switch (mode) {
-    case "professional-register":
-      return "Create a professional account";
-    case "student-register":
-      return "Create a waiting-license account";
-    case "facility-register":
-      return "Create a facility account";
     case "verify-email":
       return "Verify your email";
     case "forgot":
@@ -33,12 +28,6 @@ function titleFor(mode: AuthMode) {
 
 function bodyFor(mode: AuthMode) {
   switch (mode) {
-    case "professional-register":
-      return "Create an account and continue your profile.";
-    case "student-register":
-      return "Start early. Publication waits for license conversion.";
-    case "facility-register":
-      return "Create owner access. Approval unlocks browsing.";
     case "verify-email":
       return "Paste the token from your email.";
     case "forgot":
@@ -135,48 +124,12 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         return;
       }
 
-      if (mode === "professional-register") {
-        const data = asRecord(await apiRequest("/api/auth/register", { method: "POST", body: values }));
-        const token = String(data.token ?? "");
-        if (token) {
-          clearAllTokens();
-          setToken("professional", token, asRecord(data.user));
-        }
-        setMessage("Professional account created. Check the email verification instructions and continue your profile.");
-        router.push("/portal/professional/dashboard");
-        return;
-      }
-
-      if (mode === "student-register") {
-        const data = asRecord(await apiRequest("/api/auth/register/student", { method: "POST", body: values }));
-        const token = String(data.token ?? "");
-        if (token) {
-          clearAllTokens();
-          setToken("professional", token, asRecord(data.user));
-        }
-        setMessage("Student awaiting-license account created. Continue your pre-licensure checklist.");
-        router.push("/portal/professional/waiting-license");
-        return;
-      }
-
-      if (mode === "facility-register") {
-        const data = asRecord(await apiRequest("/api/facility/auth/register", { method: "POST", body: values }));
-        const token = String(data.token ?? "");
-        if (token) {
-          clearAllTokens();
-          setToken("facility", token, asRecord(data.user));
-        }
-        setMessage("Facility account created. Continue onboarding from the facility dashboard.");
-        router.push("/portal/facility/dashboard");
-        return;
-      }
-
       if (mode === "verify-email") {
         await apiRequest("/api/auth/email/verify", {
           method: "POST",
           body: { token: String(values.token ?? tokenFromQuery) },
         });
-        setMessage("Email verified. You can now continue your application.");
+        setMessage("Email verified. You can now sign in.");
         return;
       }
 
@@ -186,8 +139,11 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         return;
       }
 
-      await apiRequest("/api/auth/password/reset", { method: "POST", body: values });
-      setMessage("Password reset complete. You can sign in with your new password.");
+      if (mode === "reset") {
+        await apiRequest("/api/auth/password/reset", { method: "POST", body: values });
+        setMessage("Password reset complete. You can sign in with your new password.");
+        return;
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Request failed.");
     } finally {
@@ -225,154 +181,95 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             </div>
           </div>
         </aside>
-        <section className="auth-card form-card">
-        <div className="auth-card-brand">
-          <BrandLockup kicker="Secure account" />
-        </div>
-        <PageHeader
-          eyebrow="Afyalink account"
-          title={titleFor(mode)}
-          body={bodyFor(mode)}
-        />
-        <form className="form-grid" onSubmit={submit}>
-          {mode === "login" ? (
-            <label className="full">
-              Portal
-              <select value={role} onChange={(event) => setRole(event.target.value as ApiRole)}>
-                <option value="professional">Professional</option>
-                <option value="facility">Facility</option>
-                <option value="admin">Admin</option>
-              </select>
-            </label>
-          ) : null}
-          {mode === "professional-register" || mode === "student-register" || mode === "facility-register" ? (
-            <>
-              <Field label={mode === "facility-register" ? "Owner full name" : "Full name"} name="name" required autoComplete="name" />
-              <Field label={mode === "facility-register" ? "Owner/facility phone" : "Phone"} name="phone" required autoComplete="tel" inputMode="tel" />
-            </>
-          ) : null}
-          {mode === "professional-register" ? (
-            <>
-              <input type="hidden" name="applicant_track" value="licensed_professional" />
-              <p className="form-note full">Licensed profile fields continue after account creation.</p>
-            </>
-          ) : null}
-          {mode === "student-register" ? (
-            <>
-              <input type="hidden" name="applicant_track" value="student_awaiting_license" />
-              <label>
-                Student or graduate status
-                <select name="student_status" required defaultValue="completed_training_waiting_license">
-                  <option value="currently_studying">Currently studying</option>
-                  <option value="completed_training_waiting_license">Completed training, waiting for license</option>
-                  <option value="internship_or_attachment">Internship or attachment</option>
-                </select>
-              </label>
-              <Field label="Target profession" name="target_profession" required placeholder="Registered Nurse, Clinical Officer..." />
-              <Field label="Institution or training school" name="institution_name" required />
-              <Field label="Programme or course" name="programme_or_course" required />
-              <Field label="Graduation/completion date" name="graduation_or_completion_date" type="date" />
-              <Field label="Expected regulatory body" name="expected_regulatory_body" />
-              <Field label="County or location" name="county" required />
-              <label>
-                Placement type after license
-                <select name="placement_type" defaultValue="">
-                  <option value="">Choose later</option>
-                  <option value="full_time">Full time</option>
-                  <option value="part_time">Part time</option>
-                  <option value="locum">Locum</option>
-                  <option value="contract">Contract</option>
-                  <option value="internship">Internship</option>
-                  <option value="attachment">Attachment</option>
-                </select>
-              </label>
-              <Field label="Availability after licensure" name="availability_after_licensure" />
-              <TextArea label="Short note" name="notes" placeholder="Optional context for review." />
-              <p className="form-note full">Students are not shown as licensed candidates until license conversion is reviewed.</p>
-            </>
-          ) : null}
-          {mode === "facility-register" ? (
-            <>
-              <Field label="Facility legal name" name="legal_name" required autoComplete="organization" />
-              <Field label="Display name" name="display_name" required />
-              <label>
-                Facility type
-                <select name="facility_type" required defaultValue="">
-                  <option value="" disabled>Select type</option>
-                  <option value="hospital">Hospital</option>
-                  <option value="clinic">Clinic</option>
-                  <option value="medical_center">Medical center</option>
-                  <option value="laboratory">Laboratory</option>
-                  <option value="pharmacy">Pharmacy</option>
-                  <option value="homecare">Home care</option>
-                  <option value="training_institution">Training institution</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-              <Field label="Registration or license number" name="registration_number" />
-              <Field label="County" name="county" required />
-              <Field label="City or town" name="location" />
-              <Field label="Contact person" name="contact_person" required />
-              <TextArea label="Physical address" name="physical_address" placeholder="Building, road, area." />
-              <p className="form-note full">The email and phone below are used for the owner account and facility profile.</p>
-            </>
-          ) : null}
-          {mode === "login" || mode === "professional-register" || mode === "student-register" || mode === "facility-register" || mode === "forgot" ? (
-            <Field
-              label={mode === "facility-register" ? "Official email" : "Email"}
-              name="email"
-              type="email"
-              required
-              autoComplete={mode === "login" || mode === "forgot" ? "email" : "email"}
+
+        {mode === "professional-register" ? (
+          <RegistrationFlow mode="professional" />
+        ) : mode === "student-register" ? (
+          <RegistrationFlow mode="student" />
+        ) : mode === "facility-register" ? (
+          <RegistrationFlow mode="facility" />
+        ) : (
+          <section className="auth-card form-card">
+            <div className="auth-card-brand">
+              <BrandLockup kicker="Secure account" />
+            </div>
+            <PageHeader
+              eyebrow="Afyalink account"
+              title={titleFor(mode)}
+              body={bodyFor(mode)}
             />
-          ) : null}
-          {mode === "login" || mode === "professional-register" || mode === "student-register" || mode === "facility-register" || mode === "reset" ? (
-            <Field
-              label="Password"
-              name="password"
-              type="password"
-              required
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
-              minLength={mode === "login" ? undefined : 10}
-              pattern={mode === "login" ? undefined : passwordPattern}
-              title={mode === "login" ? undefined : passwordTitle}
-            />
-          ) : null}
-          {mode === "verify-email" || mode === "reset" ? (
-            <Field label="Token" name="token" required defaultValue={tokenFromQuery} />
-          ) : null}
-          <div className="form-actions full">
-            <button className="button" type="submit" disabled={busy}>
-              {busy ? "Working..." : "Continue"}
-            </button>
-            <Link className="button secondary" href="/">
-              Back to site
-            </Link>
-          </div>
-        </form>
-        <div className="data-list" style={{ marginTop: 18 }}>
-          {message ? <Feedback message={message} /> : null}
-          {error ? <Feedback message={error} tone="error" /> : null}
-        </div>
-        <div className="table-lite" style={{ marginTop: 20 }}>
-          <div>
-            <Link href="/auth/register/professional">Professional registration</Link>
-            <span />
-          </div>
-          <div>
-            <Link href="/auth/register/student">Student awaiting-license registration</Link>
-            <span />
-          </div>
-          <div>
-            <Link href="/auth/register/facility">Facility registration</Link>
-            <span />
-          </div>
-          <div>
-            <Link href="/auth/forgot-password">Forgot password</Link>
-            <span />
-          </div>
-        </div>
-        </section>
+            <form className="form-grid" onSubmit={submit}>
+              {mode === "login" ? (
+                <label className="full">
+                  Portal
+                  <select value={role} onChange={(event) => setRole(event.target.value as ApiRole)}>
+                    <option value="professional">Professional</option>
+                    <option value="facility">Facility</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </label>
+              ) : null}
+              
+              {mode === "login" || mode === "forgot" ? (
+                <Field
+                  label="Email"
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                />
+              ) : null}
+              
+              {mode === "login" || mode === "reset" ? (
+                <Field
+                  label="Password"
+                  name="password"
+                  type="password"
+                  required
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  minLength={mode === "login" ? undefined : 10}
+                  pattern={mode === "login" ? undefined : passwordPattern}
+                  title={mode === "login" ? undefined : passwordTitle}
+                />
+              ) : null}
+              
+              {mode === "verify-email" || mode === "reset" ? (
+                <Field label="Token" name="token" required defaultValue={tokenFromQuery} />
+              ) : null}
+
+              <div className="form-actions full">
+                <button className="button" type="submit" disabled={busy}>
+                  {busy ? "Working..." : "Continue"}
+                </button>
+                <Link className="button secondary" href="/">
+                  Back to site
+                </Link>
+              </div>
+            </form>
+            <div className="data-list" style={{ marginTop: 18 }}>
+              {message ? <Feedback message={message} /> : null}
+              {error ? <Feedback message={error} tone="error" /> : null}
+            </div>
+            <div className="table-lite" style={{ marginTop: 20 }}>
+              <div>
+                <Link href="/auth/register/professional">Professional registration</Link>
+                <span />
+              </div>
+              <div>
+                <Link href="/auth/register/student">Student awaiting-license registration</Link>
+                <span />
+              </div>
+              <div>
+                <Link href="/auth/register/facility">Facility registration</Link>
+                <span />
+              </div>
+              <div>
+                <Link href="/auth/forgot-password">Forgot password</Link>
+                <span />
+              </div>
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );
