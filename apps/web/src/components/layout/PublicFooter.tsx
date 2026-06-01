@@ -17,6 +17,7 @@ export function PublicFooter() {
           <Link href="/matching">Matching</Link>
           <Link href="/verification">Verification</Link>
           <Link href="/trust-security">Trust</Link>
+          <Link href="/resources">Knowledge Base & Downloads</Link>
         </div>
         <div className="footer-links">
           <strong>Portals</strong>
