@@ -1,0 +1,20 @@
+[33mbfc58e7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeat/registration-payment-verification-engine[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #23 from Owinovative/feat/workflow-auth-admin-dashboard-correction
+[33m7a486df[m[33m ([m[1;31morigin/feat/workflow-auth-admin-dashboard-correction[m[33m, [m[1;32mfeat/workflow-auth-admin-dashboard-correction[m[33m)[m feat: enforce role-safe portal workflows
+[33mce07910[m Merge pull request #22 from Owinovative/feat/frontend-contract-forms-logo-and-public-page-redesign
+[33m36b7dab[m[33m ([m[1;31morigin/feat/frontend-contract-forms-logo-and-public-page-redesign[m[33m, [m[1;32mfeat/frontend-contract-forms-logo-and-public-page-redesign[m[33m)[m feat: align frontend forms and public page visuals
+[33mf1c5273[m Merge pull request #21 from Owinovative/feat/ten-hour-frontend-polish-premium-launch-ui
+[33m5cfe01b[m[33m ([m[1;31morigin/feat/ten-hour-frontend-polish-premium-launch-ui[m[33m, [m[1;32mfeat/ten-hour-frontend-polish-premium-launch-ui[m[33m)[m feat: polish premium launch frontend
+[33mdbde865[m Merge pull request #20 from Owinovative/feat/production-launch-readiness-e2e-qa-engine
+[33mb0dcb07[m[33m ([m[1;31morigin/feat/production-launch-readiness-e2e-qa-engine[m[33m, [m[1;32mfeat/production-launch-readiness-e2e-qa-engine[m[33m)[m feat: add production launch readiness QA engine
+[33m07c7704[m Merge pull request #19 from Owinovative/feat/search-engine-indexing-seo-foundation
+[33m917aef4[m[33m ([m[1;31morigin/feat/search-engine-indexing-seo-foundation[m[33m, [m[1;32mfeat/search-engine-indexing-seo-foundation[m[33m)[m Add search indexing SEO foundation
+[33ma6fe928[m Merge pull request #18 from Owinovative/feat/domain-email-render-integration
+[33me13fffb[m Merge branch 'main' into feat/domain-email-render-integration
+[33m70372f1[m[33m ([m[1;31morigin/feat/domain-email-render-integration[m[33m, [m[1;32mfeat/domain-email-render-integration[m[33m)[m Prepare domain and branded email launch
+[33m12704e1[m Merge pull request #17 from Owinovative/feat/extreme-frontend-polish-visual-experience
+[33m8068f9d[m[33m ([m[1;31morigin/feat/extreme-frontend-polish-visual-experience[m[33m, [m[1;32mfeat/extreme-frontend-polish-visual-experience[m[33m)[m Polish frontend visual experience
+[33mff8d5fd[m[33m ([m[1;32mfeat/focused-matching-home-facility-redesign[m[33m)[m Merge pull request #15 from Owinovative/feat/frontend-minimal-copy-visual-rebuild
+[33mac9542d[m[33m ([m[1;31morigin/feat/frontend-minimal-copy-visual-rebuild[m[33m, [m[1;32mfeat/frontend-minimal-copy-visual-rebuild[m[33m)[m Rebuild frontend with minimal visual-first copy
+[33m24d204c[m Merge pull request #14 from Owinovative/feat/frontend-clean-rebuild-premium-afyalink
+[33m6c66517[m[33m ([m[1;31morigin/feat/frontend-clean-rebuild-premium-afyalink[m[33m, [m[1;32mfeat/frontend-clean-rebuild-premium-afyalink[m[33m)[m Rebuild Afyalink frontend visual foundation
+[33mb626c19[m Merge pull request #13 from Owinovative/feat/milestone-6-render-first-and-frontend-reset
