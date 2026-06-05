@@ -135,7 +135,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 transition: "all 0.2s ease"
               }}
             >
-              <option value="professional">Professional Portal</option>
+              {/* Updated to explicitly include students without breaking API logic */}
+              <option value="professional">Professional & Student Portal</option>
               <option value="facility">Facility Portal</option>
               <option value="admin">Command Center (Admin)</option>
             </select>
