@@ -60,7 +60,7 @@ export default function FacilityDashboard() {
               onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--line-strong)"}
             >
               <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "var(--teal-soft)", color: "var(--teal)", display: "flex", alignItems: "center", justifyCentent: "center", fontWeight: "bold", paddingLeft: "10px" }}>Dr</div>
+                <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "var(--teal-soft)", color: "var(--teal)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", paddingLeft: "10px" }}>Dr</div>
                 <div>
                   <strong style={{ display: "block", fontSize: "0.95rem", color: "var(--ink-strong)" }}>Dr. Alex Mwangi</strong>
                   <span style={{ fontSize: "0.8rem", color: "var(--ink-soft)" }}>Specialist Anaesthetist • 8 Yrs Exp</span>
@@ -76,7 +76,7 @@ export default function FacilityDashboard() {
               onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--line-strong)"}
             >
               <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "var(--cream)", color: "var(--gold)", display: "flex", alignItems: "center", justifyCentent: "center", fontWeight: "bold", paddingLeft: "11px" }}>Ns</div>
+                <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "var(--cream)", color: "var(--gold)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", paddingLeft: "11px" }}>Ns</div>
                 <div>
                   <strong style={{ display: "block", fontSize: "0.95rem", color: "var(--ink-strong)" }}>Sister Mary Atieno</strong>
                   <span style={{ fontSize: "0.8rem", color: "var(--ink-soft)" }}>Critical Care Nurse • KRN / KRCHN</span>
