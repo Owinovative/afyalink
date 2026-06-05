@@ -38,8 +38,7 @@ export function MarketingNav() {
           
           {/* Logo */}
           <Link href="/" style={{ textDecoration: "none" }}>
-            {/* Assuming BrandLockup has a light/dark mode, we force light mode here so it pops against the dark hero */}
-            <BrandLockup theme="light" /> 
+            <BrandLockup /> 
           </Link>
 
           {/* Desktop Navigation */}
