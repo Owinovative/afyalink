@@ -22,7 +22,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         <div style={{ position: "relative", zIndex: 10, padding: "48px", display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" }}>
           <Link href="/" style={{ textDecoration: "none" }}>
-            <BrandLockup theme="light" />
+            <BrandLockup />
           </Link>
 
           <div style={{ color: "#fff", maxWidth: "480px" }}>
