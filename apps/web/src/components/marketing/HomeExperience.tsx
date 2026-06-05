@@ -103,7 +103,7 @@ export function HomeExperience() {
 
   return (
     <main className="home-experience" aria-label="Afyalink homepage experience">
-      <section className="home-slide-stage" aria-live="polite" onKeyDown={handleKeyDown} tabIndex={0}>
+      <section className="home-slide-stage" aria-live="polite" onKeyDown={handleKeyDown} tabIndex={0} style={{ position: "relative", minHeight: "100vh" }}>
         {slides.map((slide, index) => (
           <article 
             className={`home-slide ${index === active ? "active" : ""}`} 
@@ -147,12 +147,16 @@ export function HomeExperience() {
               alignItems: 'center',
               textAlign: 'center',
               margin: '0 auto',
+              paddingTop: 'clamp(140px, 20vh, 220px)', // <-- THE FIX IS HERE. Pushes text below navbar.
+              paddingLeft: '24px',
+              paddingRight: '24px',
+              maxWidth: '800px'
             }}>
-              <span className="eyebrow" style={{ color: 'var(--teal-soft)', letterSpacing: '0.15em', fontSize: '0.85rem' }}>{slide.eyebrow}</span>
-              <h1 style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>{slide.title}</h1>
-              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1.15rem', maxWidth: '600px', lineHeight: 1.6 }}>{slide.body}</p>
+              <span className="eyebrow" style={{ color: 'var(--teal-soft)', letterSpacing: '0.15em', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 700 }}>{slide.eyebrow}</span>
+              <h1 style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.3)', fontSize: 'clamp(2.5rem, 5vw, 4rem)', margin: '12px 0', lineHeight: 1.1 }}>{slide.title}</h1>
+              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 'clamp(1.1rem, 2vw, 1.25rem)', maxWidth: '600px', lineHeight: 1.6 }}>{slide.body}</p>
               
-              <div className="home-chip-row" style={{ marginTop: '8px', marginBottom: '24px', justifyContent: 'center' }}>
+              <div className="home-chip-row" style={{ marginTop: '16px', marginBottom: '32px', display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 {slide.chips.map((chip) => (
                   <span key={chip} style={{
                     background: 'rgba(255,255,255,0.1)',
@@ -169,12 +173,20 @@ export function HomeExperience() {
                 ))}
               </div>
               
-              <div className="hero-actions" style={{ justifyContent: 'center' }}>
-                <Link className="button" href={slide.primary.href} style={{ padding: '14px 32px', fontSize: '1rem' }}>
+              <div className="hero-actions" style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                <Link href={slide.primary.href} style={{ 
+                  background: 'var(--teal)', color: '#fff', padding: '14px 32px', fontSize: '1.05rem', 
+                  fontWeight: 600, borderRadius: '99px', textDecoration: 'none', transition: 'transform 0.2s ease',
+                  boxShadow: '0 4px 15px rgba(3, 152, 158, 0.4)'
+                }}>
                   {slide.primary.label}
                 </Link>
                 {slide.secondary && (
-                  <Link className="button translucent" href={slide.secondary.href} style={{ padding: '14px 32px', fontSize: '1rem' }}>
+                  <Link href={slide.secondary.href} style={{ 
+                    background: 'rgba(255,255,255,0.1)', color: '#fff', padding: '14px 32px', fontSize: '1.05rem', 
+                    fontWeight: 600, borderRadius: '99px', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.3)',
+                    backdropFilter: 'blur(10px)'
+                  }}>
                     {slide.secondary.label}
                   </Link>
                 )}
