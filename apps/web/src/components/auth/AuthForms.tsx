@@ -40,7 +40,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   const [error, setError] = useState("");
   const [tokenFromQuery, setTokenFromQuery] = useState("");
 
-  // UI Focus States for the "Stunning" look
+  // UI Focus States for the Premium look
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   useEffect(() => {
@@ -98,18 +98,25 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     }
   }
 
-  // Registration modes use their own component
+  // Registration modes route smoothly to our premium Registration Flow
   if (mode === "professional-register" || mode === "student-register" || mode === "facility-register") {
     return <RegistrationFlow mode={mode === "professional-register" ? "professional" : mode === "student-register" ? "student" : "facility"} />;
   }
 
+  const inputStyle = (fieldName: string) => ({
+    padding: "16px", borderRadius: "12px", outline: "none", fontSize: "1.05rem", width: "100%",
+    border: `2px solid ${focusedField === fieldName ? "var(--teal)" : "var(--line-strong)"}`,
+    boxShadow: focusedField === fieldName ? "0 0 0 4px rgba(3, 152, 158, 0.12)" : "none",
+    transition: "all 0.2s ease", background: "#fff", color: "var(--ink-strong)"
+  });
+
   return (
-    <div style={{ width: "100%" }}>
-      <div style={{ marginBottom: "32px", textAlign: "center" }}>
-        <h1 style={{ fontSize: "2rem", color: "var(--ink-strong)", marginBottom: "8px", letterSpacing: "-0.02em" }}>
+    <div style={{ width: "100%", maxWidth: "440px", margin: "0 auto" }}>
+      <div style={{ marginBottom: "40px", textAlign: "center" }}>
+        <h1 style={{ fontSize: "2.25rem", color: "var(--ink-strong)", marginBottom: "12px", letterSpacing: "-0.03em" }}>
           {titleFor(mode)}
         </h1>
-        <p style={{ color: "var(--ink-soft)", fontSize: "1rem", margin: 0 }}>
+        <p style={{ color: "var(--ink-soft)", fontSize: "1.1rem", margin: 0, lineHeight: 1.5 }}>
           {bodyFor(mode)}
         </p>
       </div>
@@ -117,25 +124,19 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       {error ? <Feedback message={error} tone="error" /> : null}
       {message ? <Feedback message={message} tone="success" /> : null}
 
-      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "24px" }}>
+      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "24px", marginTop: "24px" }}>
         
         {/* Role Selector (Only for Login) */}
         {mode === "login" ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--ink-strong)" }}>Select Workspace</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <label style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--ink-strong)" }}>Select Workspace</label>
             <select 
               value={role} 
               onChange={(event) => setRole(event.target.value as ApiRole)}
               onFocus={() => setFocusedField("role")}
               onBlur={() => setFocusedField(null)}
-              style={{
-                padding: "14px 16px", borderRadius: "var(--radius-md)", outline: "none", fontSize: "1rem", cursor: "pointer",
-                border: `2px solid ${focusedField === "role" ? "var(--teal)" : "var(--line-strong)"}`,
-                boxShadow: focusedField === "role" ? "0 0 0 4px rgba(3, 152, 158, 0.1)" : "none",
-                transition: "all 0.2s ease"
-              }}
+              style={{ ...inputStyle("role"), cursor: "pointer" }}
             >
-              {/* Updated to explicitly include students without breaking API logic */}
               <option value="professional">Professional & Student Portal</option>
               <option value="facility">Facility Portal</option>
               <option value="admin">Command Center (Admin)</option>
@@ -145,8 +146,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
         {/* Email Field */}
         {mode === "login" || mode === "forgot" ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--ink-strong)" }}>Email Address</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <label style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--ink-strong)" }}>Email Address</label>
             <input
               name="email"
               type="email"
@@ -155,23 +156,18 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               placeholder="name@example.com"
               onFocus={() => setFocusedField("email")}
               onBlur={() => setFocusedField(null)}
-              style={{
-                padding: "14px 16px", borderRadius: "var(--radius-md)", outline: "none", fontSize: "1rem",
-                border: `2px solid ${focusedField === "email" ? "var(--teal)" : "var(--line-strong)"}`,
-                boxShadow: focusedField === "email" ? "0 0 0 4px rgba(3, 152, 158, 0.1)" : "none",
-                transition: "all 0.2s ease"
-              }}
+              style={inputStyle("email")}
             />
           </div>
         ) : null}
 
         {/* Password Field */}
         {mode === "login" || mode === "reset" ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--ink-strong)" }}>Password</label>
+              <label style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--ink-strong)" }}>Password</label>
               {mode === "login" && (
-                <Link href="/auth/forgot-password" style={{ fontSize: "0.8rem", color: "var(--teal)", fontWeight: 600, textDecoration: "none" }}>
+                <Link href="/auth/forgot-password" style={{ fontSize: "0.9rem", color: "var(--teal)", fontWeight: 600, textDecoration: "none" }}>
                   Forgot password?
                 </Link>
               )}
@@ -187,20 +183,15 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               title={mode === "login" ? undefined : passwordTitle}
               onFocus={() => setFocusedField("password")}
               onBlur={() => setFocusedField(null)}
-              style={{
-                padding: "14px 16px", borderRadius: "var(--radius-md)", outline: "none", fontSize: "1rem",
-                border: `2px solid ${focusedField === "password" ? "var(--teal)" : "var(--line-strong)"}`,
-                boxShadow: focusedField === "password" ? "0 0 0 4px rgba(3, 152, 158, 0.1)" : "none",
-                transition: "all 0.2s ease"
-              }}
+              style={inputStyle("password")}
             />
           </div>
         ) : null}
 
         {/* Token Field (For Email Verify or Reset Password) */}
         {mode === "verify-email" || mode === "reset" ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--ink-strong)" }}>Security Token</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <label style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--ink-strong)" }}>Security Token</label>
             <input
               name="token"
               required
@@ -208,12 +199,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               placeholder="Paste token here"
               onFocus={() => setFocusedField("token")}
               onBlur={() => setFocusedField(null)}
-              style={{
-                padding: "14px 16px", borderRadius: "var(--radius-md)", outline: "none", fontSize: "1rem",
-                border: `2px solid ${focusedField === "token" ? "var(--teal)" : "var(--line-strong)"}`,
-                boxShadow: focusedField === "token" ? "0 0 0 4px rgba(3, 152, 158, 0.1)" : "none",
-                transition: "all 0.2s ease"
-              }}
+              style={inputStyle("token")}
             />
           </div>
         ) : null}
@@ -223,12 +209,12 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           type="submit" 
           disabled={busy}
           style={{ 
-            marginTop: "12px", padding: "14px", borderRadius: "var(--radius-md)", 
+            marginTop: "8px", padding: "16px", borderRadius: "12px", 
             background: busy ? "var(--ink-soft)" : "linear-gradient(135deg, var(--teal), var(--deep))",
-            color: "#fff", fontSize: "1.05rem", fontWeight: 600, border: "none",
+            color: "#fff", fontSize: "1.1rem", fontWeight: 600, border: "none",
             cursor: busy ? "not-allowed" : "pointer", transition: "all 0.3s ease",
-            boxShadow: busy ? "none" : "0 4px 15px rgba(3, 152, 158, 0.3)",
-            display: "flex", justifyContent: "center", alignItems: "center", gap: "8px"
+            boxShadow: busy ? "none" : "0 8px 20px rgba(3, 152, 158, 0.25)",
+            display: "flex", justifyContent: "center", alignItems: "center", gap: "10px"
           }}
         >
           {busy ? (
@@ -245,15 +231,15 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
       {/* Seamless Bottom Navigation for specific modes */}
       {mode === "login" && (
-        <div style={{ marginTop: "32px", paddingTop: "24px", borderTop: "1px solid var(--line)", textAlign: "center" }}>
-          <p style={{ fontSize: "0.95rem", color: "var(--ink-soft)" }}>
+        <div style={{ marginTop: "40px", paddingTop: "32px", borderTop: "1px solid var(--line)", textAlign: "center" }}>
+          <p style={{ fontSize: "1.05rem", color: "var(--ink-soft)" }}>
             Don't have an account yet? <Link href="/auth/register" style={{ color: "var(--teal)", fontWeight: 600, textDecoration: "none" }}>Create one here</Link>
           </p>
         </div>
       )}
       {mode !== "login" && (
-        <div style={{ marginTop: "24px", textAlign: "center" }}>
-          <Link href="/auth/login" style={{ fontSize: "0.9rem", color: "var(--ink-soft)", textDecoration: "none" }}>
+        <div style={{ marginTop: "32px", textAlign: "center" }}>
+          <Link href="/auth/login" style={{ fontSize: "1rem", color: "var(--ink-soft)", textDecoration: "none", fontWeight: 500 }}>
             ← Return to sign in
           </Link>
         </div>
