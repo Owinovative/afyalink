@@ -20,8 +20,8 @@ function titleFor(mode: AuthMode) {
 function bodyFor(mode: AuthMode) {
   switch (mode) {
     case "professional": return "Create your secure account to build your clinical profile.";
-    case "student": return "Start early. Your profile publishes upon license conversion.";
-    case "facility": return "Create admin access. Approval unlocks the talent pool.";
+    case "student": return "Create your profile to access early networking and placement opportunities.";
+    case "facility": return "Create admin access to unlock the verified talent pool.";
   }
 }
 
@@ -89,7 +89,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
       setRegistration(reg);
       setReference(String(reg.registration_reference));
       setStatus(String(reg.status));
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not start registration.");
     } finally {
@@ -140,7 +140,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
       const reg = asRecord(data.registration);
       setRegistration(reg);
       setStatus(String(reg.status));
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not save password.");
     } finally {
@@ -163,7 +163,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
       const reg = asRecord(data.registration);
       setRegistration(reg);
       setStatus(String(reg.status));
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not verify code.");
     } finally {
@@ -185,8 +185,13 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
     }
   }
 
+  const inputStyle = {
+    padding: "16px", borderRadius: "12px", border: "1px solid var(--line-strong)", outline: "none", fontSize: "1rem",
+    background: "#fff", transition: "all 0.2s ease", width: "100%", color: "var(--ink-strong)"
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: "100%" }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: "100%", maxWidth: "480px", margin: "0 auto" }}>
       
       {/* Premium Step Tracker */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
@@ -198,15 +203,15 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
         ].map((step, i) => (
           <div key={step.num} style={{ display: "flex", alignItems: "center", flex: 1 }}>
             <div style={{
-              display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
-              opacity: currentStep >= step.num ? 1 : 0.4,
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "8px",
+              opacity: currentStep >= step.num ? 1 : 0.3,
               transition: "all 0.4s ease"
             }}>
               <div style={{
                 width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
                 background: currentStep >= step.num ? "var(--teal)" : "var(--paper)",
                 border: currentStep >= step.num ? "none" : "2px solid var(--line-strong)",
-                color: currentStep >= step.num ? "#fff" : "var(--ink-soft)",
+                color: currentStep >= step.num ? "#fff" : "var(--ink-strong)",
                 fontSize: "0.85rem", fontWeight: 700,
                 boxShadow: currentStep === step.num ? "0 0 0 4px rgba(3, 152, 158, 0.15)" : "none"
               }}>
@@ -227,15 +232,15 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
         ))}
       </div>
 
-      {/* Dynamic Header based on Step */}
-      <div style={{ textAlign: "center", marginBottom: "8px" }}>
-        <h2 style={{ fontSize: "1.75rem", color: "var(--ink-strong)", marginBottom: "8px", letterSpacing: "-0.02em" }}>
+      {/* Dynamic Header */}
+      <div style={{ textAlign: "center" }}>
+        <h2 style={{ fontSize: "2rem", color: "var(--ink-strong)", marginBottom: "8px", letterSpacing: "-0.02em" }}>
           {currentStep === 1 ? titleFor(mode) : 
            currentStep === 2 ? "Registration Payment" : 
            currentStep === 3 ? "Secure Your Account" : 
            currentStep === 4 ? "Verify Your Email" : "Registration Complete"}
         </h2>
-        <p style={{ color: "var(--ink-soft)", margin: 0, fontSize: "0.95rem" }}>
+        <p style={{ color: "var(--ink-soft)", margin: 0, fontSize: "1.05rem" }}>
           {currentStep === 1 ? bodyFor(mode) : 
            currentStep === 2 ? "Complete the one-time verification fee to proceed." : 
            currentStep === 3 ? "Create a strong password for your workspace." : 
@@ -248,22 +253,16 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
 
       {/* STEP 1: DRAFT (Details) */}
       {currentStep === 1 && (
-        <form className="form-grid" onSubmit={handleStart} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <form onSubmit={handleStart} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <Field label={mode === "facility" ? "Owner full name" : "Full name"} name="name" required autoComplete="name" />
           <Field label="Email" name="email" type="email" required autoComplete="email" />
           <Field label={mode === "facility" ? "Owner/facility phone" : "Phone"} name="phone" required autoComplete="tel" inputMode="tel" />
 
-          {mode === "professional" && (
-            <div style={{ background: "var(--mist)", padding: "12px", borderRadius: "var(--radius-md)", fontSize: "0.85rem", color: "var(--ink-soft)", border: "1px solid var(--line)" }}>
-              Licensed profile fields (CPD, credentials) will be completed inside your portal after account creation.
-            </div>
-          )}
-
           {mode === "student" && (
             <>
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--ink-strong)" }}>Student or graduate status</label>
-                <select name="student_status" required defaultValue="completed_training_waiting_license" style={{ padding: "12px", borderRadius: "var(--radius-md)", border: "2px solid var(--line-strong)", outline: "none", background: "#fff" }}>
+                <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--ink-strong)" }}>Student or graduate status</label>
+                <select name="student_status" required defaultValue="completed_training_waiting_license" style={inputStyle}>
                   <option value="in_training">Currently in training</option>
                   <option value="completed_training_waiting_license">Completed, waiting for license</option>
                 </select>
@@ -275,8 +274,8 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
               <Field label="Expected regulatory body" name="expected_regulatory_body" />
               <Field label="County or location" name="county" required />
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--ink-strong)" }}>Placement type after license</label>
-                <select name="placement_type" defaultValue="" style={{ padding: "12px", borderRadius: "var(--radius-md)", border: "2px solid var(--line-strong)", outline: "none", background: "#fff" }}>
+                <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--ink-strong)" }}>Placement type after license</label>
+                <select name="placement_type" defaultValue="" style={inputStyle}>
                   <option value="">Choose later</option>
                   <option value="full_time">Full time</option>
                   <option value="locum">Locum</option>
@@ -284,10 +283,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
                 </select>
               </div>
               <Field label="Availability after licensure" name="availability_after_licensure" />
-              <TextArea label="Short note" name="notes" placeholder="Optional context for review." />
-              <div style={{ background: "var(--mist)", padding: "12px", borderRadius: "var(--radius-md)", fontSize: "0.85rem", color: "var(--ink-soft)", border: "1px solid var(--line)" }}>
-                Students are not visible to facilities until their license conversion is approved.
-              </div>
+              <TextArea label="Short note" name="notes" placeholder="Optional context for your profile." />
             </>
           )}
 
@@ -296,8 +292,8 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
               <Field label="Facility legal name" name="legal_name" required autoComplete="organization" />
               <Field label="Display name" name="display_name" required />
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--ink-strong)" }}>Facility type</label>
-                <select name="facility_type" required defaultValue="" style={{ padding: "12px", borderRadius: "var(--radius-md)", border: "2px solid var(--line-strong)", outline: "none", background: "#fff" }}>
+                <label style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--ink-strong)" }}>Facility type</label>
+                <select name="facility_type" required defaultValue="" style={inputStyle}>
                   <option value="" disabled>Select type</option>
                   <option value="hospital">Hospital</option>
                   <option value="clinic">Clinic</option>
@@ -313,33 +309,29 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
             </>
           )}
 
-          <div style={{ marginTop: "16px" }}>
-            <button 
-              type="submit" 
-              disabled={busy}
-              style={{ 
-                width: "100%", padding: "14px", borderRadius: "var(--radius-md)", 
-                background: busy ? "var(--ink-soft)" : "linear-gradient(135deg, var(--teal), var(--deep))",
-                color: "#fff", fontSize: "1.05rem", fontWeight: 600, border: "none",
-                cursor: busy ? "not-allowed" : "pointer", transition: "all 0.3s ease",
-                boxShadow: busy ? "none" : "0 4px 15px rgba(3, 152, 158, 0.3)",
-                display: "flex", justifyContent: "center", alignItems: "center", gap: "8px"
-              }}
-            >
-              {busy ? (
-                <><div style={{ width: "20px", height: "20px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} /> Saving Details...</>
-              ) : "Continue to Payment →"}
-            </button>
-          </div>
+          <button 
+            type="submit" 
+            disabled={busy}
+            style={{ 
+              marginTop: "8px", width: "100%", padding: "16px", borderRadius: "12px", 
+              background: busy ? "var(--ink-soft)" : "linear-gradient(135deg, var(--teal), var(--deep))",
+              color: "#fff", fontSize: "1.1rem", fontWeight: 600, border: "none",
+              cursor: busy ? "not-allowed" : "pointer", transition: "all 0.3s ease",
+              boxShadow: busy ? "none" : "0 8px 20px rgba(3, 152, 158, 0.25)",
+              display: "flex", justifyContent: "center", alignItems: "center", gap: "8px"
+            }}
+          >
+            {busy ? "Saving Details..." : "Continue to Payment →"}
+          </button>
         </form>
       )}
 
       {/* STEP 2: PAYMENT PENDING */}
       {currentStep === 2 && (
-        <form style={{ display: "flex", flexDirection: "column", gap: "20px" }} onSubmit={handlePayment}>
-          <div style={{ background: "linear-gradient(135deg, var(--deep), var(--ink-strong))", padding: "24px", borderRadius: "var(--radius-lg)", textAlign: "center", boxShadow: "var(--shadow-md)" }}>
+        <form style={{ display: "flex", flexDirection: "column", gap: "24px" }} onSubmit={handlePayment}>
+          <div style={{ background: "linear-gradient(135deg, var(--deep), var(--ink-strong))", padding: "32px", borderRadius: "16px", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.15)" }}>
             <span style={{ fontSize: "0.85rem", color: "var(--teal-soft)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>Total Due Today</span>
-            <div style={{ fontSize: "3rem", fontWeight: 800, color: "#fff", lineHeight: 1, marginTop: "8px" }}>
+            <div style={{ fontSize: "3.5rem", fontWeight: 800, color: "#fff", lineHeight: 1, marginTop: "12px" }}>
               {priceDetails ? `${priceDetails.currency} ${Number(priceDetails.amount_cents) / 100}` : "..."}
             </div>
           </div>
@@ -348,30 +340,28 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
             <div 
               onClick={() => setPaymentMethod("stk")}
               style={{ 
-                padding: "20px", borderRadius: "var(--radius-md)", cursor: "pointer", transition: "all 0.2s ease",
-                border: paymentMethod === "stk" ? "2px solid var(--teal)" : "2px solid var(--line)", 
+                padding: "20px", borderRadius: "12px", cursor: "pointer", transition: "all 0.2s ease",
+                border: paymentMethod === "stk" ? "2px solid var(--teal)" : "1px solid var(--line-strong)", 
                 background: paymentMethod === "stk" ? "rgba(3, 152, 158, 0.05)" : "#fff",
                 boxShadow: paymentMethod === "stk" ? "0 4px 12px rgba(3, 152, 158, 0.1)" : "none"
               }}>
-              <div style={{ fontSize: "1.5rem", marginBottom: "8px" }}>📱</div>
-              <strong style={{ display: "block", color: "var(--ink-strong)", marginBottom: "4px" }}>M-PESA Prompt</strong>
-              <span style={{ fontSize: "0.8rem", color: "var(--ink-soft)", lineHeight: 1.4, display: "block" }}>Send a payment prompt directly to your phone.</span>
+              <strong style={{ display: "block", color: "var(--ink-strong)", marginBottom: "4px", fontSize: "1.05rem" }}>M-PESA Prompt</strong>
+              <span style={{ fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4, display: "block" }}>Send a prompt to your phone.</span>
             </div>
             <div 
               onClick={() => setPaymentMethod("paybill")}
               style={{ 
-                padding: "20px", borderRadius: "var(--radius-md)", cursor: "pointer", transition: "all 0.2s ease",
-                border: paymentMethod === "paybill" ? "2px solid var(--teal)" : "2px solid var(--line)", 
+                padding: "20px", borderRadius: "12px", cursor: "pointer", transition: "all 0.2s ease",
+                border: paymentMethod === "paybill" ? "2px solid var(--teal)" : "1px solid var(--line-strong)", 
                 background: paymentMethod === "paybill" ? "rgba(3, 152, 158, 0.05)" : "#fff",
                 boxShadow: paymentMethod === "paybill" ? "0 4px 12px rgba(3, 152, 158, 0.1)" : "none"
               }}>
-              <div style={{ fontSize: "1.5rem", marginBottom: "8px" }}>🧾</div>
-              <strong style={{ display: "block", color: "var(--ink-strong)", marginBottom: "4px" }}>Manual Paybill</strong>
-              <span style={{ fontSize: "0.8rem", color: "var(--ink-soft)", lineHeight: 1.4, display: "block" }}>I already paid and have a transaction code.</span>
+              <strong style={{ display: "block", color: "var(--ink-strong)", marginBottom: "4px", fontSize: "1.05rem" }}>Manual Paybill</strong>
+              <span style={{ fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4, display: "block" }}>I already have a receipt code.</span>
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "8px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {paymentMethod === "stk" ? (
               <Field label="M-PESA Phone Number" name="phone_number" inputMode="tel" defaultValue={String(registration?.phone ?? "")} />
             ) : (
@@ -382,27 +372,25 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
             )}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <button 
               type="submit" disabled={busy}
               style={{ 
-                padding: "14px", borderRadius: "var(--radius-md)", 
+                padding: "16px", borderRadius: "12px", 
                 background: busy ? "var(--ink-soft)" : "linear-gradient(135deg, var(--teal), var(--deep))",
-                color: "#fff", fontSize: "1.05rem", fontWeight: 600, border: "none",
+                color: "#fff", fontSize: "1.1rem", fontWeight: 600, border: "none",
                 cursor: busy ? "not-allowed" : "pointer", transition: "all 0.3s ease",
-                boxShadow: busy ? "none" : "0 4px 15px rgba(3, 152, 158, 0.3)",
-                display: "flex", justifyContent: "center", alignItems: "center", gap: "8px"
+                boxShadow: busy ? "none" : "0 8px 20px rgba(3, 152, 158, 0.25)",
+                display: "flex", justifyContent: "center", alignItems: "center"
               }}
             >
-              {busy ? (
-                <><div style={{ width: "20px", height: "20px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} /> Processing...</>
-              ) : paymentMethod === "stk" ? "Send M-PESA Prompt" : "Submit Receipt"}
+              {busy ? "Processing..." : paymentMethod === "stk" ? "Send M-PESA Prompt" : "Submit Receipt"}
             </button>
             <button 
               type="button" onClick={refreshStatus} disabled={busy}
               style={{ 
-                padding: "14px", borderRadius: "var(--radius-md)", background: "transparent",
-                color: "var(--ink-strong)", fontSize: "1rem", fontWeight: 600, border: "2px solid var(--line-strong)",
+                padding: "16px", borderRadius: "12px", background: "transparent",
+                color: "var(--ink-strong)", fontSize: "1.05rem", fontWeight: 600, border: "1px solid var(--line-strong)",
                 cursor: busy ? "not-allowed" : "pointer", transition: "all 0.2s ease"
               }}
             >
@@ -415,7 +403,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
       {/* STEP 3: PASSWORD CREATION */}
       {currentStep === 3 && (
         <form style={{ display: "flex", flexDirection: "column", gap: "20px" }} onSubmit={handlePassword}>
-          <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", color: "#065f46", padding: "16px", borderRadius: "var(--radius-md)", display: "flex", alignItems: "center", gap: "12px", fontWeight: 600 }}>
+          <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", color: "#065f46", padding: "16px", borderRadius: "12px", display: "flex", alignItems: "center", gap: "12px", fontWeight: 600 }}>
             <span style={{ fontSize: "1.5rem" }}>✓</span> Payment verified successfully.
           </div>
           <Field
@@ -439,17 +427,14 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
           <button 
             type="submit" disabled={busy}
             style={{ 
-              marginTop: "12px", padding: "14px", borderRadius: "var(--radius-md)", 
+              marginTop: "8px", padding: "16px", borderRadius: "12px", 
               background: busy ? "var(--ink-soft)" : "linear-gradient(135deg, var(--teal), var(--deep))",
-              color: "#fff", fontSize: "1.05rem", fontWeight: 600, border: "none",
+              color: "#fff", fontSize: "1.1rem", fontWeight: 600, border: "none",
               cursor: busy ? "not-allowed" : "pointer", transition: "all 0.3s ease",
-              boxShadow: busy ? "none" : "0 4px 15px rgba(3, 152, 158, 0.3)",
-              display: "flex", justifyContent: "center", alignItems: "center", gap: "8px"
+              boxShadow: busy ? "none" : "0 8px 20px rgba(3, 152, 158, 0.25)"
             }}
           >
-            {busy ? (
-              <><div style={{ width: "20px", height: "20px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} /> Securing...</>
-            ) : "Save Password & Continue"}
+            {busy ? "Securing..." : "Save Password & Continue"}
           </button>
         </form>
       )}
@@ -458,7 +443,7 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
       {currentStep === 4 && (
         <form style={{ display: "flex", flexDirection: "column", gap: "24px" }} onSubmit={handleOtp}>
           <div style={{ textAlign: "center", padding: "12px 0" }}>
-             <label style={{ fontSize: "1rem", color: "var(--ink-strong)", marginBottom: "16px", display: "block" }}>
+             <label style={{ fontSize: "1.05rem", color: "var(--ink-strong)", marginBottom: "20px", display: "block" }}>
                Enter the 6-digit code sent to<br/><strong style={{ color: "var(--teal)" }}>{String(registration?.email ?? "your email")}</strong>
              </label>
              <input 
@@ -471,9 +456,9 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
                 onFocus={() => setOtpFocused(true)}
                 onBlur={() => setOtpFocused(false)}
                 style={{ 
-                  fontSize: "2.5rem", letterSpacing: "0.25em", textAlign: "center", 
-                  padding: "16px", fontWeight: 800, width: "100%", maxWidth: "340px", margin: "0 auto", display: "block",
-                  borderRadius: "var(--radius-md)", outline: "none", color: "var(--ink-strong)",
+                  fontSize: "3rem", letterSpacing: "0.25em", textAlign: "center", 
+                  padding: "20px", fontWeight: 800, width: "100%", maxWidth: "380px", margin: "0 auto", display: "block",
+                  borderRadius: "16px", outline: "none", color: "var(--ink-strong)",
                   border: `2px solid ${otpFocused ? "var(--teal)" : "var(--line-strong)"}`,
                   boxShadow: otpFocused ? "0 0 0 4px rgba(3, 152, 158, 0.15)" : "none",
                   transition: "all 0.2s ease", background: "#fff"
@@ -481,27 +466,24 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
              />
           </div>
           
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "340px", margin: "0 auto", width: "100%" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "380px", margin: "0 auto", width: "100%" }}>
             <button 
               type="submit" disabled={busy}
               style={{ 
-                padding: "14px", borderRadius: "var(--radius-md)", 
+                padding: "16px", borderRadius: "12px", 
                 background: busy ? "var(--ink-soft)" : "linear-gradient(135deg, var(--teal), var(--deep))",
-                color: "#fff", fontSize: "1.05rem", fontWeight: 600, border: "none",
+                color: "#fff", fontSize: "1.1rem", fontWeight: 600, border: "none",
                 cursor: busy ? "not-allowed" : "pointer", transition: "all 0.3s ease",
-                boxShadow: busy ? "none" : "0 4px 15px rgba(3, 152, 158, 0.3)",
-                display: "flex", justifyContent: "center", alignItems: "center", gap: "8px"
+                boxShadow: busy ? "none" : "0 8px 20px rgba(3, 152, 158, 0.25)"
               }}
             >
-              {busy ? (
-                <><div style={{ width: "20px", height: "20px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} /> Verifying...</>
-              ) : "Verify Email"}
+              {busy ? "Verifying..." : "Verify Email"}
             </button>
             <button 
               type="button" onClick={handleResendOtp} disabled={busy}
               style={{ 
-                padding: "14px", borderRadius: "var(--radius-md)", background: "transparent",
-                color: "var(--ink-soft)", fontSize: "0.95rem", fontWeight: 600, border: "none",
+                padding: "16px", borderRadius: "12px", background: "transparent",
+                color: "var(--ink-soft)", fontSize: "1rem", fontWeight: 600, border: "none",
                 cursor: busy ? "not-allowed" : "pointer", transition: "all 0.2s ease"
               }}
             >
@@ -514,11 +496,11 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
       {/* STEP 5: DONE */}
       {currentStep === 5 && (
         <div style={{ textAlign: "center", padding: "40px 0" }}>
-          <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "rgba(16, 185, 129, 0.1)", color: "#10b981", fontSize: "2.5rem", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px auto" }}>
+          <div style={{ width: "96px", height: "96px", borderRadius: "50%", background: "rgba(16, 185, 129, 0.1)", color: "#10b981", fontSize: "3rem", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px auto" }}>
             ✓
           </div>
-          <h3 style={{ fontSize: "1.75rem", color: "var(--ink-strong)", marginBottom: "12px", letterSpacing: "-0.02em" }}>Registration Complete!</h3>
-          <p style={{ color: "var(--ink-soft)", fontSize: "1.05rem", maxWidth: "400px", margin: "0 auto 32px auto", lineHeight: 1.6 }}>
+          <h3 style={{ fontSize: "2rem", color: "var(--ink-strong)", marginBottom: "12px", letterSpacing: "-0.02em" }}>Registration Complete!</h3>
+          <p style={{ color: "var(--ink-soft)", fontSize: "1.1rem", maxWidth: "400px", margin: "0 auto 40px auto", lineHeight: 1.6 }}>
             {status === "approval_pending" 
               ? "Your facility is now pending admin approval. You will receive an email once your workspace is unlocked." 
               : "Your secure workspace is ready. You can now log in."}
@@ -527,10 +509,10 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
             <Link 
               href="/auth/login" 
               style={{ 
-                padding: "14px 32px", borderRadius: "var(--radius-md)", textDecoration: "none",
+                padding: "16px 40px", borderRadius: "99px", textDecoration: "none",
                 background: "linear-gradient(135deg, var(--teal), var(--deep))",
-                color: "#fff", fontSize: "1.05rem", fontWeight: 600,
-                boxShadow: "0 4px 15px rgba(3, 152, 158, 0.3)", transition: "all 0.3s ease"
+                color: "#fff", fontSize: "1.1rem", fontWeight: 600,
+                boxShadow: "0 8px 20px rgba(3, 152, 158, 0.3)", transition: "all 0.3s ease"
               }}
             >
               Go to Login Page
@@ -538,7 +520,6 @@ export function RegistrationFlow({ mode }: { mode: AuthMode }) {
           </div>
         </div>
       )}
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
