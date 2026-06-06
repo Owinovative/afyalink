@@ -19,39 +19,58 @@ final class InsuranceService
         string $tier,
         string $ipAddress
     ): array {
-        // 1. Calculate Premium
+        // Calculate premium (in cents) using a single, consistent unit
         $premiumCents = $this->calculatePremiumCents($tier, $coverType, $dependents);
-        
-        // 2. Generate Cryptographic Policy Number
-        $uniqueHash = strtoupper(bin2hex(random_bytes(3)));
+
+        // Generate a short, collision-resistant policy number
+        try {
+            $uniqueHash = strtoupper(bin2hex(random_bytes(4)));
+        } catch (\Exception $e) {
+            // Fallback to a time-based id if random_bytes is unavailable
+            $uniqueHash = strtoupper(substr(bin2hex((string) uniqid()), 0, 8));
+        }
+
         $policyNumber = "AFL-INS-{$uniqueHash}";
 
-        // 3. Persist to your database (Adjust this SQL to your bespoke DB wrapper)
-        // Database::query("INSERT INTO insurance_policies ... ");
+        // TODO: Persist to your database using your repository or DB wrapper
 
-        // 4. Return to Controller
+        // Return the canonical integer amount plus a safe decimal representation
         return [
             'number' => $policyNumber,
-            'premium' => $premiumCents / 100, // Return standard currency to frontend
+            'premiumCents' => $premiumCents,
+            // Keep a human-friendly decimal string for clients that expect display values
+            'premium' => number_format($premiumCents / 100, 2, '.', ''),
             'type' => $coverType,
-            'tier' => $tier
+            'tier' => $tier,
         ];
     }
 
     private function calculatePremiumCents(string $tier, string $coverType, int $dependents): int
     {
-        $basePrice = 2000;
-        
-        if ($tier === 'standard') {
-            $basePrice = 4500;
-        } elseif ($tier === 'premium') {
-            $basePrice = 8500;
+        // Pricing table expressed in major currency units (e.g. KES)
+        $tierPricing = [
+            'basic' => 2000,
+            'standard' => 4500,
+            'premium' => 8500,
+        ];
+
+        $perDependent = 1500; // per dependent surcharge in major currency units
+        $maxDependents = 10;
+
+        // Normalize inputs
+        $dependents = max(0, (int) $dependents);
+        if ($dependents > $maxDependents) {
+            $dependents = $maxDependents;
         }
 
-        if ($coverType === 'family') {
-            $basePrice += ($dependents * 1500);
+        $baseMajor = $tierPricing[$tier] ?? $tierPricing['basic'];
+
+        $totalMajor = $baseMajor;
+        if (strtolower($coverType) === 'family') {
+            $totalMajor += ($dependents * $perDependent);
         }
-        
-        return $basePrice * 100;
+
+        // Convert to cents (or sub-units) as canonical server-side storage
+        return (int) round($totalMajor * 100);
     }
 }
