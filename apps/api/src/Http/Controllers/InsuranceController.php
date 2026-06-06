@@ -1,42 +1,53 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
 
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use App\Application\Insurance\GeneratePublicQuote;
+namespace Afyalink\Core\Http\Controllers;
 
-class InsuranceController extends Controller
+use Afyalink\Core\Application\Insurance\InsuranceService;
+use Afyalink\Core\Http\Request;
+use Afyalink\Core\Support\Validator;
+
+final readonly class InsuranceController
 {
-    public function generatePublicQuote(Request $request, GeneratePublicQuote $useCase): JsonResponse
+    public function __construct(
+        private InsuranceService $insurance
+    ) {}
+
+    /**
+     * Generates a public B2C insurance quote.
+     * * @return array<string, mixed>
+     */
+    public function generatePublicQuote(Request $request): array
     {
-        // 1. Strict Validation
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'phone' => 'required|string',
-            'dob' => 'required|date',
-            'coverType' => 'required|in:individual,family',
-            'dependents' => 'nullable|integer',
-            'tier' => 'required|in:basic,standard,premium',
+        Validator::requireFields($request->body, [
+            'name', 
+            'email', 
+            'phone', 
+            'dob', 
+            'coverType', 
+            'tier'
         ]);
+        Validator::email('email', $request->body['email']);
 
-        try {
-            // 2. Execute Business Logic
-            $policyDetails = $useCase->execute($validated);
+        // Dependents is optional, default to 0
+        $dependents = (int) ($request->body['dependents'] ?? 0);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Insurance quote generated and policy recorded.',
-                'policy' => $policyDetails
-            ], 201);
+        $policy = $this->insurance->generateQuote(
+            name: (string) $request->body['name'],
+            email: (string) $request->body['email'],
+            phone: (string) $request->body['phone'],
+            dob: (string) $request->body['dob'],
+            coverType: (string) $request->body['coverType'],
+            dependents: $dependents,
+            tier: (string) $request->body['tier'],
+            ipAddress: $request->ipAddress,
+        );
 
-        } catch (\Exception $e) {
-            \Log::error('[InsuranceController] Failed to generate quote: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'error' => 'Internal Server Error during underwriting calculation.'
-            ], 500);
-        }
+        return [
+            'success' => true,
+            'message' => 'Insurance quote generated successfully.',
+            'policy' => $policy,
+        ];
     }
 }
