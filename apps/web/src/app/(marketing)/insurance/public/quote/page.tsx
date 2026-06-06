@@ -3,13 +3,23 @@
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { BrandLockup } from "@/components/layout/BrandLockup";
+import { apiRequest, asRecord } from "@/lib/api/client";
+import { Feedback } from "@/components/ui/Feedback";
 
 type CoverType = "individual" | "family";
 type Tier = "basic" | "standard" | "premium";
 
+interface QuoteResult {
+  number: string;
+  premium: number;
+  type: string;
+}
+
 export default function PublicQuoteFlow() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [error, setError] = useState("");
+  const [quoteResult, setQuoteResult] = useState<QuoteResult | null>(null);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -22,31 +32,40 @@ export default function PublicQuoteFlow() {
     tier: "standard" as Tier,
   });
 
-  const handleNext = (e: FormEvent) => {
+  const handleNext = async (e: FormEvent) => {
     e.preventDefault();
-    if (step === 1) setStep(2);
+    setError("");
+
+    if (step === 1) {
+      setStep(2);
+      return;
+    }
+    
     if (step === 2) {
       setIsCalculating(true);
-      // Simulate API underwriting calculation
-      setTimeout(() => {
-        setIsCalculating(false);
+      try {
+        // 🔥 THE REAL BACKEND CONNECTION
+        const response = asRecord(
+          await apiRequest("/api/insurance/public/quote", {
+            method: "POST",
+            body: formData,
+          })
+        );
+        
+        // Save the server-calculated result
+        setQuoteResult(asRecord(response.policy) as unknown as QuoteResult);
         setStep(3);
-      }, 1500);
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : "Failed to calculate quote. Please try again.");
+      } finally {
+        setIsCalculating(false);
+      }
     }
-  };
-
-  // Helper to calculate a dummy premium based on selections
-  const calculatePremium = () => {
-    let base = formData.tier === "premium" ? 8500 : formData.tier === "standard" ? 4500 : 2000;
-    if (formData.coverType === "family") {
-      base += parseInt(formData.dependents) * 1500;
-    }
-    return base.toLocaleString();
   };
 
   const inputStyle = {
     padding: "16px", borderRadius: "12px", border: "1px solid var(--line-strong)", 
-    outline: "none", fontSize: "1rem", background: "#fff", transition: "all 0.2s ease", 
+    outlineColor: "var(--teal)", fontSize: "1rem", background: "#fff", transition: "all 0.2s ease", 
     width: "100%", color: "var(--ink-strong)"
   };
 
@@ -70,13 +89,14 @@ export default function PublicQuoteFlow() {
       {/* Main Content Area */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
         
-        {/* The Card */}
         <div style={{ 
           background: "#fff", width: "100%", maxWidth: "540px", borderRadius: "24px", 
           padding: "clamp(24px, 5vw, 48px)", boxShadow: "0 10px 40px rgba(0,0,0,0.05)", border: "1px solid var(--line)" 
         }}>
           
-          {/* Step Indicator (Hidden on final step) */}
+          {error && <div style={{ marginBottom: "20px" }}><Feedback message={error} tone="error" /></div>}
+
+          {/* Step Indicator */}
           {step < 3 && (
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px" }}>
               <div style={{ height: "4px", flex: 1, background: "var(--teal)", borderRadius: "4px" }} />
@@ -201,21 +221,21 @@ export default function PublicQuoteFlow() {
             </div>
           )}
 
-          {/* STEP 3: The Quote Result */}
-          {step === 3 && (
+          {/* STEP 3: The Quote Result (Populated from the Backend) */}
+          {step === 3 && quoteResult && (
             <div style={{ animation: "fadeIn 0.5s ease-out", textAlign: "center" }}>
               <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "rgba(16, 185, 129, 0.1)", color: "#10b981", fontSize: "2.5rem", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px auto" }}>
                 ✓
               </div>
               <h1 style={{ fontSize: "2rem", color: "var(--ink-strong)", letterSpacing: "-0.02em", marginBottom: "8px" }}>Here is your quote, {formData.name.split(" ")[0]}.</h1>
-              <p style={{ color: "var(--ink-soft)", fontSize: "1.05rem", marginBottom: "32px" }}>Based on a {formData.coverType} plan with {formData.tier} limits.</p>
+              <p style={{ color: "var(--ink-soft)", fontSize: "1.05rem", marginBottom: "32px" }}>Policy Ref: <strong style={{ color: "var(--ink-strong)" }}>{quoteResult.number}</strong></p>
               
               <div style={{ background: "linear-gradient(135deg, var(--deep), var(--ink-strong))", borderRadius: "16px", padding: "32px", color: "#fff", marginBottom: "32px", boxShadow: "0 10px 30px rgba(0,0,0,0.15)" }}>
                 <span style={{ fontSize: "0.85rem", color: "var(--teal-soft)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>Estimated Monthly Premium</span>
                 <div style={{ fontSize: "3.5rem", fontWeight: 800, margin: "12px 0", lineHeight: 1 }}>
-                  <span style={{ fontSize: "1.5rem", verticalAlign: "middle", opacity: 0.8 }}>KES</span> {calculatePremium()}
+                  <span style={{ fontSize: "1.5rem", verticalAlign: "middle", opacity: 0.8 }}>KES</span> {quoteResult.premium.toLocaleString()}
                 </div>
-                <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.7)", margin: 0 }}>Billed annually at KES {(parseInt(calculatePremium().replace(/,/g, '')) * 12).toLocaleString()}.</p>
+                <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.7)", margin: 0 }}>Billed annually at KES {(quoteResult.premium * 12).toLocaleString()}.</p>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
