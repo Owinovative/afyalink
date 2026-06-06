@@ -47,7 +47,9 @@ export class GetAdminInsuranceOverview {
         type: policy.policyType,
         owner: ownerName,
         category: category,
-        premium: policy.premiumCents / 100, // Convert cents to standard display currency
+        // Keep canonical cents and a display-friendly amount for consumers
+        premiumCents: policy.premiumCents,
+        premium: policy.premiumCents / 100,
         status: policy.isActive ? "active" : "pending_payment",
         date: policy.createdAt.toISOString().split("T")[0],
       };
@@ -56,11 +58,12 @@ export class GetAdminInsuranceOverview {
     // 3. Return the exact structure the Admin Dashboard expects
     return {
       metrics: {
+        totalMonthlyPremiumCents: totalMonthlyPremiumCents,
         totalMonthlyPremium: totalMonthlyPremiumCents / 100,
         activePolicies: activePoliciesCount,
-        pendingCorporatePayments: pendingCorporateCount
+        pendingCorporatePayments: pendingCorporateCount,
       },
-      policies: mappedPolicies
+      policies: mappedPolicies,
     };
   }
 }
