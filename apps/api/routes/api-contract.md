@@ -2,7 +2,7 @@
 
 This is the first backend API contract. Controllers should enforce policy checks, validation, audit logging, and rate limits.
 
-## Professional
+## Professional & Student
 
 - `POST /auth/register`
 - `POST /auth/login`
@@ -50,6 +50,26 @@ This is the first backend API contract. Controllers should enforce policy checks
 - `POST /facility/recommendation-requests`
 - `GET /facility/recommendation-packages`
 
+## Public & B2C Insurance (No Auth Required)
+
+- `POST /insurance/public/quote` *(Generates dynamic underwriting quotes)*
+- `POST /insurance/public/apply` *(Initiates application and payment intent)*
+- `GET /insurance/public/policy/:policyNumber` *(Requires OTP or verification token for access)*
+
+## Professional Insurance (Authenticated)
+
+- `GET /professional/insurance/quote` *(Pre-filled using verified profile data)*
+- `POST /professional/insurance/apply`
+- `GET /professional/insurance/policies`
+
+## Facility Insurance (Requires Approved Status)
+
+- `GET /facility/insurance/overview` *(Metrics & billing summary)*
+- `GET /facility/insurance/catalog` *(Partnered B2B Master Plans)*
+- `GET /facility/insurance/enrolled-staff`
+- `POST /facility/insurance/enroll` *(Adds professional to master cover)*
+- `PATCH /facility/insurance/enrollments/:id/status` *(Activate/Deactivate locum cover)*
+
 ## Admin Facility Operations
 
 - `GET /admin/facility-operations/overview`
@@ -69,6 +89,13 @@ This is the first backend API contract. Controllers should enforce policy checks
 - `POST /admin/recommendation-packages`
 - `PATCH /admin/recommendation-packages/:id`
 
+## Admin Insurance Operations
+
+- `GET /admin/insurance/policies`
+- `GET /admin/insurance/policies/:id`
+- `PATCH /admin/insurance/policies/:id/status`
+- `GET /admin/insurance/analytics`
+
 ## Mandatory Rules
 
 - Professional endpoints must scope to the authenticated professional only.
@@ -80,3 +107,6 @@ This is the first backend API contract. Controllers should enforce policy checks
 - Facility candidate browsing requires approved facility status and active access.
 - Candidate detail must stay read-only, watermarked, and audited.
 - Facility endpoints must not expose raw credential storage keys or direct public document URLs.
+- **Insurance:** All monetary calculations (Premiums, Coverage Limits) must be executed server-side and stored as integers (cents/sub-units) to prevent floating-point errors.
+- **Insurance:** Unauthenticated public endpoints (`/insurance/public/*`) must have strict rate limiting to prevent automated scraping of pricing engines.
+- **Insurance:** Facility insurance endpoints MUST cryptographically verify that the `facility.status === 'approved'` before returning pricing catalogs or enrolled staff data.
