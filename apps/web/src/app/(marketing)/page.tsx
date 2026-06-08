@@ -91,7 +91,54 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. The Clean, Soft Call to Action */}
+      {/* 4. Afyalink Insurance Integration */}
+      <section style={{ 
+        padding: "clamp(64px, 8vw, 100px) 24px", 
+        background: "var(--teal)", 
+        color: "#fff",
+        textAlign: "center"
+      }}>
+        <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+          <span style={{ 
+            background: "rgba(255, 255, 255, 0.2)", backdropFilter: "blur(10px)", padding: "6px 16px", 
+            borderRadius: "99px", fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" 
+          }}>
+            New: Afyalink Cover
+          </span>
+          <h2 style={{ 
+            fontSize: "clamp(2rem, 4vw, 3rem)", 
+            fontWeight: 500, 
+            letterSpacing: "-0.03em", 
+            marginBottom: "24px",
+            marginTop: "24px",
+            lineHeight: 1.1
+          }}>
+            Comprehensive Medical & Indemnity.
+          </h2>
+          <p style={{ 
+            fontSize: "clamp(1.1rem, 2vw, 1.25rem)", 
+            color: "rgba(255, 255, 255, 0.85)", 
+            lineHeight: 1.6, 
+            marginBottom: "48px" 
+          }}>
+            Protect your health and your license. We offer premium health insurance and malpractice cover tailored for the general public, clinical professionals, and healthcare facilities.
+          </p>
+          <Link 
+            href="/insurance" 
+            style={{ 
+              display: "inline-flex", alignItems: "center", gap: "8px",
+              background: "#fff", color: "var(--teal)", padding: "16px 36px", 
+              fontSize: "1.1rem", fontWeight: 600, borderRadius: "99px", textDecoration: "none",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)"
+            }}
+          >
+            Explore Insurance Plans <span style={{ fontSize: "1.2rem" }}>→</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* 5. The Clean, Soft Call to Action */}
       <section style={{ 
         padding: "clamp(64px, 8vw, 100px) 24px", 
         background: "var(--mist)", 

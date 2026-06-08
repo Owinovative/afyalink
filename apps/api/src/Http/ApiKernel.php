@@ -43,6 +43,8 @@ use Afyalink\Core\Http\Controllers\PlacementController;
 use Afyalink\Core\Http\Controllers\RegistrationController;
 use Afyalink\Core\Application\Registration\RegistrationWorkflowService;
 use Afyalink\Core\Http\Controllers\ProfessionalController;
+use Afyalink\Core\Application\Insurance\InsuranceService;
+use Afyalink\Core\Http\Controllers\InsuranceController;
 use Afyalink\Core\Infrastructure\Notifications\EmailProvider;
 use Afyalink\Core\Infrastructure\Notifications\LogEmailProvider;
 use Afyalink\Core\Infrastructure\Persistence\DataStore;
@@ -121,8 +123,11 @@ final class ApiKernel
             $mpesa,
         );
 
+        $insuranceService = new InsuranceService();
+        $insuranceController = new InsuranceController($insuranceService);
+
         $this->router = new Router();
-        $this->routes($authController, $professionalController, $credentialController, $consentController, $paymentController, $applicationController, $adminController, $facilityController, $adminFacilityController, $placementController, $operationsController);
+        $this->routes($authController, $professionalController, $credentialController, $consentController, $paymentController, $applicationController, $adminController, $facilityController, $adminFacilityController, $placementController, $operationsController, $insuranceController);
     }
 
     public function auth(): AuthService
@@ -191,8 +196,10 @@ final class ApiKernel
         AdminFacilityController $adminFacility,
         PlacementController $placements,
         OperationsController $operations,
+        InsuranceController $insurance,
     ): void {
         $this->router->add('GET', '/api/health', static fn (): array => ['status' => 'ok']);
+        $this->router->add('POST', '/api/insurance/public/quote', [$insurance, 'generatePublicQuote']);
         
         $this->router->add('POST', '/api/auth/login', [$auth, 'login']);
         $this->router->add('POST', '/api/auth/email/verify', [$auth, 'verifyEmail']);

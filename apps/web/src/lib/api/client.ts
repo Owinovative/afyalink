@@ -15,7 +15,7 @@ export type ApiResponse<T> = {
 };
 
 export const apiBase = () =>
-  process.env.NEXT_PUBLIC_AFYA_API_BASE?.replace(/\/$/, "") || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_AFYA_API_BASE?.replace(/\/$/, "") || "";
 
 export function friendlyError(payload: ApiErrorPayload | null | undefined, fallback = "Request failed") {
   const messages: string[] = [];
