@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import "@/app/portal/portal-utilities.css";
 
 // Mock Data representing verified professionals in your network
 const mockTalent = [
@@ -47,48 +48,7 @@ export default function TalentMarketplace() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "32px", animation: "fadeIn 0.5s ease" }}>
-      <style>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .talent-card {
-          background: var(--white);
-          border: 1px solid var(--line);
-          border-radius: var(--radius-lg);
-          padding: 24px;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-          box-shadow: var(--shadow-sm);
-          position: relative;
-        }
-        .talent-card:hover {
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-lift);
-          border-color: var(--line-strong);
-        }
-        
-        .primary-btn {
-          width: 100%; padding: 12px; border-radius: 999px; background: var(--teal); color: #fff; 
-          border: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
-          display: flex; justify-content: center; alignItems: center; gap: 8px;
-        }
-        .primary-btn:hover { background: var(--deep); box-shadow: 0 4px 12px rgba(0, 103, 107, 0.2); }
-        
-        .ghost-btn {
-          width: 100%; padding: 12px; border-radius: 999px; background: transparent; color: var(--teal); 
-          border: 1px solid rgba(0, 103, 107, 0.3); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
-        }
-        .ghost-btn:hover { background: rgba(0, 103, 107, 0.05); }
 
-        .filter-tag {
-          padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line-strong); 
-          font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; background: var(--white); color: var(--ink-soft);
-        }
-        .filter-tag.active {
-          background: rgba(0, 103, 107, 0.1); border-color: var(--teal); color: var(--teal);
-        }
-      `}</style>
 
       {/* 1. Header & Insights Banner */}
       <section style={{ display: "flex", flexDirection: "column", gap: "24px" }}>

@@ -1,6 +1,21 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Geist } from "next/font/google";
 import { absoluteUrl, getSiteUrl, metadataForPath } from "@/lib/seo";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const geist = Geist({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-geist",
+  display: "swap",
+});
 
 const homeMetadata = metadataForPath("/");
 
@@ -27,7 +42,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${geist.variable}`}>
       <body>{children}</body>
     </html>
   );
