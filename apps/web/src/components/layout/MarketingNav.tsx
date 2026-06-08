@@ -66,6 +66,7 @@ export function MarketingNav() {
             <Link href="/professionals" className="nav-item">Professionals</Link>
             <Link href="/facilities" className="nav-item">Facilities</Link>
             <Link href="/matching" className="nav-item">Matching</Link>
+            <Link href="/insurance" className="nav-item">Insurance & Indemnity</Link>
             <Link href="/resources" className="nav-item">Resources</Link>
             
             <div style={{ width: "1px", height: "24px", background: "rgba(255,255,255,0.2)" }} />
@@ -100,6 +101,7 @@ export function MarketingNav() {
         <Link href="/professionals" className="nav-item" style={{ fontSize: "1.5rem" }} onClick={() => setMobileMenuOpen(false)}>Professionals</Link>
         <Link href="/facilities" className="nav-item" style={{ fontSize: "1.5rem" }} onClick={() => setMobileMenuOpen(false)}>Facilities</Link>
         <Link href="/matching" className="nav-item" style={{ fontSize: "1.5rem" }} onClick={() => setMobileMenuOpen(false)}>Matching</Link>
+        <Link href="/insurance" className="nav-item" style={{ fontSize: "1.5rem" }} onClick={() => setMobileMenuOpen(false)}>Insurance & Indemnity</Link>
         <Link href="/resources" className="nav-item" style={{ fontSize: "1.5rem" }} onClick={() => setMobileMenuOpen(false)}>Resources</Link>
         <div style={{ width: "60px", height: "2px", background: "rgba(255,255,255,0.2)" }} />
         <Link href="/auth/login" className="nav-item" style={{ fontSize: "1.5rem" }} onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
