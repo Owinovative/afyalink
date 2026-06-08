@@ -444,4 +444,27 @@ final readonly class NotificationService
             ],
         );
     }
+
+    /**
+     * @param string $phone
+     * @param string $message
+     */
+    public function dispatchSms(string $phone, string $message): void
+    {
+        // Dummy SMS dispatch logic for Micro-Insurance
+        // In a real system, this would integrate with Africa's Talking or Twilio
+        $this->store->insert('notification_outbox', [
+            'recipient_user_id' => null,
+            'recipient_email' => $phone, // Storing phone in email column for dummy schema compatibility
+            'channel' => 'sms',
+            'type' => 'micro_insurance_underwritten',
+            'subject' => 'Micro-Insurance Details',
+            'body' => trim($message),
+            'action_url' => null,
+            'status' => 'queued',
+            'metadata' => ['phone' => $phone],
+            'created_at' => gmdate(DATE_ATOM),
+            'sent_at' => null,
+        ]);
+    }
 }
