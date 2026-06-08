@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import "@/app/portal/portal-utilities.css";
 
 // Simulated Backend Data matching our Polymorphic Schema
 const mockPolicies = [
@@ -19,12 +20,7 @@ export default function AdminInsuranceOverview() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px", animation: "fadeIn 0.4s ease" }}>
-      <style>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .hover-row:hover { background-color: var(--paper) !important; cursor: pointer; }
-        .action-btn { opacity: 0; transition: opacity 0.2s ease; }
-        .hover-row:hover .action-btn { opacity: 1; }
-      `}</style>
+
       
       {/* 1. Page Header & Efficiency Score */}
       <header style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: "16px" }}>

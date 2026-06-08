@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { MetricGrid, MetricCard } from "@/components/ui/Metrics"; // Ensure this matches your UI library path
 import { Feedback } from "@/components/ui/Feedback";
+import "@/app/portal/portal-utilities.css";
 
 export default function ProfessionalInsuranceDashboard() {
   const [busy, setBusy] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export default function ProfessionalInsuranceDashboard() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "32px", paddingBottom: "40px", animation: "fadeIn 0.5s ease" }}>
-      <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+
       
       {/* Premium User Banner */}
       <section style={{ 

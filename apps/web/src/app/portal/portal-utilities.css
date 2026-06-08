@@ -1,0 +1,120 @@
+/* ==========================================================================
+   Portal Utilities
+   Shared CSS utilities for the Afyalink portal pages.
+   Extracted from inline <style> blocks in portal .tsx files for reusability.
+   ========================================================================== */
+
+/* ---------- Shared Animations ---------- */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Talent Marketplace: Card & Button Styles ---------- */
+
+.talent-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.talent-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--line-strong);
+}
+
+.primary-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 999px;
+  background: var(--teal);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.primary-btn:hover {
+  background: var(--deep);
+  box-shadow: 0 4px 12px rgba(0, 103, 107, 0.2);
+}
+
+.ghost-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--teal);
+  border: 1px solid rgba(0, 103, 107, 0.3);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ghost-btn:hover {
+  background: rgba(0, 103, 107, 0.05);
+}
+
+/* ---------- Filter Tags ---------- */
+
+.filter-tag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--white);
+  color: var(--ink-soft);
+}
+
+.filter-tag.active {
+  background: rgba(0, 103, 107, 0.1);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+/* ---------- Admin Insurance: Table Row Interactions ---------- */
+
+.hover-row:hover {
+  background-color: var(--paper) !important;
+  cursor: pointer;
+}
+
+.action-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.hover-row:hover .action-btn {
+  opacity: 1;
+}
