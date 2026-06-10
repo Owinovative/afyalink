@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Afyalink\Core\Http\Controllers;
 
 use Afyalink\Core\Application\Insurance\InsuranceService;
+use Afyalink\Core\Application\Insurance\MicroInsuranceService;
 use Afyalink\Core\Http\Request;
 use Afyalink\Core\Support\Validator;
 use Afyalink\Core\Support\Exceptions\ValidationException;
@@ -12,7 +13,8 @@ use Afyalink\Core\Support\Exceptions\ValidationException;
 final readonly class InsuranceController
 {
     public function __construct(
-        private InsuranceService $insurance
+        private InsuranceService $insurance,
+        private ?MicroInsuranceService $microInsurance = null
     ) {}
 
     /**
@@ -68,6 +70,43 @@ final readonly class InsuranceController
             'success' => true,
             'message' => 'Insurance quote generated successfully.',
             'policy' => $policy,
+        ];
+    }
+
+    /**
+     * Generates a micro-insurance quote.
+     * @return array<string, mixed>
+     */
+    public function generateMicroQuote(Request $request): array
+    {
+        if ($this->microInsurance === null) {
+            throw new \RuntimeException('MicroInsuranceService not initialized.');
+        }
+
+        Validator::requireFields($request->body, [
+            'phone',
+            'paymentFrequency',
+            'kycData'
+        ]);
+
+        $phone = (string) $request->body['phone'];
+        $frequency = (string) $request->body['paymentFrequency'];
+        $kycData = $request->body['kycData'];
+
+        if (!is_array($kycData)) {
+            throw new ValidationException(['kycData' => ['Must be a valid object.']]);
+        }
+
+        $allowedFrequencies = ['monthly', 'quarterly', 'half_yearly', 'annually'];
+        if (!in_array($frequency, $allowedFrequencies, true)) {
+            throw new ValidationException(['paymentFrequency' => ['Invalid frequency selected.']]);
+        }
+
+        $result = $this->microInsurance->underwrite($kycData, $frequency, $phone);
+
+        return [
+            'success' => true,
+            'quote' => $result,
         ];
     }
 }

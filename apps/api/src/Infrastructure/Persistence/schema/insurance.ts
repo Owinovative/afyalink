@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, uuid, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, uuid, integer, jsonb } from "drizzle-orm/pg-core";
 // IMPORTANT: Adjust these import paths to match your actual schema file locations
 import { facilities } from "./facilities"; 
 import { professionals } from "./professionals";
@@ -17,6 +17,12 @@ export const insurancePolicies = pgTable("insurance_policies", {
   premiumCents: integer("premium_cents").notNull(), 
   
   isActive: boolean("is_active").default(true).notNull(),
+  
+  // Micro-Insurance Fields
+  financialKyc: jsonb("financial_kyc"),
+  paymentFrequency: text("payment_frequency"),
+  nextDueDate: timestamp("next_due_date"),
+  penaltyCents: integer("penalty_cents").default(0),
   
   // ==========================================
   // 3. POLYMORPHIC OWNERSHIP

@@ -1,0 +1,5 @@
+ALTER TABLE insurance_policies
+ADD COLUMN IF NOT EXISTS financial_kyc JSONB,
+ADD COLUMN IF NOT EXISTS payment_frequency VARCHAR(50),
+ADD COLUMN IF NOT EXISTS next_due_date TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS penalty_cents INT DEFAULT 0;
