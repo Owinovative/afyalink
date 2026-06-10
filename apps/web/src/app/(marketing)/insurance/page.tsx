@@ -52,7 +52,7 @@ export default function InsuranceHubPage() {
               <li>✓ Maternity & Dental add-ons</li>
               <li>✓ No Afyalink account required</li>
             </ul>
-            <Link href="/insurance/public/quote" style={{ 
+            <Link href="/insurance/micro" style={{ 
               display: "block", textAlign: "center", padding: "16px", borderRadius: "12px", 
               background: "var(--paper)", color: "var(--ink-strong)", fontWeight: 600, textDecoration: "none",
               border: "1px solid var(--line-strong)"
